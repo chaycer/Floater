@@ -5,14 +5,14 @@ import android.database.sqlite.SQLiteDatabase;
 
 public class DBHandler {
     private SQLiteDatabase db;
-    private String dbLocation;
+    private static String DB_LOCATION;
 
     /**
      * Creates and opens connection to database
      */
     public DBHandler(){
-        dbLocation = "android.resource://com.company.cc.floater/baseball_database";
-        db = SQLiteDatabase.openOrCreateDatabase(dbLocation,null,null);
+        DB_LOCATION = "baseball_database";
+        db = SQLiteDatabase.openOrCreateDatabase(DB_LOCATION,null,null);
 
 
         return;

@@ -12,6 +12,8 @@ public class MainActivity extends AppCompatActivity {
 
         DBHandler myDB = new DBHandler();
 
+        myDB.CloseDatabase();
+
 
         myDB.CloseDatabase();
     }
