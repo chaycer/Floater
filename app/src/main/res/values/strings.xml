@@ -1,3 +1,18 @@
 <resources>
     <string name="app_name">Floater</string>
+    <string name="company_name">CCEnterprises</string>
+    <string name="searchButton">Search</string>
+    <string name="statSearchButton">Search by stats</string>
+    <string name="addPlayerButton">Add player to database</string>
+    <string name="playerSearch">Player search</string>
+    <string name="teamSearch">Team search</string>
+    <string name="title_activity_player_profile">Player Profile</string>
+    <string name="battingSearch">Batting</string>
+    <string name="fieldingSearch">Fielding</string>
+    <string name="pitchingSearch">Pitching</string>
+    <string name="addStat">Add stat</string>
+    <string name="addOperator">Add operator</string>
+    <string name="title_activity_stat_search_results">StatSearchResults</string>
+
+
 </resources>
