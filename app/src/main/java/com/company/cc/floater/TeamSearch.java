@@ -1,7 +1,7 @@
-package ccenterprises.floater;
+package com.company.cc.floater;
 
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.app.AppCompatActivity;
 
 public class TeamSearch extends AppCompatActivity {
 

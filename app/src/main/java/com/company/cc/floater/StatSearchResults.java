@@ -1,7 +1,7 @@
-package ccenterprises.floater;
+package com.company.cc.floater;
 
-import android.os.Bundle;
 import android.app.Activity;
+import android.os.Bundle;
 
 public class StatSearchResults extends Activity {
 

@@ -1,4 +1,4 @@
-package ccenterprises.floater;
+package com.company.cc.floater;
 
 import android.app.Application;
 
