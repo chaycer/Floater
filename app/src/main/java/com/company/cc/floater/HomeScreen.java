@@ -15,6 +15,7 @@ public class HomeScreen extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_home_screen);
 
+
         //player search
         Button playerSearchButton = (Button) findViewById(R.id.playerSearchButton);
         playerSearchButton.setOnClickListener(new View.OnClickListener() {
