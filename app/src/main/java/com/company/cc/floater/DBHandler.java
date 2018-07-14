@@ -22,7 +22,6 @@ public class DBHandler extends SQLiteOpenHelper {
      */
     public DBHandler(Context context){
         super(context, DB_NAME, null, 1);
-        context.getFilesDir()
         DB_PATH = "/data/data/" + context.getPackageName() + "/databases/";
         this.myContext = context;
     }
