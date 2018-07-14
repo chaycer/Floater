@@ -13,6 +13,8 @@ import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import java.io.IOException;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -49,10 +51,12 @@ public class StatSearch extends AppCompatActivity {
                 if (!filters.isEmpty()){
                     Intent startIntent = new Intent(getApplicationContext(), StatSearchResults.class);
 
-                    /*
-                    DO SEARCH STUFF IN HERE
+                    //Begin Search
+                    DBHandler db = new DBHandler(getApplicationContext(),0);
 
-                     */
+                    db.createFilter(filters);
+
+                    //End Search
 
                     //startIntent.putExtra(getString(R.string.company_name), playerET.getText().toString());
                     startActivity(startIntent);
