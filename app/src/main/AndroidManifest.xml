@@ -1,7 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.company.cc.floater">
-    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
+
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+
     <application
         android:name=".FloaterApplication"
         android:allowBackup="true"
@@ -26,7 +28,10 @@
             android:label="@string/title_activity_player_profile" />
         <activity
             android:name=".StatSearchResults"
-            android:label="@string/title_activity_stat_search_results"></activity>
+            android:label="@string/title_activity_stat_search_results" />
+        <activity
+            android:name=".ManagerSearch"
+            android:label="@string/title_activity_manager_search"></activity>
     </application>
 
 </manifest>

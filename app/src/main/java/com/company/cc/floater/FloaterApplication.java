@@ -12,6 +12,10 @@ public class FloaterApplication extends Application{
     int FIELDING = 2;
     int PITCHING = 3;
 
+    int PLAYER = 10;
+    int TEAM = 20;
+    int MANAGER = 30;
+
     public CharSequence[] getBattingStats() {
         return battingStats;
     }

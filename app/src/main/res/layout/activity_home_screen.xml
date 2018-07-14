@@ -23,7 +23,7 @@
         android:id="@+id/teamSearchEditText"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="38dp"
+        android:layout_marginTop="20dp"
         android:ems="10"
         android:hint="@string/teamSearch"
         android:inputType="text"
@@ -34,7 +34,7 @@
         android:id="@+id/statSearchButton"
         android:layout_width="148dp"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="32dp"
+        android:layout_marginBottom="28dp"
         android:text="@string/statSearchButton"
         app:layout_constraintBottom_toTopOf="@+id/addPlayerButton"
         app:layout_constraintStart_toStartOf="@+id/addPlayerButton" />
@@ -59,12 +59,31 @@
         android:id="@+id/addPlayerButton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="84dp"
+        android:layout_marginBottom="36dp"
         android:text="@string/addPlayerButton"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.485"
+        app:layout_constraintHorizontal_bias="0.503"
         app:layout_constraintStart_toStartOf="parent" />
+
+    <EditText
+        android:id="@+id/managerSearchEditText"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="14dp"
+        android:ems="10"
+        android:hint="@string/managerSearch"
+        android:inputType="text"
+        app:layout_constraintStart_toStartOf="@+id/teamSearchButton"
+        app:layout_constraintTop_toBottomOf="@+id/teamSearchButton" />
+
+    <Button
+        android:id="@+id/managerSearchButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/searchButton"
+        app:layout_constraintStart_toStartOf="@+id/managerSearchEditText"
+        app:layout_constraintTop_toBottomOf="@+id/managerSearchEditText" />
 
 </android.support.constraint.ConstraintLayout>
 

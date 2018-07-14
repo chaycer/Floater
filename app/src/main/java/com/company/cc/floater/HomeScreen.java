@@ -9,38 +9,14 @@ import android.widget.Button;
 import android.widget.EditText;
 
 public class HomeScreen extends AppCompatActivity {
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_home_screen);
 
-
-        //player search
-        Button playerSearchButton = (Button) findViewById(R.id.playerSearchButton);
-        playerSearchButton.setOnClickListener(new View.OnClickListener() {
-            public void onClick(View view) {
-                EditText playerET = (EditText) findViewById(R.id.playerSearchEditText);
-                if (!TextUtils.isEmpty(playerET.getText())){
-                    Intent startIntent = new Intent(getApplicationContext(), PlayerSearch.class);
-                    startIntent.putExtra(getString(R.string.company_name), playerET.getText().toString());
-                    startActivity(startIntent);
-                }
-            }
-        });
-
-        //team search
-        Button teamSearchButton = (Button) findViewById(R.id.teamSearchButton);
-        teamSearchButton.setOnClickListener(new View.OnClickListener() {
-            public void onClick(View view) {
-                EditText teamET = (EditText) findViewById(R.id.teamSearchEditText);
-                if (!TextUtils.isEmpty(teamET.getText())){
-                    Intent startIntent = new Intent(getApplicationContext(), TeamSearch.class);
-                    startIntent.putExtra(getString(R.string.company_name), teamET.getText().toString());
-                    startActivity(startIntent);
-                }
-            }
-        });
+        searchButton(((FloaterApplication) getApplication()).PLAYER); // set up player search
+        searchButton(((FloaterApplication) getApplication()).TEAM); // set up team search
+        searchButton(((FloaterApplication) getApplication()).MANAGER); // set up manager search
 
         //stat search
         Button statSearchButton = (Button) findViewById(R.id.statSearchButton);
@@ -61,5 +37,47 @@ public class HomeScreen extends AppCompatActivity {
         });
     }
 
+
+    /**
+     * Sets up the player, team, and manager searches
+     * @param type 10 for player, 20 for team, 30 for manager
+     */
+    void searchButton(int type){
+        final Button searchButton;
+        final EditText searchET;
+        final Class newActivity;
+        if (type == ((FloaterApplication) getApplication()).PLAYER){
+            searchButton = findViewById(R.id.playerSearchButton);
+            searchET = findViewById(R.id.playerSearchEditText);
+            newActivity = PlayerSearch.class;
+        }
+        else if (type == ((FloaterApplication) getApplication()).TEAM){
+            searchButton = findViewById(R.id.teamSearchButton);
+            searchET = findViewById(R.id.teamSearchEditText);
+            newActivity = TeamSearch.class;
+        }
+        else{
+            searchButton = findViewById(R.id.managerSearchButton);
+            searchET = findViewById(R.id.managerSearchEditText);
+            newActivity = ManagerSearch.class;
+        }
+
+        searchButton.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View view) {
+                if (!TextUtils.isEmpty(searchET.getText())){
+                    String searchString = searchET.getText().toString(); // User-provided string to search on
+
+                    /*
+                    DATABASE CONNECTION HERE WITH searchString AND type
+                     */
+
+
+                    Intent startIntent = new Intent(getApplicationContext(), newActivity);
+                    startIntent.putExtra(getString(R.string.company_name), searchString);
+                    startActivity(startIntent);
+                }
+            }
+        });
+    }
 
 }
