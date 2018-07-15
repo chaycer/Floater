@@ -1,9 +1,9 @@
 package com.company.cc.floater;
 
-public class whereBuilder {
+public class QueryBuilder {
     //batting
 
-    public whereBuilder() {
+    public QueryBuilder() {
 
     }
 }

@@ -108,20 +108,43 @@ public class DBHandler extends SQLiteOpenHelper {
     }
 
     /**
-     * Player
+     * Player search query.
+     * @param player Name of the player to search for
+     * @return queryResult Cursor object containing the query result
      */
     public Cursor playerSearchQuery(String player) {
         String[] name = player.split(" ");
-
+        if(name.length == 0){
+            throw new Error("Blank player name");
+        }
+        String firstName = "%" + name[0] + "%";
         if(name.length == 1) { //If only 1 name was put in, assume it is last name
 
-            return db.rawQuery(String.format("Select * from player where name_first like '%s'",name[0]),null);
+            return db.rawQuery(String.format("Select * from player where name_first like '%s'",firstName),null);
 
         }
-        return db.rawQuery(String.format("Select * from player where name_first like '%s' AND name_last like '%s'",name[0],name[1]) ,null);
+        String lastName = "%" + name[1] + "%";
+        return db.rawQuery(String.format("Select * from player where name_first like '%s' AND name_last like '%s'",firstName,lastName), null);
 
     }
 
+    /**
+     * Query to return specific stats for a player
+     * @param playerID
+     * @param seasonYear
+     * @param teamID
+     * @param stats specific stats to be returned.  If null, return
+     * @return queryResult Cursor object containing the query result
+     */
+    public Cursor playerStatsQuery(String playerID, int seasonYear, String teamID, String stats) {
+        if (stats.equals(null) || stats.equals("")){
+            stats = "*";
+        }
+
+        String query = "";
+
+        return db.rawQuery(query,null);
+    }
     @Override
     public synchronized void close() {
         if(db != null)

@@ -19,6 +19,7 @@ public class PlayerSearch extends AppCompatActivity {
         Cursor result = db.playerSearchQuery(player);
 
 
+        db.close(); //CRR Do this once everything with database is done (will apparently crash if you try to access cursor after calling this)
         TextView tv = (TextView) findViewById(R.id.playerNameTextView);
         tv.setText(player);
     }
