@@ -1,10 +1,10 @@
 package com.company.cc.floater;
 
+import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteException;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.content.Context;
-
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -18,14 +18,22 @@ public class DBHandler extends SQLiteOpenHelper {
     private static String DB_PATH;
     private static String DB_NAME = "baseball_database.sqlite";
     private final Context myContext;
+    private String whereClause;
 
     /**
-     *
+     * Open connection to database
+     * @param context current context of application
+     * @param RO Read only Status.  0 for Read only, 1 for writeable
      */
-    public DBHandler(Context context){
+    public DBHandler(Context context, int RO){
         super(context, DB_NAME, null, 1);
         DB_PATH = "/data/data/" + context.getPackageName() + "/databases/";
         this.myContext = context;
+        switch(RO){
+            case 0: this.createDatabase();
+                    this.openDataBaseReadOnly();
+        }
+
     }
 
     /**
@@ -101,11 +109,14 @@ public class DBHandler extends SQLiteOpenHelper {
     /**
      * Player
      */
-    public Cursor playerSearchQuery(String Player) {
+    public Cursor playerSearchQuery(String player) {
+        String[] name = player.split(" ");
 
-        String firstName;
-        String lastName;
-        Cursor result = db.rawQuery("Select * from player where name_first like '%?%' and name_last like '%?%'",);
+        if(name[1] == null) { //If only 1 name was put in, assume it is last name
+            return db.rawQuery("Select * from player where name_last like '%?%'",name);
+        }
+        Cursor test = db.rawQuery(String.format("Select * from player where name_first like '%s%' and name_last like '%%s%'",name[0],name[1]),null);
+        return test;
     }
 
     @Override

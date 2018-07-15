@@ -52,9 +52,9 @@ public class StatSearch extends AppCompatActivity {
                     Intent startIntent = new Intent(getApplicationContext(), StatSearchResults.class);
 
                     //Begin Search
-                    DBHandler db = new DBHandler(getApplicationContext(),0);
 
-                    db.createFilter(filters);
+                    //DBHandler db = new DBHandler(getApplicationContext(),0); //May not work, need to figure out context
+                    //db.createFilter(filters);
 
                     //End Search
 
