@@ -1,5 +1,6 @@
 package com.company.cc.floater;
 
+import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteException;
 import android.database.sqlite.SQLiteOpenHelper;
@@ -10,6 +11,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.sql.SQLException;
+import java.util.List;
 
 
 public class DBHandler extends SQLiteOpenHelper {
@@ -106,7 +108,15 @@ public class DBHandler extends SQLiteOpenHelper {
         whereClause = "";
     }
 
+    /**
+     * Player
+     */
+    public Cursor playerSearchQuery(String Player) {
 
+        String firstName;
+        String lastName;
+        Cursor result = db.rawQuery("Select * from player where name_first like '%?%' and name_last like '%?%'",);
+    }
 
     @Override
     public synchronized void close() {
