@@ -1,6 +1,5 @@
 package com.company.cc.floater;
 
-import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteException;
 import android.database.sqlite.SQLiteOpenHelper;
@@ -19,23 +18,14 @@ public class DBHandler extends SQLiteOpenHelper {
     private static String DB_PATH;
     private static String DB_NAME = "baseball_database.sqlite";
     private final Context myContext;
-    private String whereClause;
 
     /**
-     * Create DBHandler
-     * @Param Context Pass in current context of application
-     * @Param ReadOnly - How to open database.  0 for ReadOnly
+     *
      */
-    public DBHandler(Context context,int RO){
+    public DBHandler(Context context){
         super(context, DB_NAME, null, 1);
         DB_PATH = "/data/data/" + context.getPackageName() + "/databases/";
         this.myContext = context;
-        this.createDatabase();
-        switch (RO) {
-            case 0: this.openDataBaseReadOnly();
-        }
-
-        whereClause = new whereBuilder();
     }
 
     /**
