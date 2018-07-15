@@ -22,20 +22,19 @@ public class DBHandler extends SQLiteOpenHelper {
     private String whereClause;
 
     /**
-     * Create DBHandler
-     * @Param Context Pass in current context of application
-     * @Param ReadOnly - How to open database.  0 for ReadOnly
+     * Open connection to database
+     * @param context current context of application
+     * @param RO Read only Status.  0 for Read only, 1 for writeable
      */
-    public DBHandler(Context context,int RO){
+    public DBHandler(Context context, int RO){
         super(context, DB_NAME, null, 1);
         DB_PATH = "/data/data/" + context.getPackageName() + "/databases/";
         this.myContext = context;
-        this.createDatabase();
-        switch (RO) {
-            case 0: this.openDataBaseReadOnly();
+        switch(RO){
+            case 0: this.createDatabase();
+                    this.openDataBaseReadOnly();
         }
 
-        whereClause = new whereBuilder();
     }
 
     /**
@@ -111,11 +110,14 @@ public class DBHandler extends SQLiteOpenHelper {
     /**
      * Player
      */
-    public Cursor playerSearchQuery(String Player) {
+    public Cursor playerSearchQuery(String player) {
+        String[] name = player.split(" ");
 
-        String firstName;
-        String lastName;
-        Cursor result = db.rawQuery("Select * from player where name_first like '%?%' and name_last like '%?%'",);
+        if(name[1] == null) { //If only 1 name was put in, assume it is last name
+            return db.rawQuery("Select * from player where name_last like '%?%'",name);
+        }
+        Cursor test = db.rawQuery(String.format("Select * from player where name_first like '%s%' and name_last like '%%s%'",name[0],name[1]),null);
+        return test;
     }
 
     @Override
