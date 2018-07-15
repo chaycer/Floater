@@ -1,5 +1,6 @@
 package com.company.cc.floater;
 
+import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteException;
 import android.database.sqlite.SQLiteOpenHelper;
@@ -9,6 +10,8 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.sql.SQLException;
+import java.util.List;
 
 
 public class DBHandler extends SQLiteOpenHelper {
@@ -16,14 +19,23 @@ public class DBHandler extends SQLiteOpenHelper {
     private static String DB_PATH;
     private static String DB_NAME = "baseball_database.sqlite";
     private final Context myContext;
+    private String whereClause;
 
     /**
-     *
+     * Create DBHandler
+     * @Param Context Pass in current context of application
+     * @Param ReadOnly - How to open database.  0 for ReadOnly
      */
-    public DBHandler(Context context){
+    public DBHandler(Context context,int RO){
         super(context, DB_NAME, null, 1);
         DB_PATH = "/data/data/" + context.getPackageName() + "/databases/";
         this.myContext = context;
+        this.createDatabase();
+        switch (RO) {
+            case 0: this.openDataBaseReadOnly();
+        }
+
+        whereClause = new whereBuilder();
     }
 
     /**
@@ -60,7 +72,7 @@ public class DBHandler extends SQLiteOpenHelper {
         }
 
     /**
-     *
+     * Copy database into memory from the static database
       */
     private void copyDataBase() throws IOException{
         InputStream myInput = myContext.getAssets().open(DB_NAME);
@@ -84,6 +96,27 @@ public class DBHandler extends SQLiteOpenHelper {
     /**
      *
      */
+    public void createFilter(List<FilterSearch> filters) {
+
+
+    }
+
+    /**
+     *
+     */
+    public void clearFilter() {
+        whereClause = "";
+    }
+
+    /**
+     * Player
+     */
+    public Cursor playerSearchQuery(String Player) {
+
+        String firstName;
+        String lastName;
+        Cursor result = db.rawQuery("Select * from player where name_first like '%?%' and name_last like '%?%'",);
+    }
 
     @Override
     public synchronized void close() {
