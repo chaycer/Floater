@@ -115,17 +115,11 @@ public class DBHandler extends SQLiteOpenHelper {
 
         if(name.length == 1) { //If only 1 name was put in, assume it is last name
 
-            Cursor test = db.rawQuery(String.format("Select * from player where name_first like '%s'",name[0]),null);
-            test.moveToFirst();
-            int count = test.getCount();
-            return test;
+            return db.rawQuery(String.format("Select * from player where name_first like '%s'",name[0]),null);
 
         }
-        String query = String.format("Select * from player where name_first like '%s' AND name_last like '%s'",name[0],name[1]);
-        Cursor test = db.rawQuery(query ,null);
-        test.moveToFirst();
-        int count = test.getCount();
-        return test;
+        return db.rawQuery(String.format("Select * from player where name_first like '%s' AND name_last like '%s'",name[0],name[1]) ,null);
+
     }
 
     @Override
