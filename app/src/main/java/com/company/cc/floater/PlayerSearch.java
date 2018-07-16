@@ -21,6 +21,15 @@ public class PlayerSearch extends AppCompatActivity {
         String[] names = result.getColumnNames();
         String result1 = result.getString(result.getColumnIndex("player_id"));
 
+        result = db.playerTeamsQuery("aardsda01", "CHN");
+        result.moveToFirst();
+        names = result.getColumnNames();
+        result1 = result.getString(result.getColumnIndex("year"));
+
+        result = db.playerStatsQuery("aardsda01",2006,"CHN",null);
+        result.moveToFirst();
+        names = result.getColumnNames();
+
         db.close(); //CRR Do this once everything with database is done (will apparently crash if you try to access cursor after calling this)
         TextView tv = (TextView) findViewById(R.id.playerNameTextView);
         tv.setText(player);
