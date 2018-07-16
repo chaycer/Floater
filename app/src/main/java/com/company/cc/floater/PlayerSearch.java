@@ -18,7 +18,7 @@ public class PlayerSearch extends AppCompatActivity {
         DBHandler db = new DBHandler(this, 0);
         Cursor result = db.playerSearchQuery(player);
         result.moveToFirst();
-        String[] names = result.getColumnNames();
+            String[] names = result.getColumnNames();
         String result1 = result.getString(result.getColumnIndex("player_id"));
 
         result = db.playerTeamsQuery("aardsda01", "CHN");

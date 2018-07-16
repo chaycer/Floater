@@ -105,7 +105,7 @@ public class DBHandler extends SQLiteOpenHelper {
      * @param player Name of the player to search for
      * @return queryResult Cursor object containing the query result
      */
-    public Cursor playerSearchQuery(String player) {
+    public Cursor   playerSearchQuery(String player) {
         String[] name = player.split(" ");
         if(name.length == 0){
             throw new Error("Blank player name");
@@ -130,34 +130,34 @@ public class DBHandler extends SQLiteOpenHelper {
     public Cursor playerTeamsQuery(String playerID, String teamID) {
 
         if (teamID == null || teamID.equals("")) {
-            String query = String.format("Select distinct fielding_test.year, fielding_test.team_id " +
-                    "FROM fielding_test " +
-                    "WHERE fielding_test.player_id = '%s' " +
+            String query = String.format("SELECT DISTINCT fielding.year, fielding.team_id " +
+                    "FROM fielding " +
+                    "WHERE fielding.player_id = '%s' " +
                     "union " +
-                    "SELECT distinct batting_test.year, batting_test.team_id " +
-                    "FROM batting_test " +
-                    "WHERE batting_test.player_id = '%s' " +
+                    "SELECT distinct batting.year, batting.team_id " +
+                    "FROM batting " +
+                    "WHERE batting.player_id = '%s' " +
                     "union " +
-                    "SELECT Distinct pitching_test.year, pitching_test.team_id " +
-                    "FROM pitching_test " +
-                    "WHERE pitching_test.player_id = '%s' ", playerID, playerID, playerID);
+                    "SELECT DISTINCT pitching.year, pitching.team_id " +
+                    "FROM pitching " +
+                    "WHERE pitching.player_id = '%s' ", playerID, playerID, playerID);
             return db.rawQuery(query, null);
         }
 
-        String query = String.format("Select distinct fielding_test.year " +
-                "FROM fielding_test " +
-                "WHERE fielding_test.player_id = '%s' " +
-                "AND fielding_test.team_id = '%s' " +
+        String query = String.format("Select distinct fielding.year " +
+                "FROM fielding " +
+                "WHERE fielding.player_id = '%s' " +
+                "AND fielding.team_id = '%s' " +
                 "union " +
-                "SELECT distinct batting_test.year " +
-                "FROM batting_test " +
-                "WHERE batting_test.player_id = '%s' " +
-                "AND batting_test.team_id = '%s' " +
+                "SELECT distinct batting.year " +
+                "FROM batting " +
+                "WHERE batting.player_id = '%s' " +
+                "AND batting.team_id = '%s' " +
                 "union " +
-                "SELECT Distinct pitching_test.year " +
-                "FROM pitching_test " +
-                "WHERE pitching_test.player_id = '%s' " +
-                "AND pitching_test.team_id = '%s'",playerID,teamID,playerID,teamID,playerID,teamID);
+                "SELECT DISTINCT pitching.year " +
+                "FROM pitching " +
+                "WHERE pitching.player_id = '%s' " +
+                "AND pitching.team_id = '%s'",playerID,teamID,playerID,teamID,playerID,teamID);
 
         return db.rawQuery(query, null);
     }
@@ -175,10 +175,10 @@ public class DBHandler extends SQLiteOpenHelper {
         }
 
         String query = String.format("SELECT %s" +
-                        "FROM fielding_test " +
-                        "LEFT OUTER JOIN batting_test on batting_test.player_id = fielding_test.player_id AND batting_test.year = fielding_test.year " +
-                        "LEFT OUTER JOIN pitching_test on pitching_test.player_id = fielding_test.player_id AND pitching_test.year = fielding_test.year " +
-                "where fielding_test.player_id = '%s' and fielding_test.year = %d", stats,playerID,seasonYear);
+                        "FROM fielding " +
+                        "LEFT OUTER JOIN batting on batting.player_id = fielding.player_id AND batting.year = fielding.year " +
+                        "LEFT OUTER JOIN pitching on pitching.player_id = fielding.player_id AND pitching.year = fielding.year " +
+                "where fielding.player_id = '%s' and fielding.year = %d", stats,playerID,seasonYear);
         ;
 
         return db.rawQuery(query,null);
