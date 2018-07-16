@@ -40,7 +40,7 @@ public class DBHandler extends SQLiteOpenHelper {
     /**
      * Create empty database in memory and fill with static database
      */
-    public void createDatabase(){
+    private void createDatabase(){
         boolean dbExist = checkDataBase();
         if(!dbExist) {
             this.getReadableDatabase();
@@ -88,7 +88,7 @@ public class DBHandler extends SQLiteOpenHelper {
         myInput.close();
     }
 
-    public void openDataBaseReadOnly() throws SQLiteException{
+    private void openDataBaseReadOnly() throws SQLiteException{
         String myPath = DB_PATH + DB_NAME;
         db = SQLiteDatabase.openDatabase(myPath,null,SQLiteDatabase.OPEN_READONLY);
     }
