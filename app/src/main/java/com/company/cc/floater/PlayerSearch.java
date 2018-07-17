@@ -17,8 +17,11 @@ public class PlayerSearch extends AppCompatActivity {
         //CRR Adding search
         DBHandler db = new DBHandler(this, 0);
         Cursor result = db.playerSearchQuery(player);
+
+        /*
         result.moveToFirst();
             String[] names = result.getColumnNames();
+            result.getColumnCount();
         String result1 = result.getString(result.getColumnIndex("player_id"));
 
         result = db.playerTeamsQuery("aardsda01", "CHN");
@@ -29,6 +32,8 @@ public class PlayerSearch extends AppCompatActivity {
         result = db.playerStatsQuery("aardsda01",2006,"CHN",null);
         result.moveToFirst();
         names = result.getColumnNames();
+        */ //Examples of usage
+
 
         db.close(); //CRR Do this once everything with database is done (will apparently crash if you try to access cursor after calling this)
         TextView tv = (TextView) findViewById(R.id.playerNameTextView);
