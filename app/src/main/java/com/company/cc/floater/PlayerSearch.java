@@ -16,7 +16,12 @@ public class PlayerSearch extends AppCompatActivity {
 
         //CRR Adding search
         DBHandler db = new DBHandler(this, 0);
-        Cursor result = db.playerSearchQuery(player);
+        Cursor result = db.teamSearch(player);
+
+        result.moveToFirst();
+        String[] names = result.getColumnNames();
+        int count = result.getColumnCount();
+        String result1 = result.getString(result.getColumnIndex("name"));
 
         /*
         result.moveToFirst();

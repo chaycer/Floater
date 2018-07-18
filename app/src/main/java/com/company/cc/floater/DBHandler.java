@@ -105,7 +105,7 @@ public class DBHandler extends SQLiteOpenHelper {
      * @param player Name of the player to search for
      * @return queryResult Cursor object containing the query result
      */
-    public Cursor   playerSearchQuery(String player) {
+    public Cursor playerSearchQuery(String player) {
         String[] name = player.split(" ");
         if(name.length == 0){
             throw new Error("Blank player name");
@@ -183,6 +183,38 @@ public class DBHandler extends SQLiteOpenHelper {
 
         return db.rawQuery(query,null);
     }
+
+    /**
+     * Query to be used when searching for teams so that we can retrieve the proper team_id
+     * @param teamName Team name to search for
+     * @return Query with a list of team_ids and seasons for those teams
+     */
+    public Cursor teamSearch(String teamName) {
+
+        String cTeamName = "%" + teamName + "%";
+        String query = String.format("select name, team_id, year from team where name like '%s' order by name asc",cTeamName);
+        return db.rawQuery(query,null);
+    }
+
+    /**
+     *
+     * @param teamID team ID to search for
+     * @param seasonYear Season year to search for.  If null, returns all seasons
+     * @return
+     */
+    public Cursor teamStatsQuery(String teamID, Integer seasonYear) {
+        String where;
+        if (seasonYear == null || seasonYear.equals("")) {
+            where = String.format("team_id = %s", teamID);
+        } else {
+            where = String.format("team_id = %s AND year = %d", teamID, seasonYear);
+        }
+        String query = "select * from team where" + where;
+
+        return db.rawQuery(query, null);
+    }
+
+    //Override methods
     @Override
     public synchronized void close() {
         if(db != null)
