@@ -15,7 +15,7 @@ public class PlayerSearch extends AppCompatActivity {
         // adding some testing code to make sure passing string works
 
         //CRR Adding search
-        DBHandler db = new DBHandler(this, 0);
+        DBHandler db = new DBHandler(this);
         Cursor result = db.teamSearch(player);
 
         result.moveToFirst();

@@ -23,16 +23,14 @@ public class DBHandler extends SQLiteOpenHelper {
     /**
      * Open connection to database
      * @param context current context of application
-     * @param RO Read only Status.  0 for Read only, 1 for writeable
      */
-    public DBHandler(Context context, int RO){
+    public DBHandler(Context context){
         super(context, DB_NAME, null, 1);
         DB_PATH = "/data/data/" + context.getPackageName() + "/databases/";
         this.myContext = context;
-        switch(RO){
-            case 0: this.createDatabase();
-                    this.openDataBaseReadOnly();
-        }
+        this.createDatabase();
+        this.openDatabase();
+
     }
 
     /**
@@ -86,9 +84,9 @@ public class DBHandler extends SQLiteOpenHelper {
         myInput.close();
     }
 
-    private void openDataBaseReadOnly() throws SQLiteException{
+    private void openDatabase() throws SQLiteException{
         String myPath = DB_PATH + DB_NAME;
-        db = SQLiteDatabase.openDatabase(myPath,null,SQLiteDatabase.OPEN_READONLY);
+        db = SQLiteDatabase.openDatabase(myPath,null,SQLiteDatabase.OPEN_READWRITE);
     }
 
     /**
