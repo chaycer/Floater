@@ -15,30 +15,9 @@ public class PlayerSearch extends AppCompatActivity {
         // adding some testing code to make sure passing string works
 
         //CRR Adding search
-        DBHandler db = new DBHandler(this);
-        Cursor result = db.teamSearch(player);
-
+        DBHandler db = new DBHandler(getApplicationContext());
+        Cursor result = db.playerSearchQuery(player);
         result.moveToFirst();
-        String[] names = result.getColumnNames();
-        int count = result.getColumnCount();
-        String result1 = result.getString(result.getColumnIndex("name"));
-
-        /*
-        result.moveToFirst();
-            String[] names = result.getColumnNames();
-            result.getColumnCount();
-        String result1 = result.getString(result.getColumnIndex("player_id"));
-
-        result = db.playerTeamsQuery("aardsda01", "CHN");
-        result.moveToFirst();
-        names = result.getColumnNames();
-        result1 = result.getString(result.getColumnIndex("year"));
-
-        result = db.playerStatsQuery("aardsda01",2006,"CHN",null);
-        result.moveToFirst();
-        names = result.getColumnNames();
-        */ //Examples of usage
-
 
         db.close(); //CRR Do this once everything with database is done (will apparently crash if you try to access cursor after calling this)
         TextView tv = (TextView) findViewById(R.id.playerNameTextView);

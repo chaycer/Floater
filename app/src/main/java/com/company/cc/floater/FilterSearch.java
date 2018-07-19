@@ -24,6 +24,10 @@ public class FilterSearch {
     public String getValue() {
         return value;
     }
+
+    public String toString() {
+        return stat + operator + value;
+    }
 }
 
 

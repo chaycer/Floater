@@ -10,8 +10,8 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.sql.SQLException;
 import java.util.List;
+
 
 
 public class DBHandler extends SQLiteOpenHelper {
@@ -39,7 +39,7 @@ public class DBHandler extends SQLiteOpenHelper {
     private void createDatabase(){
         boolean dbExist = checkDataBase();
         if(!dbExist) {
-            this.getReadableDatabase();
+            this.getWritableDatabase();
             try {
                 copyDataBase();
             } catch (IOException e) {
@@ -177,8 +177,6 @@ public class DBHandler extends SQLiteOpenHelper {
                         "LEFT OUTER JOIN batting on batting.player_id = fielding.player_id AND batting.year = fielding.year " +
                         "LEFT OUTER JOIN pitching on pitching.player_id = fielding.player_id AND pitching.year = fielding.year " +
                 "where fielding.player_id = '%s' and fielding.year = %d", stats,playerID,seasonYear);
-        ;
-
         return db.rawQuery(query,null);
     }
 
@@ -210,6 +208,56 @@ public class DBHandler extends SQLiteOpenHelper {
         String query = "select * from team where" + where;
 
         return db.rawQuery(query, null);
+    }
+
+    /**
+     * Pulls all players that played on a specific team in a given season
+     * @param teamID teamID that you want to search for.
+     * @param Season Season that you want to pull the roster for
+     * @return Cursor object with the result of the query
+     */
+    public Cursor teamRosterSearch(String teamID, int Season) {
+        String query = String.format("select distinct player.player_id, player.name_first, player.name_last, team.team_id, team.name, team.year " +
+                        "FROM fielding " +
+                        "JOIN team on team.team_id = fielding.team_id and team.year = fielding.year " +
+                        "JOIN player on player.player_id = fielding.player_id " +
+                        "where team.team_id = '%s' and team.year = %d " +
+                        "union " +
+                        "select distinct player.player_id, player.name_first, player.name_last, team.team_id, team.name, team.year " +
+                        "from batting " +
+                        "JOIN team on team.team_id = batting.team_id and team.year = batting.year " +
+                        "JOIN player on player.player_id = batting.player_id " +
+                        "where team.team_id = '%s' and team.year = %d " +
+                        "union " +
+                        "select distinct player.player_id, player.name_first, player.name_last, team.team_id, team.name, team.year " +
+                        "from pitching " +
+                        "JOIN team on team.team_id = pitching.team_id and pitching.year = team.year " +
+                        "JOIN player on player.player_id = pitching.player_id " +
+                        "where team.team_id = '%s' and team.year = %d",teamID, Season,teamID, Season,teamID, Season);
+        return db.rawQuery(query,null);
+    }
+
+    /**
+     * DONT USE YET
+     * @param playerID
+     * @param playerData
+     * @return
+     */
+    public Cursor insertPlayerData(String playerID, List<String> playerData){
+        String query = "INSERT INTO player (player_id, name_first, name_last) VALUES ('CRR1', 'Chayce', 'Ririe')";
+        db.execSQL(query);
+
+        return db.rawQuery("select * from player", null);
+
+    }
+
+    /**
+     * DONT USE YET
+     * @return
+     */
+    public Cursor updatePlayerData(){
+        return db.rawQuery("select * from player", null); //temp
+
     }
 
     //Override methods
