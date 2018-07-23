@@ -243,8 +243,8 @@ public class DBHandler extends SQLiteOpenHelper {
      * @param playerData
      * @return
      */
-    public Cursor insertPlayerData(String playerID, List<String> playerData){
-        String query = "INSERT INTO player (player_id, name_first, name_last) VALUES ('CRR1', 'Chayce', 'Ririe')";
+    public Cursor insertPlayerData(String playerID, int seasonYear, String team_id, List<InsertStat> playerData){
+        ;
         db.execSQL(query);
 
         return db.rawQuery("select * from player", null);
@@ -261,6 +261,7 @@ public class DBHandler extends SQLiteOpenHelper {
     }
 
     //Override methods
+
     @Override
     public synchronized void close() {
         if(db != null)
