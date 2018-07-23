@@ -2,45 +2,76 @@ package com.company.cc.floater;
 
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
+import android.view.LayoutInflater;
 import android.view.View;
+import android.widget.Button;
 import android.widget.LinearLayout;
-import android.widget.TextView;
 
 public class AddPlayer extends AppCompatActivity {
 
-    //CardView hittingCard;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_add_player);
+        LinearLayout mainLayout = findViewById(R.id.addPlayerLayout);
+        // generate layout showing each player stat input
+        LayoutInflater inflater = getLayoutInflater();
+        FloaterApplication.addStatLines(mainLayout, inflater, FloaterApplication.getPlayerStats());
 
-        //display stuff on click
-        final TextView mSampleTitle = (TextView) findViewById(R.id.title);
-        final LinearLayout mSampleContent = (LinearLayout) findViewById(R.id.year);
-        mSampleTitle.setOnClickListener(new View.OnClickListener() {
-            public void onClick(View v) {
-                if (v == mSampleTitle) {
-                    mSampleContent.setVisibility(mSampleContent.getVisibility() == View.VISIBLE ? View.GONE : View.VISIBLE);
-                }
-            }
-            });
+        // add buttons
+        View save = inflater.inflate(R.layout.save_changes_button, null);
+        View add = inflater.inflate(R.layout.add_season_stats, null);
+
         /*
-        hittingCard = (CardView) findViewById(R.id.hittingCardView);
-        //hide until title is clicked
-        hittingCard.setVisibility(View.GONE);
-        final TextView descriptionText = (TextView) findViewById(R.id.detail_description_content);
-        final TextView showAll = (TextView) findViewById(R.id.detail_read_all);
-        showAll.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                showAll.setVisibility(View.INVISIBLE);
-                descriptionText.setMaxLines(Integer.MAX_VALUE);
+        TODO: NEED TO SAVE STATS AS PART OF ONCLICK LISTENER
+         */
+        Button saveButton = save.findViewById(R.id.saveChangesButton);
+        Button hittingButton = add.findViewById(R.id.hittingAddButton);
+        Button fieldingButton = add.findViewById(R.id.fieldingAddButton);
+        Button pitchingButton = add.findViewById(R.id.pitchingAddButton);
+
+        FloaterApplication.setSaveButton(saveButton, this);
+        FloaterApplication.setHittingButton(hittingButton, this);
+        FloaterApplication.setFieldingButton(fieldingButton, this);
+        FloaterApplication.setPitchingButton(pitchingButton, this);
+
+        mainLayout.addView(save);
+        mainLayout.addView(add);
+
+/*
+        saveButton.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View view) {
+                Intent startIntent = new Intent(getApplicationContext(), PlayerProfile.class);
+                startActivity(startIntent);
+            }
+        });
+
+
+
+        hittingButton.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View view) {
+                Intent startIntent = new Intent(getApplicationContext(), AddHitting.class);
+                startActivity(startIntent);
+            }
+        });
+
+
+        fieldingButton.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View view) {
+                Intent startIntent = new Intent(getApplicationContext(), AddFielding.class);
+                startActivity(startIntent);
+            }
+        });
+
+
+        pitchingButton.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View view) {
+                Intent startIntent = new Intent(getApplicationContext(), AddPitching.class);
+                startActivity(startIntent);
             }
         });*/
+
+
     }
-/*
-    public void toggleContents(View v){
-        hittingCard.setVisibility(hittingCard.isShown() ? View.GONE : View.VISIBLE );
-    }*/
 
 }

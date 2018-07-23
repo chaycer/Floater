@@ -1,14 +1,14 @@
 package com.company.cc.floater;
 
-import android.app.Activity;
 import android.os.Bundle;
+import android.app.Activity;
 
-public class ManagerSearch extends Activity {
+public class ParkProfile extends Activity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_manager_search);
+        setContentView(R.layout.activity_park_profile);
     }
 
 }

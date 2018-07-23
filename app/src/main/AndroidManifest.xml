@@ -30,8 +30,20 @@
             android:name=".StatSearchResults"
             android:label="@string/title_activity_stat_search_results" />
         <activity
-            android:name=".ManagerSearch"
-            android:label="@string/title_activity_manager_search"></activity>
+            android:name=".TeamProfile"
+            android:label="@string/title_activity_team_profile" />
+        <activity
+            android:name=".ParkProfile"
+            android:label="@string/title_activity_park_profile" />
+        <activity
+            android:name=".AddHitting"
+            android:label="@string/title_activity_add_hitting" />
+        <activity
+            android:name=".AddFielding"
+            android:label="@string/title_activity_add_fielding" />
+        <activity
+            android:name=".AddPitching"
+            android:label="@string/title_activity_add_pitching"></activity>
     </application>
 
 </manifest>

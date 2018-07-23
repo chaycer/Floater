@@ -16,7 +16,6 @@ public class HomeScreen extends AppCompatActivity {
 
         searchButton(((FloaterApplication) getApplication()).PLAYER); // set up player search
         searchButton(((FloaterApplication) getApplication()).TEAM); // set up team search
-        searchButton(((FloaterApplication) getApplication()).MANAGER); // set up manager search
 
         //stat search
         Button statSearchButton = (Button) findViewById(R.id.statSearchButton);
@@ -39,8 +38,8 @@ public class HomeScreen extends AppCompatActivity {
 
 
     /**
-     * Sets up the player, team, and manager searches
-     * @param type 10 for player, 20 for team, 30 for manager
+     * Sets up the player and team searches
+     * @param type 10 for player, 20 for team
      */
     void searchButton(int type){
         final Button searchButton;
@@ -51,15 +50,10 @@ public class HomeScreen extends AppCompatActivity {
             searchET = findViewById(R.id.playerSearchEditText);
             newActivity = PlayerSearch.class;
         }
-        else if (type == ((FloaterApplication) getApplication()).TEAM){
+        else {
             searchButton = findViewById(R.id.teamSearchButton);
             searchET = findViewById(R.id.teamSearchEditText);
             newActivity = TeamSearch.class;
-        }
-        else{
-            searchButton = findViewById(R.id.managerSearchButton);
-            searchET = findViewById(R.id.managerSearchEditText);
-            newActivity = ManagerSearch.class;
         }
 
         searchButton.setOnClickListener(new View.OnClickListener() {
