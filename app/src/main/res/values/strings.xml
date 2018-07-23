@@ -23,6 +23,8 @@
     <string name="addFieldingStats">Fielding Stats</string>
     <string name="addPitchingStats">Pitching Stats</string>
     <string name="title_activity_add_hitting">AddHitting</string>
+    <string name="playerNameHeader">Player Name</string>
+    <string name="yearsActiveHeader">Years Active</string>
     <string name="large_text">
         "Material is the metaphor.\n\n"
 

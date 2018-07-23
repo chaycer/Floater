@@ -3,6 +3,7 @@ package com.company.cc.floater;
 import android.app.Application;
 import android.content.Context;
 import android.content.Intent;
+import android.database.Cursor;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.Button;
@@ -78,6 +79,37 @@ public class FloaterApplication extends Application{
             tv.setText(stats[i]); // set label
             mainLayout.addView(dynamicLayout);
         }
+    }
+
+    public static void addPlayerLines(LinearLayout mainLayout, LayoutInflater inflater, Cursor result){
+
+        // show "no results" if cursor empty
+        if (result == null || (result.getCount() < 1)){
+
+            result.close();
+            return;
+        }
+
+        while (result.moveToNext()){
+
+            View dynamicLayout = inflater.inflate(R.layout.player_search_layout, null);
+            TextView name = dynamicLayout.findViewById(R.id.playerNameTextView);
+            TextView years = dynamicLayout.findViewById(R.id.yearsActiveTextView);
+
+            name.setText(result.getString(result.getColumnIndex("name_first")) + " "
+                    + result.getString(result.getColumnIndex("name_last"))); // set label
+            String active = result.getString(result.getColumnIndex("debut"));
+            if (active != null && active.length() >= 4){
+                active = active.substring(0, 4);
+            }
+            if (active != null && result.getString(result.getColumnIndex("final_game")) != null && result.getString(result.getColumnIndex("final_game")).length() >= 4){
+                active = active + " - " + result.getString(result.getColumnIndex("final_game")).substring(0, 4);
+            }
+            years.setText(active);
+
+            mainLayout.addView(dynamicLayout);
+        }
+        result.close();
     }
 
     public static void setSaveButton(Button saveButton, final Context context){
