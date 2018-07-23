@@ -83,7 +83,7 @@ public class FloaterApplication extends Application{
 
     public static void addPlayerLines(LinearLayout mainLayout, LayoutInflater inflater, Cursor result){
 
-        // show "no results" if cursor empty
+        // TODO: show "no results" if cursor empty
         if (result == null || (result.getCount() < 1)){
 
             result.close();
@@ -91,13 +91,14 @@ public class FloaterApplication extends Application{
         }
 
         while (result.moveToNext()){
-
             View dynamicLayout = inflater.inflate(R.layout.player_search_layout, null);
             TextView name = dynamicLayout.findViewById(R.id.playerNameTextView);
             TextView years = dynamicLayout.findViewById(R.id.yearsActiveTextView);
 
-            name.setText(result.getString(result.getColumnIndex("name_first")) + " "
-                    + result.getString(result.getColumnIndex("name_last"))); // set label
+            if (result.getString(result.getColumnIndex("name_first")) != null) {
+                name.setText(result.getString(result.getColumnIndex("name_first")) + " "
+                        + result.getString(result.getColumnIndex("name_last"))); // set label
+            }
             String active = result.getString(result.getColumnIndex("debut"));
             if (active != null && active.length() >= 4){
                 active = active.substring(0, 4);
