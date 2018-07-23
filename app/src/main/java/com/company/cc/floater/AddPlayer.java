@@ -37,41 +37,6 @@ public class AddPlayer extends AppCompatActivity {
 
         mainLayout.addView(save);
         mainLayout.addView(add);
-
-/*
-        saveButton.setOnClickListener(new View.OnClickListener() {
-            public void onClick(View view) {
-                Intent startIntent = new Intent(getApplicationContext(), PlayerProfile.class);
-                startActivity(startIntent);
-            }
-        });
-
-
-
-        hittingButton.setOnClickListener(new View.OnClickListener() {
-            public void onClick(View view) {
-                Intent startIntent = new Intent(getApplicationContext(), AddHitting.class);
-                startActivity(startIntent);
-            }
-        });
-
-
-        fieldingButton.setOnClickListener(new View.OnClickListener() {
-            public void onClick(View view) {
-                Intent startIntent = new Intent(getApplicationContext(), AddFielding.class);
-                startActivity(startIntent);
-            }
-        });
-
-
-        pitchingButton.setOnClickListener(new View.OnClickListener() {
-            public void onClick(View view) {
-                Intent startIntent = new Intent(getApplicationContext(), AddPitching.class);
-                startActivity(startIntent);
-            }
-        });*/
-
-
     }
 
 }
