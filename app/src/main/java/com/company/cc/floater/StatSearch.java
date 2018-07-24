@@ -13,8 +13,6 @@ import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
-import java.io.IOException;
-import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -75,7 +73,7 @@ public class StatSearch extends AppCompatActivity {
             EditText et = etsIterator.next();
 
             if (!TextUtils.isEmpty(stat.getText()) && !TextUtils.isEmpty(op.getText()) && !TextUtils.isEmpty(et.getText())){
-                FilterSearch fs = new FilterSearch(stat.getText().toString(), op.getText().toString(), et.getText().toString());
+                FilterSearch fs = new FilterSearch(stat.getText().toString(), op.getText().toString(), et.getText().toString(), searchType);
                 filters.add(fs);
             }
         }
