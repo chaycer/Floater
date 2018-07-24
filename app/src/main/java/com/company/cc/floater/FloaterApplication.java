@@ -79,6 +79,8 @@ public class FloaterApplication extends Application{
             tv.setText(stats[i]); // set label
             mainLayout.addView(dynamicLayout);
         }
+        View dynamicLayout = inflater.inflate(R.layout.null_overwrite_checkbox, null);
+        mainLayout.addView(dynamicLayout);
     }
 
     public static void addPlayerLines(LinearLayout mainLayout, LayoutInflater inflater, Cursor result){
