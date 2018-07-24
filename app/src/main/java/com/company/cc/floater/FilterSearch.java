@@ -42,7 +42,7 @@ public class FilterSearch {
     }
 
     public String toString() {
-        return stat + operator + value;
+        return stat + operator + "'" + value + "'";
     }
 }
 
