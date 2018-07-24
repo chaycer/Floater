@@ -117,4 +117,5 @@
     </string>
     <string name="title_activity_add_fielding">AddFielding</string>
     <string name="title_activity_add_pitching">AddPitching</string>
+    <string name="title_activity_hitting_season">HittingSeason</string>
 </resources>

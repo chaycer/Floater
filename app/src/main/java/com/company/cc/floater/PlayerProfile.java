@@ -1,21 +1,31 @@
 package com.company.cc.floater;
 
 import android.app.Activity;
+import android.app.Fragment;
 import android.os.Bundle;
+import android.support.v4.app.FragmentActivity;
+import android.support.v4.app.FragmentManager;
+import android.support.v4.app.FragmentPagerAdapter;
+import android.support.v4.view.ViewPager;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
-public class PlayerProfile extends Activity {
+public class PlayerProfile extends FragmentActivity {
+    ViewPager viewPager;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_player_profile);
+        viewPager = findViewById(R.id.playerProfileViewPager);
+        FragmentManager swipeAdapter = getSupportFragmentManager();
+
 
         //Bundle extras = getIntent().getExtras();
-        CursorRow CR = (CursorRow) getIntent().getExtras().getSerializable("CursorRow");
-        if (CR == null) {
+        CursorRow row = (CursorRow) getIntent().getExtras().getSerializable("CursorRow");
+        if (row == null) {
             String playerId = getIntent().getExtras().getString("playerId");
             /*
             TODO: add a db call to pull player info based on ID and then add to a CursorRow
@@ -23,7 +33,13 @@ public class PlayerProfile extends Activity {
         }
 
         TextView pname = findViewById(R.id.playerName);
-        pname.setText(CR.getValueByColumnName("name_first") + " " + CR.getValueByColumnName("name_last"));
+        String[] fullnameColumns = {"name_first", "name_last"};
+        pname.setText(row.getValueByColumnName(fullnameColumns[0]) + " " + row.getValueByColumnName(fullnameColumns[1]));
+
+        LinearLayout LL = findViewById(R.id.playerProfileLinearLayout);
+        LayoutInflater inflater = getLayoutInflater();
+        FloaterApplication.addStatsFromRow(LL, inflater, row, fullnameColumns);
+
 
         /*
         final TextView mSampleTitle = (TextView) findViewById(R.id.title);
@@ -36,6 +52,23 @@ public class PlayerProfile extends Activity {
             }
         });*/
     }
+
+    private Fragment profile(){
+        return new Fragment();
+    }
+
+    private Fragment hitting(){
+        return new Fragment();
+    }
+
+    private Fragment pitching(){
+        return new Fragment();
+    }
+
+    private Fragment fielding(){
+        return new Fragment();
+    }
+
     /*
         //CardView hittingCard;
     @Override

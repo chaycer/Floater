@@ -89,6 +89,31 @@ public class FloaterApplication extends Application{
         mainLayout.addView(dynamicLayout);
     }
 
+
+    public static void addStatsFromRow(LinearLayout mainLayout, LayoutInflater inflater, CursorRow row, String[] toExclude){
+        for (int i = 0; i < row.getSize(); i++){
+            boolean exclude = false;
+            if (toExclude != null) {
+                for (int j = 0; j < toExclude.length; j++) {
+                    if (row.getColumnNameByIndex(i).compareTo(toExclude[j]) == 0) {
+                        exclude = true;
+                    }
+                }
+            }
+            if (exclude){
+                continue;
+            }
+            View dynamicLayout = inflater.inflate(R.layout.stat_line_no_edit, null);
+            TextView name = dynamicLayout.findViewById(R.id.statNameNoEditTextView);
+            name.setText(row.getColumnNameByIndex(i));
+
+            TextView value = dynamicLayout.findViewById(R.id.statValueNoEditTextView);
+            value.setText(row.getValueByIndex(i));
+
+            mainLayout.addView(dynamicLayout);
+        }
+    }
+
     /**
      * Displays each player and years active from a cursor containing player information
      * @param mainLayout - layout to display each line on
