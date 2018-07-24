@@ -1,5 +1,6 @@
 package com.company.cc.floater;
 
+import android.annotation.SuppressLint;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteException;
@@ -19,6 +20,9 @@ public class DBHandler extends SQLiteOpenHelper {
     private static String DB_PATH;
     private static String DB_NAME = "baseball_database.sqlite";
     private final Context myContext;
+    private String[] battingTable;
+    private String[] pitchingTable;
+    private String[] fieldingTable;
 
     /**
      * Open connection to database
@@ -30,9 +34,10 @@ public class DBHandler extends SQLiteOpenHelper {
         this.myContext = context;
         this.createDatabase();
         this.openDatabase();
+        this.getColumns();
+
 
     }
-
     /**
      * Create empty database in memory and fill with static database
      */
@@ -88,7 +93,15 @@ public class DBHandler extends SQLiteOpenHelper {
         String myPath = DB_PATH + DB_NAME;
         db = SQLiteDatabase.openDatabase(myPath,null,SQLiteDatabase.OPEN_READWRITE);
     }
+    private void getColumns() {
+        Cursor setColumns = db.rawQuery("select * from batting", null);
+        battingTable = setColumns.getColumnNames();
+        setColumns = db.rawQuery("select * from pitching", null);
+        pitchingTable = setColumns.getColumnNames();
+        setColumns = db.rawQuery("select * from fielding", null);
+        fieldingTable = setColumns.getColumnNames();
 
+    }
     /**
      * 
      * @param filters
@@ -217,7 +230,7 @@ public class DBHandler extends SQLiteOpenHelper {
      * @return Cursor object with the result of the query
      */
     public Cursor teamRosterSearch(String teamID, int Season) {
-        String query = String.format("select distinct player.player_id, player.name_first, player.name_last, team.team_id, team.name, team.year " +
+        @SuppressLint("DefaultLocale") String query = String.format("select distinct player.player_id, player.name_first, player.name_last, team.team_id, team.name, team.year " +
                         "FROM fielding " +
                         "JOIN team on team.team_id = fielding.team_id and team.year = fielding.year " +
                         "JOIN player on player.player_id = fielding.player_id " +
@@ -238,29 +251,130 @@ public class DBHandler extends SQLiteOpenHelper {
     }
 
     /**
-     * DONT USE YET
-     * @param playerID
-     * @param playerData
+     * Inserts a new player into the database.  Will parse out the different columns/tables from the list of playerdata into the correct insert table query.
+     * Also generates new playerID based on first and last name
+     * @param playerID Can be null, if it is null I will automatically generate a playerID
+     * @param firstName
+     * @param lastName
+     * @param seasonYear
+     * @param teamID
+     * @param pos Position.  Required only if you are inserting into the fielding table
+     * @param playerData List of data that is to be inserted into the tables
      * @return
      */
-    public Cursor insertPlayerData(String playerID, List<String> playerData){
-        String query = "INSERT INTO player (player_id, name_first, name_last) VALUES ('CRR1', 'Chayce', 'Ririe')";
-        db.execSQL(query);
+    public Cursor insertPlayerData(String playerID, String firstName, String lastName, int seasonYear, String teamID, String pos, List<InsertStat> playerData){
+        if (playerID.equals("") || playerID == null) {
+            playerID = this.createPlayerID(firstName, lastName);
+        }
+        StringBuilder bQueryValues = new StringBuilder();
+        StringBuilder bQueryCol = new StringBuilder();
+        StringBuilder pQueryValues = new StringBuilder();
+        StringBuilder pQueryCol = new StringBuilder();
+        StringBuilder fQueryValues = new StringBuilder();
+        StringBuilder fQueryCol = new StringBuilder();
+        StringBuilder plQueryCol = new StringBuilder();
+        StringBuilder plQueryValues = new StringBuilder();
 
-        return db.rawQuery("select * from player", null);
+        for (InsertStat player:playerData) {
+            if (player.getTable().equals("batting")){
+                if (bQueryCol.length() == 0) {
+                    bQueryCol.append("Insert into batting (player_id, year, team_id, " + player.getColumn());
+                    bQueryValues.append("(\'" + playerID + "\'," + seasonYear + ",\'" + teamID + "\',\'" + player.getValue() + "'");
+                }
+                else {
+                    bQueryCol.append(", " + player.getColumn());
+                    bQueryValues.append(", \'" + player.getValue() + "'");
+                }
+            }
+            if (player.getTable().equals("pitching")){
+                if (pQueryCol.length() == 0) {
+                    pQueryCol.append("Insert into pitching (player_id, year, team_id, " + player.getColumn());
+                    pQueryValues.append("(\'" + playerID + "\'," + seasonYear + ",\'" + teamID + "\',\'" + player.getValue() +"'");
+                }
+                else {
+                    pQueryCol.append(", " + player.getColumn());
+                    pQueryValues.append(", \'" + player.getValue() + "'");
+                }
+            }
+            if (player.getTable().equals("fielding")){
+                if (fQueryCol.length() == 0) {
+                    if(pos.equals("")||pos == null){
+                        throw new Error("Can't insert with a null position");
+                    }
+                    fQueryCol.append("Insert into fielding (player_id, year, team_id, pos, " + player.getColumn());
+                    fQueryValues.append("(\'" + playerID + "\'," + seasonYear + ",\'" + teamID + "\',\'" + pos + "\',\'" + player.getValue() +"'");
+                }
+                else {
+                    fQueryCol.append(", " + player.getColumn());
+                    fQueryValues.append(", \'" + player.getValue() + "'");
+                }
+            }
+            if (player.getTable().equals("player")){
+                if (plQueryCol.length() == 0) {
+                    plQueryCol.append("Insert into player (player_id, name_first, name_last, " + player.getColumn());
+                    plQueryValues.append("(\'" + playerID + "\', \'" + firstName + "\', \'" + lastName + "\', \'" + player.getValue() + "'");
+                }
+                else {
+                    plQueryCol.append(", " + player.getColumn());
+                    plQueryValues.append(", \'" + player.getValue()+ "'");
+                }
+            }
+        }
+
+        if(bQueryCol.length() != 0) {
+            bQueryCol.append(")");
+            bQueryValues.append(")");
+            String bQuery = bQueryCol.toString() + " Values " + bQueryValues.toString();
+            db.execSQL(bQuery);
+        }
+
+        if(fQueryCol.length() != 0) {
+            fQueryCol.append(")");
+            fQueryValues.append(")");
+            String fQuery = fQueryCol.toString() + " Values " + fQueryValues.toString();
+            db.execSQL(fQuery);
+        }
+
+        if(pQueryCol.length() != 0) {
+            pQueryCol.append(")");
+            pQueryValues.append(")");
+            String pQuery = pQueryCol.toString() + " Values " + pQueryValues.toString();
+            db.execSQL(pQuery);
+        }
+
+        if(plQueryCol.length() != 0) {
+            plQueryCol.append(")");
+            plQueryValues.append(")");
+            String plQuery = plQueryCol.toString() + " Values " + plQueryValues.toString();
+            db.execSQL(plQuery);
+        }
+
+        return this.playerStatsQuery(playerID,seasonYear,teamID,null);
 
     }
 
     /**
-     * DONT USE YET
+     * Create a unique playerID from the name and last name.  General structure is first 5 letters of first name + first 2 letters of last name + number
+     * @param firstName
+     * @param lastName
      * @return
      */
-    public Cursor updatePlayerData(){
-        return db.rawQuery("select * from player", null); //temp
-
+    public String createPlayerID(String firstName, String lastName) {
+        StringBuilder playerID = new StringBuilder();
+        if(firstName.length() < 5) {
+            playerID.append(firstName);
+        } else {
+            playerID.append(firstName.substring(0, 5));
+        }
+        playerID.append(lastName.substring(0,2));
+        String query = "select * from player where player_id like '" + playerID + "%'";
+        Cursor result = db.rawQuery(query,null);
+        int id = result.getCount() + 1;
+        playerID.append(id);
+        return playerID.toString().toLowerCase();
     }
-
     //Override methods
+
     @Override
     public synchronized void close() {
         if(db != null)
