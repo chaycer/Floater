@@ -102,14 +102,6 @@ public class DBHandler extends SQLiteOpenHelper {
         fieldingTable = setColumns.getColumnNames();
 
     }
-    /**
-     * 
-     * @param filters
-     */
-    public void createFilter(List<FilterSearch> filters) {
-
-
-    }
 
     /**
      * Searches for player based on provided name
@@ -189,7 +181,8 @@ public class DBHandler extends SQLiteOpenHelper {
                         "FROM fielding " +
                         "LEFT OUTER JOIN batting on batting.player_id = fielding.player_id AND batting.year = fielding.year " +
                         "LEFT OUTER JOIN pitching on pitching.player_id = fielding.player_id AND pitching.year = fielding.year " +
-                "where fielding.player_id = '%s' and fielding.year = %d", stats,playerID,seasonYear);
+                        "LEFT OUTER JOIN ERA_Stats on pitching.ip = ERA_Stats.ip AND pitching.er = ERA_Stats.er" +
+                        "where fielding.player_id = '%s' and fielding.year = %d", stats,playerID,seasonYear);
         return db.rawQuery(query,null);
     }
 
@@ -373,6 +366,36 @@ public class DBHandler extends SQLiteOpenHelper {
         playerID.append(id);
         return playerID.toString().toLowerCase();
     }
+
+    public Cursor statSearchQuery(List<FilterSearch> playerFilters){
+        StringBuilder query = new StringBuilder();
+        query.append("select  player.name_first, " +
+                        "player.name_last, " +
+                        "player.player_id, " +
+                        "CASE " +
+                        "WHEN fielding.year IS NOT NULL THEN fielding.year " +
+                        "WHEN batting.year IS NOT NULL THEN batting.year " +
+                        "ELSE pitching.year " +
+                        "END as 'year' " +
+                        "FROM fielding " +
+                        "LEFT OUTER JOIN batting on batting.player_id = fielding.player_id AND batting.year = fielding.year " +
+                        "LEFT OUTER JOIN pitching on pitching.player_id = fielding.player_id AND pitching.year = fielding.year " +
+                        "LEFT OUTER JOIN ERA_Stats on pitching.ip = ERA_Stats.ip AND pitching.er = ERA_Stats.er " +
+                        "LEFT OUTER JOIN player on player.player_id = fielding.player_id " +
+                        "where ");
+        boolean first = true;
+        for (FilterSearch filter:playerFilters) {
+            if(first){
+                query.append(filter.toString());
+                first = false;
+            }
+            query.append(" AND " + filter.toString());
+        }
+
+        return db.rawQuery(query.toString(), null);
+
+    }
+
     //Override methods
 
     @Override

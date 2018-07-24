@@ -2,6 +2,7 @@ package com.company.cc.floater;
 
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.database.Cursor;
 import android.os.Bundle;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
@@ -52,9 +53,9 @@ public class StatSearch extends AppCompatActivity {
                     Intent startIntent = new Intent(getApplicationContext(), StatSearchResults.class);
 
                     //Begin Search
+                    DBHandler db = new DBHandler(getApplicationContext());
+                    Cursor result = db.statSearchQuery(filters);
 
-                    //DBHandler db = new DBHandler(getApplicationContext(),0); //May not work, need to figure out context
-                    //db.createFilter(filters);
 
                     //End Search
 
