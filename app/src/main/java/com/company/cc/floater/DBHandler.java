@@ -203,6 +203,12 @@ public class DBHandler extends SQLiteOpenHelper {
         return db.rawQuery(query,null);
     }
 
+    public Cursor playerTableQuery(String playerID){
+        String query = String.format("Select * from player where player_id = %s", playerID);
+        return db.rawQuery(query,null);
+
+    }
+
     /**
      * Query to be used when searching for teams so that we can retrieve the proper team_id
      * @param teamName Team name to search for
@@ -519,11 +525,12 @@ public class DBHandler extends SQLiteOpenHelper {
      */
     public Cursor parkQuery(String teamID, int year){
         Integer iYear = year;
-        String where = "where team.teamID = '" + teamID + "' AND team.year = " + iYear.toString();
-        String query =  "select team.name, park.park_name, team.year " +
+        String where = "where team.team_id = '" + teamID + "' AND team.year = " + iYear.toString();
+        String query =  "select home_game.year,home_game.team_id,home_game.park_id,home_game.span_first,home_game.span_last,home_game.games,home_game.openings,home_game.attendance," +
+                "park.park_name,park.park_alias,park.city,park.state,park.country " +
                 "from home_game " +
                 "INNER JOIN team on home_game.team_id = team.team_id and home_game.year = team.year " +
-                "INNER JOIN park on park.park_id = home_game.park_id" + where + "ORDER BY team.year asc";
+                "INNER JOIN park on park.park_id = home_game.park_id " + where + " ORDER BY team.year asc";
         return db.rawQuery(query, null);
     }
     //Override methods
