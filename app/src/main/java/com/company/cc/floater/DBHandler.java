@@ -177,12 +177,12 @@ public class DBHandler extends SQLiteOpenHelper {
             stats = "*";
         }
 
-        String query = String.format("SELECT %s" +
+        String query = String.format("SELECT %s " +
                         "FROM fielding " +
                         "LEFT OUTER JOIN batting on batting.player_id = fielding.player_id AND batting.year = fielding.year " +
                         "LEFT OUTER JOIN pitching on pitching.player_id = fielding.player_id AND pitching.year = fielding.year " +
-                        "LEFT OUTER JOIN ERA_Stats on pitching.ip = ERA_Stats.ip AND pitching.er = ERA_Stats.er" +
-                        "where fielding.player_id = '%s' and fielding.year = %d", stats,playerID,seasonYear);
+                        "LEFT OUTER JOIN ERA_Stats on pitching.ip = ERA_Stats.ip AND pitching.er = ERA_Stats.er " +
+                        "WHERE fielding.player_id = '%s' and fielding.year = %d", stats,playerID,seasonYear);
         return db.rawQuery(query,null);
     }
 
@@ -247,18 +247,117 @@ public class DBHandler extends SQLiteOpenHelper {
      * Inserts a new player into the database.  Will parse out the different columns/tables from the list of playerdata into the correct insert table query.
      * Also generates new playerID based on first and last name
      * @param playerID Can be null, if it is null I will automatically generate a playerID
-     * @param firstName
-     * @param lastName
-     * @param seasonYear
-     * @param teamID
+     * @param firstName First name of player
+     * @param lastName Last name of player
+     * @param seasonYear year they played in
+     * @param teamID ID of team they play for
      * @param pos Position.  Required only if you are inserting into the fielding table
      * @param playerData List of data that is to be inserted into the tables
      * @return
      */
     public Cursor insertPlayerData(String playerID, String firstName, String lastName, int seasonYear, String teamID, String pos, List<InsertStat> playerData){
-        if (playerID.equals("") || playerID == null) {
+        if (playerID.equals("") || playerID == null) { //No player ID passed in create a new one and insert as new player
             playerID = this.createPlayerID(firstName, lastName);
+            return InsertNewPlayer(playerID, firstName, lastName, seasonYear, teamID, pos, playerData);
         }
+        if(this.playerStatsQuery(playerID,seasonYear,teamID,"").getCount() > 0){ //if they exist already
+            return updatePlayer(playerID, seasonYear, teamID, pos, playerData);
+        } else {
+            return InsertNewPlayer(playerID, firstName, lastName, seasonYear, teamID, pos, playerData);
+        }
+
+    }
+
+    /**
+     * Use to update an existing player
+     * @param playerID PlayerID to use
+     * @param seasonYear year they played in
+     * @param teamID ID of team they play for
+     * @param pos Position.  Required only if you are inserting into the fielding table
+     * @param playerData List of data that is to be inserted into the tables
+     * @return query cursor pointing to player data to be displayed
+     */
+    private Cursor updatePlayer(String playerID, int seasonYear, String teamID, String pos, List<InsertStat> playerData) {
+        StringBuilder bQueryCol = new StringBuilder();
+        StringBuilder pQueryCol = new StringBuilder();
+        StringBuilder fQueryCol = new StringBuilder();
+        StringBuilder plQueryCol = new StringBuilder();
+
+        for (InsertStat player : playerData) {
+            if (player.getTable().equals("batting")) {
+                if (bQueryCol.length() == 0) {
+                    bQueryCol.append("UPDATE batting SET " + player.getColumn() + " = '" + player.getValue() + "'");
+                } else {
+                    bQueryCol.append(", " + player.getColumn() + " = '" + player.getValue() + "'");
+                }
+            }
+            if (player.getTable().equals("pitching")) {
+                if (pQueryCol.length() == 0) {
+                    pQueryCol.append("UPDATE pitching SET " + player.getColumn() + " = '" + player.getValue() + "'");
+                } else {
+                    pQueryCol.append(", " + player.getColumn() + " = '" + player.getValue() + "'");
+                }
+            }
+            if (player.getTable().equals("fielding")) {
+                if (fQueryCol.length() == 0) {
+                    if (pos.equals("") || pos == null) {
+                        throw new Error("Can't insert with a null position");
+                    } else {
+                        fQueryCol.append("UPDATE fielding SET " + player.getColumn() + " = '" + player.getValue() + "'");
+                    }
+                } else {
+                        fQueryCol.append(", " + player.getColumn() + " = '" + player.getValue() + "'");
+                    }
+            }
+            if (player.getTable().equals("player")) {
+                if (plQueryCol.length() == 0) {
+                    plQueryCol.append("UPDATE player SET " + player.getColumn() + " = '" + player.getValue() + "'");
+                } else {
+                    plQueryCol.append(", " + player.getColumn() + " = '" + player.getValue()+ "'");
+                }
+            }
+        }
+        if (bQueryCol.length() != 0) {
+            String bQuery = bQueryCol.toString() + " WHERE batting.player_id = '" + playerID +
+                    "' AND batting.team_id = '" + teamID +
+                    "' AND batting.year = '" + seasonYear + "'";
+            db.execSQL(bQuery);
+        }
+
+        if (fQueryCol.length() != 0) {
+            String fQuery = fQueryCol.toString() + " WHERE fielding.player_id = '" + playerID +
+                    "' AND fielding.team_id = '" + teamID +
+                    "' AND fielding.year = '" + seasonYear +
+                    "' AND fielding.pos = '" + pos + "'";
+            db.execSQL(fQuery);
+        }
+
+        if (pQueryCol.length() != 0) {
+            String pQuery = pQueryCol.toString() + " WHERE pitching.player_id = '" + playerID +
+                    "' AND pitching.team_id = '" + teamID +
+                    "' AND pitching.year = '" + seasonYear + "'";
+            db.execSQL(pQuery);
+        }
+
+        if (plQueryCol.length() != 0) {
+            String plQuery = plQueryCol.toString() + " WHERE player.player_id = '" + playerID + "'";
+            db.execSQL(plQuery);
+        }
+        return this.playerStatsQuery(playerID, seasonYear, teamID, null);
+    }
+
+    /**
+     * Method for inserting a new player
+     * @param playerID PlayerID to use
+     * @param firstName First name of player
+     * @param lastName Last name of player
+     * @param seasonYear year they played in
+     * @param teamID ID of team they play for
+     * @param pos Position.  Required only if you are inserting into the fielding table
+     * @param playerData List of data that is to be inserted into the tables
+     * @return
+     */
+    private Cursor InsertNewPlayer(String playerID, String firstName, String lastName, int seasonYear, String teamID, String pos, List<InsertStat> playerData) {
         StringBuilder bQueryValues = new StringBuilder();
         StringBuilder bQueryCol = new StringBuilder();
         StringBuilder pQueryValues = new StringBuilder();
@@ -343,7 +442,6 @@ public class DBHandler extends SQLiteOpenHelper {
         }
 
         return this.playerStatsQuery(playerID,seasonYear,teamID,null);
-
     }
 
     /**
@@ -388,14 +486,29 @@ public class DBHandler extends SQLiteOpenHelper {
             if(first){
                 query.append(filter.toString());
                 first = false;
+            } else {
+                query.append(" AND " + filter.toString());
             }
-            query.append(" AND " + filter.toString());
         }
-
         return db.rawQuery(query.toString(), null);
 
     }
 
+    /**
+     * Search for the park that a team played in that year
+     * @param teamID
+     * @param year
+     * @return
+     */
+    public Cursor parkQuery(String teamID, int year){
+        Integer iYear = year;
+        String where = "where team.teamID = '" + teamID + "' AND team.year = " + iYear.toString();
+        String query =  "select team.name, park.park_name, team.year " +
+                "from home_game " +
+                "INNER JOIN team on home_game.team_id = team.team_id and home_game.year = team.year " +
+                "INNER JOIN park on park.park_id = home_game.park_id" + where + "ORDER BY team.year asc";
+        return db.rawQuery(query, null);
+    }
     //Override methods
 
     @Override
