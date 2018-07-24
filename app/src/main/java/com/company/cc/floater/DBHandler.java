@@ -253,6 +253,7 @@ public class DBHandler extends SQLiteOpenHelper {
     /**
      * Inserts a new player into the database.  Will parse out the different columns/tables from the list of playerdata into the correct insert table query.
      * Also generates new playerID based on first and last name
+     * @param playerID Can be null, if it is null I will automatically generate a playerID
      * @param firstName
      * @param lastName
      * @param seasonYear
@@ -261,8 +262,10 @@ public class DBHandler extends SQLiteOpenHelper {
      * @param playerData List of data that is to be inserted into the tables
      * @return
      */
-    public Cursor insertPlayerData(String firstName, String lastName, int seasonYear, String teamID, String pos, List<InsertStat> playerData){
-        String playerID = this.createPlayerID(firstName,lastName);
+    public Cursor insertPlayerData(String playerID, String firstName, String lastName, int seasonYear, String teamID, String pos, List<InsertStat> playerData){
+        if (playerID.equals("") || playerID == null) {
+            playerID = this.createPlayerID(firstName, lastName);
+        }
         StringBuilder bQueryValues = new StringBuilder();
         StringBuilder bQueryCol = new StringBuilder();
         StringBuilder pQueryValues = new StringBuilder();
