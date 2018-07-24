@@ -27,7 +27,7 @@ public class PlayerSearch extends AppCompatActivity {
         // CNP generating page based off result
         LinearLayout mainLayout = findViewById(R.id.playerSearchLayout);
         LayoutInflater inflater = getLayoutInflater();
-        FloaterApplication.addPlayerLines(mainLayout, inflater, result);
+        FloaterApplication.addPlayerLines(mainLayout, inflater, result, this);
 
         db.close(); //CRR Do this once everything with database is done (will apparently crash if you try to access cursor after calling this)
     }

@@ -12,6 +12,20 @@ public class PlayerProfile extends Activity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_player_profile);
+
+        //Bundle extras = getIntent().getExtras();
+        CursorRow CR = (CursorRow) getIntent().getExtras().getSerializable("CursorRow");
+        if (CR == null) {
+            String playerId = getIntent().getExtras().getString("playerId");
+            /*
+            TODO: add a db call to pull player info based on ID and then add to a CursorRow
+             */
+        }
+
+        TextView pname = findViewById(R.id.playerName);
+        pname.setText(CR.getValueByColumnName("name_first") + " " + CR.getValueByColumnName("name_last"));
+
+        /*
         final TextView mSampleTitle = (TextView) findViewById(R.id.title);
         final LinearLayout mSampleContent = (LinearLayout) findViewById(R.id.year);
         mSampleTitle.setOnClickListener(new View.OnClickListener() {
@@ -20,7 +34,7 @@ public class PlayerProfile extends Activity {
                     mSampleContent.setVisibility(mSampleContent.getVisibility() == View.VISIBLE ? View.GONE : View.VISIBLE);
                 }
             }
-        });
+        });*/
     }
     /*
         //CardView hittingCard;
