@@ -115,7 +115,7 @@ public class DBHandler extends SQLiteOpenHelper {
         for (String col: fieldingTable){
             select.append("fielding." + col + " AS 'fielding." + col + "',");
         }
-        select.deleteCharAt(select.length() - 1);
+        select.append("ERA_Stats.era as ERA_Stats.era");
         selectAll = select.toString();
 
     }
@@ -482,7 +482,7 @@ public class DBHandler extends SQLiteOpenHelper {
         return playerID.toString().toLowerCase();
     }
 
-    public Cursor statSearchQuery(List<FilterSearch> playerFilters){
+    public Cursor filterSearchQuery(List<FilterSearch> playerFilters){
         StringBuilder query = new StringBuilder();
         query.append("select  player.name_first, " +
                         "player.name_last, " +
