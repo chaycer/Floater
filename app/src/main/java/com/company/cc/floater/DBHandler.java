@@ -23,6 +23,7 @@ public class DBHandler extends SQLiteOpenHelper {
     private String[] battingTable;
     private String[] pitchingTable;
     private String[] fieldingTable;
+    private String selectAll;
 
     /**
      * Open connection to database
@@ -93,6 +94,10 @@ public class DBHandler extends SQLiteOpenHelper {
         String myPath = DB_PATH + DB_NAME;
         db = SQLiteDatabase.openDatabase(myPath,null,SQLiteDatabase.OPEN_READWRITE);
     }
+
+    /**
+     * gets columns from database
+     */
     private void getColumns() {
         Cursor setColumns = db.rawQuery("select * from batting", null);
         battingTable = setColumns.getColumnNames();
@@ -100,6 +105,18 @@ public class DBHandler extends SQLiteOpenHelper {
         pitchingTable = setColumns.getColumnNames();
         setColumns = db.rawQuery("select * from fielding", null);
         fieldingTable = setColumns.getColumnNames();
+        StringBuilder select = new StringBuilder();
+        for (String col: battingTable){
+            select.append("batting." + col + " AS 'batting." + col + "',");
+        }
+        for (String col: pitchingTable){
+            select.append("pitching." + col + " AS 'pitching." + col + "',");
+        }
+        for (String col: fieldingTable){
+            select.append("fielding." + col + " AS 'fielding." + col + "',");
+        }
+        select.deleteCharAt(select.length() - 1);
+        selectAll = select.toString();
 
     }
 
@@ -174,7 +191,7 @@ public class DBHandler extends SQLiteOpenHelper {
      */
     public Cursor playerStatsQuery(String playerID, int seasonYear, String teamID, String stats) {
         if (stats == null || stats.equals("")){
-            stats = "*";
+            stats = selectAll;
         }
 
         String query = String.format("SELECT %s " +
