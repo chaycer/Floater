@@ -194,7 +194,7 @@ public class DBHandler extends SQLiteOpenHelper {
         if (table.equals("pitching")) {
             query = String.format("SELECT * FROM pitching " +
                     "INNER JOIN ERA_Stats on pitching.ip = ERA_Stats.ip and pitching.er = ERA_Stats.er " +
-                    "where pitching.player_id = %s and pitching.year = %d and pitching.team_id = %s",playerID,seasonYear,teamID);
+                    "where pitching.player_id = '%s' and pitching.year = %d and pitching.team_id = '%s'",playerID,seasonYear,teamID);
         } else {
             query = String.format("SELECT * " +
                     "FROM %s " +
