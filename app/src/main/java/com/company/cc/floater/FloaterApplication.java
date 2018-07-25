@@ -80,6 +80,44 @@ public class FloaterApplication extends Application{
     }
 
     /**
+     * @return - all the columns of a stat array in a comma-delimited string with format tableName.ColumnName
+     */
+    public String delimitedStatsColumns(String prefix, CharSequence[] names){
+        String stats = "";
+        prefix = prefix + ".";
+        for (int i = 0; i < names.length; i++){
+            if (i == 0) {
+                stats = stats + prefix + names[i];
+            }
+            else{
+                stats = stats + "," + prefix + names[i];
+            }
+        }
+        return stats;
+    }
+
+    /**
+     * @return - all the batting columns in a comma-delimited string with format tableName.ColumnName
+     */
+    public String battingStatsColumns(){
+        return delimitedStatsColumns("batting", battingStats);
+    }
+
+    /**
+     * @return - all the pitching columns in a comma-delimited string with format tableName.ColumnName
+     */
+    public String pitchingStatsColumns(){
+        return delimitedStatsColumns("pitching", pitchingStats);
+    }
+
+    /**
+     * @return - all the fielding columns in a comma-delimited string with format tableName.ColumnName
+     */
+    public String fieldingStatsColumns(){
+        return delimitedStatsColumns("fielding", fieldingStats);
+    }
+
+    /**
      * Displays a list of label/value-to-edit pairs for the given stat group
      * @param mainLayout - layout to display each line on
      * @param inflater - LayoutInflater for the mainLayout
