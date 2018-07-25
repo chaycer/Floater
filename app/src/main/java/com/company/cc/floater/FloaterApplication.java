@@ -17,15 +17,13 @@ import java.util.LinkedList;
 public class FloaterApplication extends Application{
     static CharSequence battingStats[] = new CharSequence[] {"player_id", "year", "team_id", "g", "ab", "r", "h", "double", "triple", "hr", "rbi", "sb", "cs", "bb", "so", "ibb", "sh", "sf", "g_idp"};
     static CharSequence fieldingStats[] = new CharSequence[] {"player_id", "year", "team_id", "pos", "g", "gs", "inn_outs", "po", "a", "e", "dp", "pb", "wp", "sb", "cs", "zr"};
-    static CharSequence pitchingStats[] = new CharSequence[] {"player_id", "year", "team_id", "w", "l", "g", "gs", "cg", "sho", "sv", "ipouts", "h", "er", "hr", "bb", "so", "baopp", "era", "ibb", "wp", "hbp", "bk", "bfp", "gf", "r", "sh", "sf", "g_idp"};
+    static CharSequence pitchingStats[] = new CharSequence[] {"player_id", "year", "team_id", "w", "l", "g", "gs", "cg", "sho", "sv", "ip", "h", "er", "hr", "bb", "so", "baopp", "era", "ibb", "wp", "hbp", "bk", "bfp", "gf", "r", "sh", "sf", "g_idp"};
 
     static CharSequence playerStats[] = new CharSequence[] {"player_id", "first_name", "last_name", "birth_day", "birth_month", "birth_year", "birth_country", "death_day", "death_month", "death_year", "bats", "throws", "debut", "final_game"};
     static CharSequence teamStats[] = new CharSequence[] {"team_id", "name", "year", "league", "div_id", "rank", "g", "w", "l", "ws_win", "attendance"};
     static CharSequence parkStats[] = new CharSequence[] {"park_id", "park_name", "park_alias", "city", "state", "country"};
 
     static CharSequence operators[] = new CharSequence[] {"=", "<", ">", "<=", ">="};
-
-    static DBHandler db;
 
     static int BATTING = 1;
     static int FIELDING = 2;
@@ -75,10 +73,6 @@ public class FloaterApplication extends Application{
         return PITCHING;
     }
 
-    public static DBHandler getDb() {
-        return db;
-    }
-
     /**
      * @return - all the columns of a stat array in a comma-delimited string with format tableName.ColumnName
      */
@@ -86,11 +80,15 @@ public class FloaterApplication extends Application{
         String stats = "";
         prefix = prefix + ".";
         for (int i = 0; i < names.length; i++){
+            String tempprefix = prefix;
+            if (names[i].toString().compareTo("era") == 0){
+                tempprefix = "ERA_stats.";
+            }
             if (i == 0) {
-                stats = stats + prefix + names[i];
+                stats = stats + tempprefix + names[i];
             }
             else{
-                stats = stats + "," + prefix + names[i];
+                stats = stats + "," + tempprefix + names[i];
             }
         }
         return stats;
@@ -167,13 +165,19 @@ public class FloaterApplication extends Application{
         return views;
     }
 
-    public static void addPlayerStatsFromCursor(LinearLayout mainLayout, LayoutInflater inflater, Cursor playerTeams, String playerId, int type){
+    public static void addPlayerStatsFromCursor(LinearLayout mainLayout, LayoutInflater inflater, String playerId, int type, Context context){
+
+        DBHandler db = new DBHandler(context);
+        Cursor playerTeams = db.playerTeamsQuery(playerId, null);
+
         LinkedList<CursorRow> rowList = new LinkedList<CursorRow>();
         while (playerTeams.moveToNext()){
             rowList.add(new CursorRow(playerTeams, playerTeams.getPosition()));
         }
+        playerTeams.close();
         Iterator<CursorRow> iterator = rowList.iterator();
         while (iterator.hasNext()){
+
             // First, generate the headers
             CursorRow row = iterator.next();
             final View dynamicLayout = inflater.inflate(R.layout.key_header, null);
@@ -189,6 +193,7 @@ public class FloaterApplication extends Application{
 
             String stats = null;
             String[] exclude = {"player_id", "year", "team_id"};
+            String[] fieldExclude = {"player_id", "year", "team_id", "pos"};
             if (type == BATTING){
                 stats = battingStatsColumns();
             }
@@ -200,14 +205,17 @@ public class FloaterApplication extends Application{
             }
 
             // Now, generate the individual stat lines
-            Cursor playerStats = FloaterApplication.db.playerStatsQuery(playerId, Integer.parseInt(year), null, stats);
+            Cursor playerStats = db.playerStatsQuery(playerId, Integer.parseInt(year), null, stats);
+
+
             LinearLayout LL = dynamicLayout.findViewById(R.id.keyHeaderVertical);
             final LinkedList<LinkedList<View>> hiddenViews = new LinkedList<>();
-            while (playerStats.moveToNext()){
+
+
+            if (playerStats.moveToNext()){ // changing to if instead of while since sometimes duplicates get returned
                 CursorRow statRow = new CursorRow(playerStats, playerStats.getPosition(), true);
                 if (type == FIELDING) {
-                    exclude[3] = "pos";
-                    hiddenViews.add(addStatsFromRow(LL, inflater, statRow, exclude, true));
+                    hiddenViews.add(addStatsFromRow(LL, inflater, statRow, fieldExclude, true));
                     TextView pos = dynamicLayout.findViewById(R.id.keyHeaderPos);
                     pos.setText(statRow.getValueByColumnName("fielding.pos"));
                     pos.setVisibility(View.VISIBLE);
@@ -216,6 +224,18 @@ public class FloaterApplication extends Application{
                     hiddenViews.add(addStatsFromRow(LL, inflater, statRow, exclude, true));
                 }
             }
+            CursorRow statRow = new CursorRow(playerStats, playerStats.getPosition(), true);
+
+            if (type == FIELDING) {
+                hiddenViews.add(addStatsFromRow(LL, inflater, statRow, fieldExclude, true));
+                TextView pos = dynamicLayout.findViewById(R.id.keyHeaderPos);
+                pos.setText(statRow.getValueByColumnName("fielding.pos"));
+                pos.setVisibility(View.VISIBLE);
+            }
+            else{
+                hiddenViews.add(addStatsFromRow(LL, inflater, statRow, exclude, true));
+            }
+
             dynamicLayout.setOnClickListener(new View.OnClickListener() {
                 public void onClick(View v) {
                     if (v == dynamicLayout) {
@@ -231,10 +251,15 @@ public class FloaterApplication extends Application{
                     }
                 }
             });
+
             playerStats.close();
-            playerTeams.close(); //TODO need to get rid of this
+
             mainLayout.addView(dynamicLayout);
+
         }
+
+        db.close();
+
     }
 
     /**
