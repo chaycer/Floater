@@ -130,14 +130,14 @@ public class DBHandler extends SQLiteOpenHelper {
         if(name.length == 0){
             throw new Error("Blank player name");
         }
-        String firstName = "%" + name[0] + "%";
+        String plname = "%" + name[0] + "%";
         if(name.length == 1) { //If only 1 name was put in, assume it is last name
 
-            return db.rawQuery(String.format("Select * from player where name_first like '%s'",firstName),null);
+            return db.rawQuery(String.format("Select * from player where name_first like '%s' OR name_last like '%s'",plname,plname),null);
 
         }
         String lastName = "%" + name[1] + "%";
-        return db.rawQuery(String.format("Select * from player where name_first like '%s' AND name_last like '%s'",firstName,lastName), null);
+        return db.rawQuery(String.format("Select * from player where name_first like '%s' AND name_last like '%s'",plname,lastName), null);
 
     }
 
@@ -222,7 +222,7 @@ public class DBHandler extends SQLiteOpenHelper {
     }
 
     /**
-     *
+     * Pulls the team stats for a given year
      * @param teamID team ID to search for
      * @param seasonYear Season year to search for.  If null, returns all seasons
      * @return
