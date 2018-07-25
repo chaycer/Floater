@@ -499,10 +499,10 @@ public class DBHandler extends SQLiteOpenHelper {
                         "ELSE pitching.year " +
                         "END as 'year' " +
                         "FROM fielding " +
-                        "LEFT OUTER JOIN batting on batting.player_id = fielding.player_id AND batting.year = fielding.year " +
-                        "LEFT OUTER JOIN pitching on pitching.player_id = fielding.player_id AND pitching.year = fielding.year " +
-                        "LEFT OUTER JOIN ERA_Stats on pitching.ip = ERA_Stats.ip AND pitching.er = ERA_Stats.er " +
-                        "LEFT OUTER JOIN player on player.player_id = fielding.player_id " +
+                        "INNER JOIN batting on batting.player_id = fielding.player_id AND batting.year = fielding.year and batting.team_id = fielding.team_id " +
+                        "INNER join pitching on pitching.player_id = fielding.player_id AND pitching.year = fielding.year and pitching.team_id = fielding.team_id " +
+                        "inner JOIN ERA_Stats on pitching.ip = ERA_Stats.ip AND pitching.er = ERA_Stats.er " +
+                        "inner JOIN player on player.player_id = fielding.player_id " +
                         "where ");
         boolean first = true;
         for (FilterSearch filter:playerFilters) {
