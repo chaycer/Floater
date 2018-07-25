@@ -15,9 +15,9 @@ import java.util.Iterator;
 import java.util.LinkedList;
 
 public class FloaterApplication extends Application{
-    static CharSequence battingStats[] = new CharSequence[] {"player_id", "year", "team_id", "league_id", "g", "ab", "r", "h", "double", "triple", "hr", "rbi", "sb", "cs", "bb", "so", "ibb", "sh", "sf", "g_idp"};
-    static CharSequence fieldingStats[] = new CharSequence[] {"player_id", "year", "team_id", "league_id", "pos", "g", "gs", "inn_outs", "po", "a", "e", "dp", "pb", "wp", "sb", "cs", "zr"};
-    static CharSequence pitchingStats[] = new CharSequence[] {"player_id", "year", "team_id", "league_id", "w", "l", "g", "gs", "cg", "sho", "sv", "ipouts", "h", "er", "hr", "bb", "so", "baopp", "era", "ibb", "wp", "hbp", "bk", "bfp", "gf", "r", "sh", "sf", "g_idp"};
+    static CharSequence battingStats[] = new CharSequence[] {"player_id", "year", "team_id", "g", "ab", "r", "h", "double", "triple", "hr", "rbi", "sb", "cs", "bb", "so", "ibb", "sh", "sf", "g_idp"};
+    static CharSequence fieldingStats[] = new CharSequence[] {"player_id", "year", "team_id", "pos", "g", "gs", "inn_outs", "po", "a", "e", "dp", "pb", "wp", "sb", "cs", "zr"};
+    static CharSequence pitchingStats[] = new CharSequence[] {"player_id", "year", "team_id", "w", "l", "g", "gs", "cg", "sho", "sv", "ipouts", "h", "er", "hr", "bb", "so", "baopp", "era", "ibb", "wp", "hbp", "bk", "bfp", "gf", "r", "sh", "sf", "g_idp"};
 
     static CharSequence playerStats[] = new CharSequence[] {"player_id", "first_name", "last_name", "birth_day", "birth_month", "birth_year", "birth_country", "death_day", "death_month", "death_year", "bats", "throws", "debut", "final_game"};
     static CharSequence teamStats[] = new CharSequence[] {"team_id", "name", "year", "league", "div_id", "rank", "g", "w", "l", "ws_win", "attendance"};
@@ -82,7 +82,7 @@ public class FloaterApplication extends Application{
     /**
      * @return - all the columns of a stat array in a comma-delimited string with format tableName.ColumnName
      */
-    public String delimitedStatsColumns(String prefix, CharSequence[] names){
+    public static String delimitedStatsColumns(String prefix, CharSequence[] names){
         String stats = "";
         prefix = prefix + ".";
         for (int i = 0; i < names.length; i++){
@@ -99,21 +99,21 @@ public class FloaterApplication extends Application{
     /**
      * @return - all the batting columns in a comma-delimited string with format tableName.ColumnName
      */
-    public String battingStatsColumns(){
+    public static String battingStatsColumns(){
         return delimitedStatsColumns("batting", battingStats);
     }
 
     /**
      * @return - all the pitching columns in a comma-delimited string with format tableName.ColumnName
      */
-    public String pitchingStatsColumns(){
+    public static String pitchingStatsColumns(){
         return delimitedStatsColumns("pitching", pitchingStats);
     }
 
     /**
      * @return - all the fielding columns in a comma-delimited string with format tableName.ColumnName
      */
-    public String fieldingStatsColumns(){
+    public static String fieldingStatsColumns(){
         return delimitedStatsColumns("fielding", fieldingStats);
     }
 
@@ -137,7 +137,8 @@ public class FloaterApplication extends Application{
     }
 
 
-    public static void addStatsFromRow(LinearLayout mainLayout, LayoutInflater inflater, CursorRow row, String[] toExclude){
+    public static LinkedList<View> addStatsFromRow(LinearLayout mainLayout, LayoutInflater inflater, CursorRow row, String[] toExclude, boolean hide){
+        LinkedList<View> views = new LinkedList<>();
         for (int i = 0; i < row.getSize(); i++){
             boolean exclude = false;
             if (toExclude != null) {
@@ -157,11 +158,16 @@ public class FloaterApplication extends Application{
             TextView value = dynamicLayout.findViewById(R.id.statValueNoEditTextView);
             value.setText(row.getValueByIndex(i));
 
+            if (hide){
+                dynamicLayout.setVisibility(View.GONE);
+            }
             mainLayout.addView(dynamicLayout);
+            views.add(dynamicLayout);
         }
+        return views;
     }
 
-    public static void addPlayerStatsFromCursor(LinearLayout mainLayout, LayoutInflater inflater, Cursor playerTeams, String playerId){
+    public static void addPlayerStatsFromCursor(LinearLayout mainLayout, LayoutInflater inflater, Cursor playerTeams, String playerId, int type){
         LinkedList<CursorRow> rowList = new LinkedList<CursorRow>();
         while (playerTeams.moveToNext()){
             rowList.add(new CursorRow(playerTeams, playerTeams.getPosition()));
@@ -170,7 +176,7 @@ public class FloaterApplication extends Application{
         while (iterator.hasNext()){
             // First, generate the headers
             CursorRow row = iterator.next();
-            View dynamicLayout = inflater.inflate(R.layout.key_header, null);
+            final View dynamicLayout = inflater.inflate(R.layout.key_header, null);
 
             String year = row.getValueByIndex(0);
             String teamId = row.getValueByIndex(1);
@@ -181,13 +187,52 @@ public class FloaterApplication extends Application{
             TextView value = dynamicLayout.findViewById(R.id.keyHeaderYear);
             value.setText(teamId);
 
+            String stats = null;
+            String[] exclude = {"player_id", "year", "team_id"};
+            if (type == BATTING){
+                stats = battingStatsColumns();
+            }
+            else if (type == PITCHING){
+                stats = pitchingStatsColumns();
+            }
+            else if (type == FIELDING){
+                stats = fieldingStatsColumns();
+            }
+
             // Now, generate the individual stat lines
-            Cursor playerStats = FloaterApplication.db.playerStatsQuery(playerId, Integer.parseInt(year), null, null);
-            playerStats.moveToFirst();
-            CursorRow singleStat = new CursorRow(playerStats, playerStats.getPosition());
-
-
+            Cursor playerStats = FloaterApplication.db.playerStatsQuery(playerId, Integer.parseInt(year), null, stats);
+            LinearLayout LL = dynamicLayout.findViewById(R.id.keyHeaderVertical);
+            final LinkedList<LinkedList<View>> hiddenViews = new LinkedList<>();
+            while (playerStats.moveToNext()){
+                CursorRow statRow = new CursorRow(playerStats, playerStats.getPosition(), true);
+                if (type == FIELDING) {
+                    exclude[3] = "pos";
+                    hiddenViews.add(addStatsFromRow(LL, inflater, statRow, exclude, true));
+                    TextView pos = dynamicLayout.findViewById(R.id.keyHeaderPos);
+                    pos.setText(statRow.getValueByColumnName("fielding.pos"));
+                    pos.setVisibility(View.VISIBLE);
+                }
+                else{
+                    hiddenViews.add(addStatsFromRow(LL, inflater, statRow, exclude, true));
+                }
+            }
+            dynamicLayout.setOnClickListener(new View.OnClickListener() {
+                public void onClick(View v) {
+                    if (v == dynamicLayout) {
+                        Iterator<LinkedList<View>> viewIterator = hiddenViews.iterator();
+                        while (viewIterator.hasNext()){
+                            LinkedList<View> viewList = viewIterator.next();
+                            Iterator<View> listIterator = viewList.iterator();
+                            while (listIterator.hasNext()) {
+                                View nextView = listIterator.next();
+                                nextView.setVisibility(nextView.getVisibility() == View.VISIBLE ? View.GONE : View.VISIBLE);
+                            }
+                        }
+                    }
+                }
+            });
             playerStats.close();
+            playerTeams.close(); //TODO need to get rid of this
             mainLayout.addView(dynamicLayout);
         }
     }
