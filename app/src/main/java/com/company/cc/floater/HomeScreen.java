@@ -14,6 +14,8 @@ public class HomeScreen extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_home_screen);
 
+        FloaterApplication.db  = new DBHandler(getApplicationContext());
+
         searchButton(((FloaterApplication) getApplication()).PLAYER); // set up player search
         searchButton(((FloaterApplication) getApplication()).TEAM); // set up team search
 

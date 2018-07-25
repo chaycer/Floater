@@ -13,14 +13,32 @@ public class CursorRow implements Serializable {
     private ArrayList<String> values;
     private int size;
 
-    public CursorRow(Cursor result, int pos){
+    public CursorRow(Cursor result, int position){
         this.size = result.getColumnCount();
         this.columnNames = new ArrayList<String>();
         this.values = new ArrayList<String>();
-        result.moveToPosition(pos);
+        result.moveToPosition(position);
         for(int i = 0; i < this.size; i++){
             this.columnNames.add(result.getColumnName(i));
             this.values.add(result.getString(i));
+        }
+    }
+
+    public CursorRow(Cursor result, int position, boolean filter){
+        this.size = result.getColumnCount();
+        this.columnNames = new ArrayList<String>();
+        this.values = new ArrayList<String>();
+        result.moveToPosition(position);
+        for(int i = 0; i < this.size; i++){
+            if (filter){
+                String name = result.getColumnName(i);
+                this.columnNames.add(name.substring(name.indexOf(".") + 1));
+                this.values.add(result.getString(i));
+            }
+            else {
+                this.columnNames.add(result.getColumnName(i));
+                this.values.add(result.getString(i));
+            }
         }
     }
 

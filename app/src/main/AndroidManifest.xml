@@ -43,7 +43,7 @@
             android:label="@string/title_activity_add_fielding" />
         <activity
             android:name=".AddPitching"
-            android:label="@string/title_activity_add_pitching"></activity>
+            android:label="@string/title_activity_add_pitching" />
     </application>
 
 </manifest>
