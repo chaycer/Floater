@@ -199,7 +199,7 @@ public class DBHandler extends SQLiteOpenHelper {
                         "LEFT OUTER JOIN batting on batting.player_id = fielding.player_id AND batting.year = fielding.year AND batting.team_id = fielding.team_id " +
                         "LEFT OUTER JOIN pitching on pitching.player_id = fielding.player_id AND pitching.year = fielding.year AND pitching.team_id = fielding.team_id " +
                         "LEFT OUTER JOIN ERA_Stats on pitching.ip = ERA_Stats.ip AND pitching.er = ERA_Stats.er " +
-                        "WHERE fielding.player_id = '%s' and fielding.year = %d", stats,playerID,seasonYear);
+                        "WHERE fielding.player_id = '%s' and fielding.year = %d and fielding.team_id = '%s'", stats,playerID,seasonYear,teamID);
         return db.rawQuery(query,null);
     }
 
