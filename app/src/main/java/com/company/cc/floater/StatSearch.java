@@ -52,7 +52,7 @@ public class StatSearch extends AppCompatActivity {
 
                     //Begin Search
                     DBHandler db = new DBHandler(getApplicationContext());
-                    Cursor result = db.filterSearchQuery(filters);
+                    Cursor result = db.filterSearchQuery(filters);;
                     //End Search
 
                     //startIntent.putExtra(getString(R.string.company_name), playerET.getText().toString());
