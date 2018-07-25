@@ -58,21 +58,21 @@ public class AddStatsAsync extends AsyncTask<Object, Boolean, Boolean> {
             TextView value = dynamicLayout.findViewById(R.id.keyHeaderYear);
             value.setText(teamId);
 
-            String stats = null;
+            String table = null;
             String[] exclude = {"player_id", "year", "team_id"};
             String[] fieldExclude = {"player_id", "year", "team_id", "pos"};
             if (type == BATTING){
-                stats = battingStatsColumns();
+                table = "batting";
             }
             else if (type == PITCHING){
-                stats = pitchingStatsColumns();
+                table = "pitching";
             }
             else if (type == FIELDING){
-                stats = fieldingStatsColumns();
+                table = "fielding";
             }
 
             // Now, generate the individual stat lines
-            Cursor playerStats = db.playerStatsQuery(playerId, Integer.parseInt(year), null, stats);
+            Cursor playerStats = db.playerStatsQuery(playerId, Integer.parseInt(year), teamId, table);
 
 
             LinearLayout LL = dynamicLayout.findViewById(R.id.keyHeaderVertical);
