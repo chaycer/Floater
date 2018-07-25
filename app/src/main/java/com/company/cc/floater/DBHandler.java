@@ -186,20 +186,21 @@ public class DBHandler extends SQLiteOpenHelper {
      * @param playerID player to search for.
      * @param seasonYear year of stats.
      * @param teamID team_id of player you would like to be associated with.
-     * @param stats specific stats to be returned.  Must include in format 'tableName.ColumnName', with each column delimited by a comma. If null, return all stats from pitching, batting, and fielding tables
+     * @param table table to pull stats from (pitching, batting, fielding)
      * @return queryResult Cursor object containing the query result
      */
-    public Cursor playerStatsQuery(String playerID, int seasonYear, String teamID, String stats) {
-        if (stats == null || stats.equals("")){
-            stats = selectAll;
+    public Cursor playerStatsQuery(String playerID, int seasonYear, String teamID, String table) {
+        String query;
+        if (table.equals("pitching")) {
+            query = String.format("SELECT * FROM pitching " +
+                    "INNER JOIN ERA_Stats on pitching.ip = ERA_Stats.ip and pitching.er = ERA_Stats.er " +
+                    "where pitching.player_id = %s and pitching.year = %d and pitching.team_id = %s",playerID,seasonYear,teamID);
+        } else {
+            query = String.format("SELECT * " +
+                    "FROM %s " +
+                    "WHERE %s.player_id = '%s' and %s.year = %d and %s.team_id = '%s'", table,table,playerID,table,seasonYear,table,teamID);
         }
 
-        String query = String.format("SELECT %s " +
-                        "FROM fielding " +
-                        "LEFT OUTER JOIN batting on batting.player_id = fielding.player_id AND batting.year = fielding.year AND batting.team_id = fielding.team_id " +
-                        "LEFT OUTER JOIN pitching on pitching.player_id = fielding.player_id AND pitching.year = fielding.year AND pitching.team_id = fielding.team_id " +
-                        "LEFT OUTER JOIN ERA_Stats on pitching.ip = ERA_Stats.ip AND pitching.er = ERA_Stats.er " +
-                        "WHERE fielding.player_id = '%s' and fielding.year = %d and fielding.team_id = '%s'", stats,playerID,seasonYear,teamID);
         return db.rawQuery(query,null);
     }
 
