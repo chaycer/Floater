@@ -7,9 +7,6 @@ import android.view.LayoutInflater;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
-import java.util.ArrayList;
-import java.util.List;
-
 public class PlayerSearch extends AppCompatActivity {
 
     @Override
@@ -23,7 +20,6 @@ public class PlayerSearch extends AppCompatActivity {
         //CRR Adding search
         DBHandler db = new DBHandler(getApplicationContext());
         Cursor result = db.playerSearchQuery(player);
-        result = db.parkQuery("ATL", 2005);
 
         // CNP generating page based off result
         LinearLayout mainLayout = findViewById(R.id.playerSearchLayout);
