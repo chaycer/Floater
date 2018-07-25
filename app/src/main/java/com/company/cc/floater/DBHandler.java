@@ -115,7 +115,7 @@ public class DBHandler extends SQLiteOpenHelper {
         for (String col: fieldingTable){
             select.append("fielding." + col + " AS 'fielding." + col + "',");
         }
-        select.append("ERA_Stats.era as ERA_Stats.era");
+        select.append("ERA_Stats.era as 'ERA_Stats.era'");
         selectAll = select.toString();
 
     }
