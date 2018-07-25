@@ -18,14 +18,11 @@ public class PlayerSearch extends AppCompatActivity {
         tv.setText("Searching for \"" + player + "\"");
 
         //CRR Adding search
-        DBHandler db = new DBHandler(getApplicationContext());
-        Cursor result = db.playerSearchQuery(player);
+        Cursor result = FloaterApplication.db.playerSearchQuery(player);
 
         // CNP generating page based off result
         LinearLayout mainLayout = findViewById(R.id.playerSearchLayout);
         LayoutInflater inflater = getLayoutInflater();
         FloaterApplication.addPlayerLines(mainLayout, inflater, result, this);
-
-        db.close(); //CRR Do this once everything with database is done (will apparently crash if you try to access cursor after calling this)
     }
 }

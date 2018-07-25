@@ -19,9 +19,9 @@ public class PlayerProfile extends FragmentActivity {
     private PagerAdapter pagerAdapter;
 
     private CursorRow playerRow;
-    private CursorRow hittingRow;
-    private CursorRow pitchingRow;
-    private CursorRow fieldingRow;
+    public SerialCursor playerTeams;
+
+    private String playerId;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -34,14 +34,15 @@ public class PlayerProfile extends FragmentActivity {
 
         playerRow = (CursorRow) getIntent().getExtras().getSerializable("CursorRow");
         if (playerRow == null) {
-            String playerId = getIntent().getExtras().getString("playerId");
+            playerId = getIntent().getExtras().getString("playerId");
             /*
             TODO: add a db call to pull player info based on ID and then add to a CursorRow
              */
         }
-
-
-
+        else{
+            playerId = playerRow.getValueByColumnName("player_id");
+        }
+        playerTeams = new SerialCursor(FloaterApplication.db.playerTeamsQuery(playerId, null));
 
         /*
         final TextView mSampleTitle = (TextView) findViewById(R.id.title);
@@ -77,7 +78,7 @@ public class PlayerProfile extends FragmentActivity {
         public Fragment getItem(int position) {
             switch(position) {
                 case 0: return ProfileFragment.newInstance(playerRow);
-                case 1: return HittingFragment.newInstance(playerRow);
+                case 1: return HittingFragment.newInstance(playerRow, playerTeams);
                 case 2: return PitchingFragment.newInstance(playerRow);
                 case 3: return FieldingFragment.newInstance(playerRow);
                 default: return ProfileFragment.newInstance(playerRow);
@@ -123,24 +124,27 @@ public class PlayerProfile extends FragmentActivity {
         @Override
         public View onCreateView(LayoutInflater inflater, ViewGroup container,
                                  Bundle savedInstanceState) {
-            View v = inflater.inflate(R.layout.fragment_player_profile, container, false);
+            View v = inflater.inflate(R.layout.fragment_stat_profile, container, false);
 
             CursorRow row = (CursorRow) getArguments().getSerializable("CursorRow");
+            SerialCursor playerTeams = (SerialCursor) getArguments().getSerializable("Cursor");
 
             TextView pName = v.findViewById(R.id.playerName);
             String[] fullNameColumns = {"name_first", "name_last"};
             pName.setText(row.getValueByColumnName(fullNameColumns[0]) + " " + row.getValueByColumnName(fullNameColumns[1]));
 
-            LinearLayout LL = v.findViewById(R.id.playerProfileLinearLayout);
+            LinearLayout sv = v.findViewById(R.id.statProfileVerticalLayout);
             LayoutInflater inflater2 = getLayoutInflater();
-            FloaterApplication.addStatsFromRow(LL, inflater2, row, fullNameColumns);
+            FloaterApplication.addPlayerStatsFromCursor(sv, inflater2, playerTeams.getCursor(), row.getValueByColumnName("player_id"));
+            playerTeams.close();
             return v;
         }
 
-        public static ProfileFragment newInstance(CursorRow row){
-            ProfileFragment fragment = new ProfileFragment();
+        public static HittingFragment newInstance(CursorRow row, SerialCursor playerTeams){
+            HittingFragment fragment = new HittingFragment();
             Bundle b = new Bundle();
             b.putSerializable("CursorRow", row);
+            b.putSerializable("Cursor", playerTeams);
             fragment.setArguments(b);
 
             return fragment;
@@ -165,8 +169,8 @@ public class PlayerProfile extends FragmentActivity {
             return v;
         }
 
-        public static ProfileFragment newInstance(CursorRow row){
-            ProfileFragment fragment = new ProfileFragment();
+        public static PitchingFragment newInstance(CursorRow row){
+            PitchingFragment fragment = new PitchingFragment();
             Bundle b = new Bundle();
             b.putSerializable("CursorRow", row);
             fragment.setArguments(b);
@@ -193,8 +197,8 @@ public class PlayerProfile extends FragmentActivity {
             return v;
         }
 
-        public static ProfileFragment newInstance(CursorRow row){
-            ProfileFragment fragment = new ProfileFragment();
+        public static FieldingFragment newInstance(CursorRow row){
+            FieldingFragment fragment = new FieldingFragment();
             Bundle b = new Bundle();
             b.putSerializable("CursorRow", row);
             fragment.setArguments(b);

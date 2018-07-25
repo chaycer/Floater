@@ -11,6 +11,9 @@ import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import java.util.Iterator;
+import java.util.LinkedList;
+
 public class FloaterApplication extends Application{
     static CharSequence battingStats[] = new CharSequence[] {"player_id", "year", "team_id", "league_id", "g", "ab", "r", "h", "double", "triple", "hr", "rbi", "sb", "cs", "bb", "so", "ibb", "sh", "sf", "g_idp"};
     static CharSequence fieldingStats[] = new CharSequence[] {"player_id", "year", "team_id", "league_id", "pos", "g", "gs", "inn_outs", "po", "a", "e", "dp", "pb", "wp", "sb", "cs", "zr"};
@@ -21,6 +24,8 @@ public class FloaterApplication extends Application{
     static CharSequence parkStats[] = new CharSequence[] {"park_id", "park_name", "park_alias", "city", "state", "country"};
 
     static CharSequence operators[] = new CharSequence[] {"=", "<", ">", "<=", ">="};
+
+    static DBHandler db;
 
     static int BATTING = 1;
     static int FIELDING = 2;
@@ -70,6 +75,10 @@ public class FloaterApplication extends Application{
         return PITCHING;
     }
 
+    public static DBHandler getDb() {
+        return db;
+    }
+
     /**
      * Displays a list of label/value-to-edit pairs for the given stat group
      * @param mainLayout - layout to display each line on
@@ -110,6 +119,37 @@ public class FloaterApplication extends Application{
             TextView value = dynamicLayout.findViewById(R.id.statValueNoEditTextView);
             value.setText(row.getValueByIndex(i));
 
+            mainLayout.addView(dynamicLayout);
+        }
+    }
+
+    public static void addPlayerStatsFromCursor(LinearLayout mainLayout, LayoutInflater inflater, Cursor playerTeams, String playerId){
+        LinkedList<CursorRow> rowList = new LinkedList<CursorRow>();
+        while (playerTeams.moveToNext()){
+            rowList.add(new CursorRow(playerTeams, playerTeams.getPosition()));
+        }
+        Iterator<CursorRow> iterator = rowList.iterator();
+        while (iterator.hasNext()){
+            // First, generate the headers
+            CursorRow row = iterator.next();
+            View dynamicLayout = inflater.inflate(R.layout.key_header, null);
+
+            String year = row.getValueByIndex(0);
+            String teamId = row.getValueByIndex(1);
+
+            TextView name = dynamicLayout.findViewById(R.id.keyHeaderTeam);
+            name.setText(year);
+
+            TextView value = dynamicLayout.findViewById(R.id.keyHeaderYear);
+            value.setText(teamId);
+
+            // Now, generate the individual stat lines
+            Cursor playerStats = FloaterApplication.db.playerStatsQuery(playerId, Integer.parseInt(year), null, null);
+            playerStats.moveToFirst();
+            CursorRow singleStat = new CursorRow(playerStats, playerStats.getPosition());
+
+
+            playerStats.close();
             mainLayout.addView(dynamicLayout);
         }
     }
