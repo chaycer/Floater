@@ -492,8 +492,12 @@ public class DBHandler extends SQLiteOpenHelper {
     public Cursor filterSearchQuery(List<FilterSearch> playerFilters){
         StringBuilder where = new StringBuilder();
         StringBuilder select = new StringBuilder();
+        String fPos = "";
         boolean first = true;
         for (FilterSearch filter:playerFilters) {
+            if(fPos == "" && filter.getStat().contains("fielding")) {
+                fPos = ",fielding.pos as 'fielding.pos'";
+            }
             if(first){
                 where.append(filter.toString());
                 select.append(String.format(",%s as '%s'",filter.getStat(),filter.getStat()));
@@ -503,8 +507,8 @@ public class DBHandler extends SQLiteOpenHelper {
                 select.append(String.format(", %s AS '%s'", filter.getStat(),filter.getStat()));
             }
         }
-        String query = String.format("select  player.name_first as 'player.name_first', " +
-                        "player.name_last as 'player.name_last', " +
+        String query = String.format("select distinct player.name_first as 'name_first', " +
+                        "player.name_last as 'name_last', " +
                         "player.player_id as 'player_id', " +
                         "CASE " +
                         "WHEN fielding.year IS NOT NULL THEN fielding.year " +
@@ -515,15 +519,15 @@ public class DBHandler extends SQLiteOpenHelper {
                         "WHEN fielding.team_id IS NOT NULL THEN fielding.team_id " +
                         "WHEN batting.team_id IS NOT NULL THEN batting.team_id " +
                         "ELSE pitching.team_id " +
-                        "END as 'team_id', " +
-                        "fielding.pos as 'fielding.pos'" +
+                        "END as 'team_id' " +
+                        "%s" +
                         "%s " +
                         "FROM fielding " +
-                        "INNER JOIN batting on batting.player_id = fielding.player_id AND batting.year = fielding.year and batting.team_id = fielding.team_id " +
-                        "INNER join pitching on pitching.player_id = fielding.player_id AND pitching.year = fielding.year and pitching.team_id = fielding.team_id " +
-                        "inner JOIN ERA_Stats on pitching.ip = ERA_Stats.ip AND pitching.er = ERA_Stats.er " +
-                        "inner JOIN player on player.player_id = fielding.player_id " +
-                        "where %s",select,where);
+                        "LEFT OUTER JOIN batting on batting.player_id = fielding.player_id AND batting.year = fielding.year and batting.team_id = fielding.team_id " +
+                        "LEFT OUTER JOIN pitching on pitching.player_id = fielding.player_id AND pitching.year = fielding.year and pitching.team_id = fielding.team_id " +
+                        "LEFT OUTER JOIN ERA_Stats on pitching.ip = ERA_Stats.ip AND pitching.er = ERA_Stats.er " +
+                        "LEFT OUTER JOIN player on player.player_id = fielding.player_id " +
+                        "where %s",fPos,select,where);
 
         return db.rawQuery(query.toString(), null);
 
