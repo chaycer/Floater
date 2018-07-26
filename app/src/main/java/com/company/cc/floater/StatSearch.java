@@ -24,8 +24,7 @@ public class StatSearch extends AppCompatActivity {
     List<TextView> operatorStrings = new ArrayList<>();
     List<TextView> statStrings = new ArrayList<>();
     List<EditText> ets = new ArrayList<>();
-    public class serialList extends ArrayList<FilterSearch> implements Serializable{    }
-    List<FilterSearch> filters = new serialList();
+    SerialList filters = new SerialList(new ArrayList<FilterSearch>());
     int searchType = 1; // 1 for batting, 2 for fielding, 3 for pitching
 
     @Override
@@ -53,7 +52,7 @@ public class StatSearch extends AppCompatActivity {
                 if (!filters.isEmpty()){
                     Intent startIntent = new Intent(getApplicationContext(), StatSearchResults.class);
 
-                    startIntent.putExtra("filters", (serialList) filters);
+                    startIntent.putExtra("filters", filters);
                     startIntent.putExtra("count", "0");
                     startActivity(startIntent);
                 }

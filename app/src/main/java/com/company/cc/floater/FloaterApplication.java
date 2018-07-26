@@ -318,9 +318,9 @@ public class FloaterApplication extends Application{
         }
     }
 
-    public static void addStatSearchLines(LinearLayout mainLayout, LayoutInflater inflater, final StatSearch.serialList filters, final Context context, int count){
+    public static void addStatSearchLines(LinearLayout mainLayout, LayoutInflater inflater, final SerialList filters, final Context context, int count){
         DBHandler db = new DBHandler(context);
-        Cursor result = db.filterSearchQuery(filters);
+        Cursor result = db.filterSearchQuery(filters.getList());
         String[] exclude = {"player_id", "name_first", "name_last", "year", "team_id", "pos"};
         result.moveToPosition(count);
         int max = count + 100;
@@ -376,6 +376,7 @@ public class FloaterApplication extends Application{
 
             // add load more button after 100 rows
             if (++count > max){
+                final int retCount = count -1;
                 View buttonLayout = inflater.inflate(R.layout.load_more_button, null);
                 Button loadButton = buttonLayout.findViewById(R.id.loadMoreButton);
                 mainLayout.addView(buttonLayout);
@@ -383,8 +384,8 @@ public class FloaterApplication extends Application{
                 loadButton.setOnClickListener(new View.OnClickListener() {
                     public void onClick(View view) {
                         Intent startIntent = new Intent(context, StatSearchResults.class);
-                        startIntent.putExtra("filters", (StatSearch.serialList) filters);
-                        startIntent.putExtra("count", "count - 1");
+                        startIntent.putExtra("filters", filters);
+                        startIntent.putExtra("count", String.format("%s", retCount));
                         context.startActivity(startIntent);
                     }
                 });
