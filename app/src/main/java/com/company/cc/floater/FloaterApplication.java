@@ -318,7 +318,7 @@ public class FloaterApplication extends Application{
         }
     }
 
-    public static void addStatSearchLines(LinearLayout mainLayout, LayoutInflater inflater, final List<FilterSearch> filters, final Context context, int count){
+    public static void addStatSearchLines(LinearLayout mainLayout, LayoutInflater inflater, final StatSearch.serialList filters, final Context context, int count){
         DBHandler db = new DBHandler(context);
         Cursor result = db.filterSearchQuery(filters);
         String[] exclude = {"player_id", "name_first", "name_last", "year", "team_id", "pos"};
