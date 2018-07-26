@@ -22,7 +22,10 @@ public class StatSearchResults extends Activity {
         SerialList filters = (SerialList) getIntent().getExtras().getSerializable("filters");
         int count = Integer.parseInt(getIntent().getStringExtra("count"));
 
-        FloaterApplication.addStatSearchLines(mainLayout, inflater, filters, getApplicationContext(), count);
+        AddStatSearchAsync add = new AddStatSearchAsync();
+        add.execute(mainLayout, inflater, filters, getApplicationContext(), count, this);
+
+        //FloaterApplication.addStatSearchLines(mainLayout, inflater, filters, getApplicationContext(), count);
 
     }
 
