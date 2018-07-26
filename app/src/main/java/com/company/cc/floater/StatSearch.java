@@ -11,9 +11,11 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.Filter;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -22,7 +24,8 @@ public class StatSearch extends AppCompatActivity {
     List<TextView> operatorStrings = new ArrayList<>();
     List<TextView> statStrings = new ArrayList<>();
     List<EditText> ets = new ArrayList<>();
-    List<FilterSearch> filters = new ArrayList<>();
+    public class serialList extends ArrayList<FilterSearch> implements Serializable{    }
+    List<FilterSearch> filters = new serialList();
     int searchType = 1; // 1 for batting, 2 for fielding, 3 for pitching
 
     @Override
@@ -50,12 +53,8 @@ public class StatSearch extends AppCompatActivity {
                 if (!filters.isEmpty()){
                     Intent startIntent = new Intent(getApplicationContext(), StatSearchResults.class);
 
-                    //Begin Search
-                    DBHandler db = new DBHandler(getApplicationContext());
-                    Cursor result = db.filterSearchQuery(filters);;
-                    //End Search
-
-                    //startIntent.putExtra(getString(R.string.company_name), playerET.getText().toString());
+                    startIntent.putExtra("filters", (serialList) filters);
+                    startIntent.putExtra("count", "0");
                     startActivity(startIntent);
                 }
             }

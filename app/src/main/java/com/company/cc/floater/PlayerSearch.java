@@ -25,6 +25,7 @@ public class PlayerSearch extends AppCompatActivity {
         LinearLayout mainLayout = findViewById(R.id.playerSearchLayout);
         LayoutInflater inflater = getLayoutInflater();
         FloaterApplication.addPlayerLines(mainLayout, inflater, result, this);
+        result.close();
         db.close();
     }
 }

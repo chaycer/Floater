@@ -1,9 +1,59 @@
 <?xml version="1.0" encoding="utf-8"?>
-<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/statSearchScrollView"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    tools:context=".StatSearchResults">
+    android:layout_height="match_parent">
 
-</android.support.constraint.ConstraintLayout>
+    <LinearLayout
+        android:id="@+id/statSearchLayout"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical">
+
+        <TextView
+            android:id="@+id/playerSearchSearchingFor"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+
+        <LinearLayout
+            android:id="@+id/playerSearchColumnHeaders"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="horizontal">
+
+            <TextView
+                android:id="@+id/playerSearchNameHeader"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="@string/playerNameHeader"
+                android:visibility="gone" />
+
+            <TextView
+                android:id="@+id/playerSearchTeamHeader"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="@string/teamName"
+                android:visibility="gone" />
+
+            <TextView
+                android:id="@+id/playerSearchYearsActiveHeader"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="@string/yearHeader"
+                android:visibility="gone" />
+
+            <TextView
+                android:id="@+id/playerSearchPositionHeader"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="@string/position"
+                android:visibility="gone" />
+        </LinearLayout>
+    </LinearLayout>
+
+</ScrollView>

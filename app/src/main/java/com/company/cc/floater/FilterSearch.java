@@ -1,7 +1,9 @@
 package com.company.cc.floater;
 
 
-public class FilterSearch {
+import java.io.Serializable;
+
+public class FilterSearch implements Serializable {
     String stat;
     String operator;
     String value;

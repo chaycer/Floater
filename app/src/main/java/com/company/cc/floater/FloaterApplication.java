@@ -13,6 +13,7 @@ import android.widget.TextView;
 
 import java.util.Iterator;
 import java.util.LinkedList;
+import java.util.List;
 
 public class FloaterApplication extends Application{
     static CharSequence battingStats[] = new CharSequence[] {"player_id", "year", "team_id", "g", "ab", "r", "h", "double", "triple", "hr", "rbi", "sb", "cs", "bb", "so", "ibb", "sh", "sf", "g_idp"};
@@ -315,7 +316,82 @@ public class FloaterApplication extends Application{
 
             mainLayout.addView(dynamicLayout);
         }
+    }
+
+    public static void addStatSearchLines(LinearLayout mainLayout, LayoutInflater inflater, final List<FilterSearch> filters, final Context context, int count){
+        DBHandler db = new DBHandler(context);
+        Cursor result = db.filterSearchQuery(filters);
+        String[] exclude = {"player_id", "name_first", "name_last", "year", "team_id", "pos"};
+        result.moveToPosition(count);
+        int max = count + 100;
+
+        // TODO: show "no results" if cursor empty
+        if (result == null || (result.getCount() < 1)){
+
+            result.close();
+            db.close();
+            return;
+        }
+
+        while (result.moveToNext() && count <= max){
+            final CursorRow player = new CursorRow(result, result.getPosition(), true);
+            View dynamicLayout = inflater.inflate(R.layout.stat_return_layout, null);
+            TextView name = dynamicLayout.findViewById(R.id.playerNameTextView);
+            TextView team = dynamicLayout.findViewById(R.id.teamTextView);
+            TextView year = dynamicLayout.findViewById(R.id.yearTextView);
+            TextView pos = dynamicLayout.findViewById(R.id.positionTextView);
+
+            if(player.getValueByColumnName("name_first").isEmpty()
+                    || player.getValueByColumnName("name_last").isEmpty()){
+                continue;
+            }
+
+            if (!player.getValueByColumnName("name_first").isEmpty()) {
+                name.setText(player.getValueByColumnName("name_first") + " "
+                        + player.getValueByColumnName("name_last")); // set label
+            }
+
+            team.setText(player.getValueByColumnName("team_id"));
+            year.setText(player.getValueByColumnName("year"));
+            pos.setText(player.getValueByColumnName("pos"));
+            if (pos.getText() != null){
+                pos.setVisibility(View.VISIBLE);
+                //mainLayout.findViewById(R.id.playerSearchPositionHeader).setVisibility(View.VISIBLE);
+            }
+
+            LinearLayout LL = dynamicLayout.findViewById(R.id.statResultsHorizontalLayout);
+            LL.setOnClickListener(new View.OnClickListener(){
+                @Override
+                public void onClick(View v){
+                    Intent startIntent = new Intent(context, PlayerProfile.class);
+                    startIntent.putExtra("CursorRow", player);
+                    context.startActivity(startIntent);
+                }
+            });
+
+            LinearLayout verticalLayout = dynamicLayout.findViewById(R.id.statResultsVerticalLayout);
+
+            addStatsFromRow(verticalLayout, inflater, player, exclude, false);
+            mainLayout.addView(dynamicLayout);
+
+            // add load more button after 100 rows
+            if (++count > max){
+                View buttonLayout = inflater.inflate(R.layout.load_more_button, null);
+                Button loadButton = buttonLayout.findViewById(R.id.loadMoreButton);
+                mainLayout.addView(buttonLayout);
+
+                loadButton.setOnClickListener(new View.OnClickListener() {
+                    public void onClick(View view) {
+                        Intent startIntent = new Intent(context, StatSearchResults.class);
+                        startIntent.putExtra("filters", (StatSearch.serialList) filters);
+                        startIntent.putExtra("count", "count - 1");
+                        context.startActivity(startIntent);
+                    }
+                });
+            }
+        }
         result.close();
+        db.close();
     }
 
     /**
