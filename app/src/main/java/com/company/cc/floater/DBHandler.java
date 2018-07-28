@@ -380,7 +380,7 @@ public class DBHandler extends SQLiteOpenHelper {
             db.execSQL(plQuery);
         }
         updateERA();
-        return this.playerStatsQuery(playerID, seasonYear, teamID, null);
+        return this.playerTableQuery(playerID);
     }
 
     /**
@@ -478,7 +478,7 @@ public class DBHandler extends SQLiteOpenHelper {
             db.execSQL(plQuery);
         }
         updateERA();
-        return this.playerStatsQuery(playerID,seasonYear,teamID,null);
+        return this.playerTableQuery(playerID);
     }
 
     /**
