@@ -40,31 +40,22 @@ public class DBHandler extends SQLiteOpenHelper {
 
 
     }
-    private class UpdateERAAsync extends AsyncTask<Void, Boolean, Boolean> {
-        protected Boolean doInBackground(Void... v) {
-
-            boolean result = updateERA();
-            return result;
+    private void updateERA(String playerID, int seasonYear, String teamID){
+        Cursor eras = db.rawQuery(String.format("Select er, ip from pitching where player_id = '%s' and year = %d and team_id = '%s'",playerID,seasonYear,teamID),null);
+        eras.moveToFirst();
+        String er = eras.getString(eras.getColumnIndex("pitching.er"));
+        String ip = eras.getString(eras.getColumnIndex("pitching.ip"));
+        if(er.equals("") || ip.equals("")){
+            return;
         }
-
-        private Boolean updateERA(){
-            String myPath = DB_PATH + DB_NAME;
-            SQLiteDatabase bdb = SQLiteDatabase.openDatabase(myPath,null,SQLiteDatabase.OPEN_READWRITE);
-            Cursor eras = db.rawQuery("SELECT distinct er, ip FROM pitching WHERE NOT EXISTS (SELECT ERA_Stats.er, ERA_Stats.ip FROM ERA_Stats WHERE pitching.er = ERA_Stats.er AND pitching.ip = ERA_Stats.ip)", null);
-            if (eras.getCount() < 1) {
-                return false;
-            }
-            eras.moveToFirst();
-
-            do {
-                String er = eras.getString(eras.getColumnIndex("pitching.er"));
-                String ip = eras.getString(eras.getColumnIndex("pitching.ip"));
-                Integer era = Integer.getInteger(er)/Integer.getInteger(ip) * 9;
-                bdb.execSQL(String.format("INSERT INTO ERA_Stats (ER,IP,ERA) VALUES ('%s','%s','%s')",er,ip,era.toString()));
-            } while (eras.moveToNext() != false);
-
-            return true;
+        Integer era = Integer.getInteger(er)/Integer.getInteger(ip) * 9;
+        Cursor exists = db.rawQuery(String.format("Select * from ERA_Stats where ip = '%s' and er = '%s'",ip,er),null);
+        if(exists.getCount()>0){ //already exists, quit out
+            return;
         }
+        db.execSQL(String.format("INSERT INTO ERA_Stats (ER,IP,ERA) VALUES ('%s','%s','%s')",er,ip,era.toString())); //doesn't exist, insert into
+
+
     }
 
     /**
@@ -399,8 +390,7 @@ public class DBHandler extends SQLiteOpenHelper {
             db.execSQL(plQuery);
         }
         if(pitching) {
-            UpdateERAAsync background = new UpdateERAAsync();
-            background.execute();
+            updateERA(playerID,seasonYear,teamID);
         }
         return this.playerTableQuery(playerID);
     }
@@ -501,8 +491,7 @@ public class DBHandler extends SQLiteOpenHelper {
             db.execSQL(plQuery);
         }
         if (pitching) {
-            UpdateERAAsync background = new UpdateERAAsync();
-            background.execute();
+            updateERA(playerID,seasonYear,teamID);
         }
         return this.playerTableQuery(playerID);
     }
