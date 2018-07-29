@@ -396,33 +396,36 @@ public class FloaterApplication extends Application{
         db.close();
     }
 
-    public static void setAddOnClick(final LinearLayout mainLayout, Button button, final String type, final String homeType, final Context context){
+    public static void setAddOnClick(final LinearLayout mainLayout, Button button, final String buttonType, final String homeType, final Context context){
         button.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                if (type.compareTo("player") == 0){
-                    CursorRow cursorRow = addStatsToPlayer(mainLayout, homeType, context);
+                CursorRow cursorRow = addStatsToPlayer(mainLayout, buttonType, homeType, context);
+                if (buttonType.compareTo("player") == 0){
                     if (cursorRow != null) {
                         Intent startIntent = new Intent(context, PlayerProfile.class);
                         startIntent.putExtra("CursorRow", cursorRow);
                         context.startActivity(startIntent);
                     }
                 }
-                else if (type.compareTo("batting") == 0){
-                    if (addStatsToPlayer(mainLayout, homeType, context) != null) {
+                else if (buttonType.compareTo("batting") == 0){
+                    if (addStatsToPlayer(mainLayout, buttonType, homeType, context) != null) {
                         Intent startIntent = new Intent(context, AddHitting.class);
+                        startIntent.putExtra("CursorRow", cursorRow);
                         context.startActivity(startIntent);
                     }
                 }
-                else if (type.compareTo("fielding") == 0){
-                    if (addStatsToPlayer(mainLayout, homeType, context) != null) {
+                else if (buttonType.compareTo("fielding") == 0){
+                    if (addStatsToPlayer(mainLayout, buttonType, homeType, context) != null) {
                         Intent startIntent = new Intent(context, AddFielding.class);
+                        startIntent.putExtra("CursorRow", cursorRow);
                         context.startActivity(startIntent);
                     }
                 }
-                else if (type.compareTo("pitching") == 0){
-                    if (addStatsToPlayer(mainLayout, homeType, context) != null) {
+                else if (buttonType.compareTo("pitching") == 0){
+                    if (addStatsToPlayer(mainLayout, buttonType, homeType, context) != null) {
                         Intent startIntent = new Intent(context, AddPitching.class);
+                        startIntent.putExtra("CursorRow", cursorRow);
                         context.startActivity(startIntent);
                     }
                 }
@@ -430,7 +433,7 @@ public class FloaterApplication extends Application{
         });
     }
 
-    public static CursorRow addStatsToPlayer(LinearLayout mainLayout, String homeType, Context context){
+    public static CursorRow addStatsToPlayer(LinearLayout mainLayout, String buttonType, String homeType, Context context){
         boolean addNulls = false;
         boolean empty = true;
         List<InsertStat> ret = new LinkedList<>();
@@ -493,17 +496,17 @@ public class FloaterApplication extends Application{
                 }
                 else if (is.getColumn().compareTo("year") == 0){
                     if (is.getValue().compareTo("") == 0){
-                        return null;
+                        return playerTableRow(buttonType, playerId, context);
                     }
                 }
                 else if (is.getColumn().compareTo("team_id") == 0){
                     if (is.getValue().compareTo("") == 0){
-                        return null;
+                        return playerTableRow(buttonType, playerId, context);
                     }
                 }
                 else if (homeType.compareTo("fielding") == 0 && is.getColumn().compareTo("pos") == 0){
                     if (is.getValue().compareTo("") == 0){
-                        return null;
+                        return playerTableRow(buttonType, playerId, context);
                     }
                 }
             }
@@ -554,6 +557,17 @@ public class FloaterApplication extends Application{
         return cursorRow;
     }
 
-
+    public static CursorRow playerTableRow(String buttonType, String playerId, Context context){
+        if (buttonType.compareTo("player") == 0 && playerId.compareTo("") != 0) {
+            DBHandler db = new DBHandler(context);
+            Cursor result = db.playerTableQuery(playerId);
+            result.moveToFirst();
+            CursorRow cursorRow = new CursorRow(result, result.getPosition());
+            result.close();
+            db.close();
+            return cursorRow;
+        }
+        return null;
+    }
 
 }
