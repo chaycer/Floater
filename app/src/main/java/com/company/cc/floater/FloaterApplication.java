@@ -401,7 +401,7 @@ public class FloaterApplication extends Application{
             @Override
             public void onClick(View view) {
                 if (type.compareTo("player") == 0){
-                    CursorRow cursorRow = addStatsToPlayer(mainLayout, type, homeType, context);
+                    CursorRow cursorRow = addStatsToPlayer(mainLayout, homeType, context);
                     if (cursorRow != null) {
                         Intent startIntent = new Intent(context, PlayerProfile.class);
                         startIntent.putExtra("CursorRow", cursorRow);
@@ -409,19 +409,19 @@ public class FloaterApplication extends Application{
                     }
                 }
                 else if (type.compareTo("batting") == 0){
-                    if (addStatsToPlayer(mainLayout, type, homeType, context) != null) {
+                    if (addStatsToPlayer(mainLayout, homeType, context) != null) {
                         Intent startIntent = new Intent(context, AddHitting.class);
                         context.startActivity(startIntent);
                     }
                 }
                 else if (type.compareTo("fielding") == 0){
-                    if (addStatsToPlayer(mainLayout, type, homeType, context) != null) {
+                    if (addStatsToPlayer(mainLayout, homeType, context) != null) {
                         Intent startIntent = new Intent(context, AddFielding.class);
                         context.startActivity(startIntent);
                     }
                 }
                 else if (type.compareTo("pitching") == 0){
-                    if (addStatsToPlayer(mainLayout, type, homeType, context) != null) {
+                    if (addStatsToPlayer(mainLayout, homeType, context) != null) {
                         Intent startIntent = new Intent(context, AddPitching.class);
                         context.startActivity(startIntent);
                     }
@@ -430,7 +430,7 @@ public class FloaterApplication extends Application{
         });
     }
 
-    public static CursorRow addStatsToPlayer(LinearLayout mainLayout, final String type, String homeType, Context context){
+    public static CursorRow addStatsToPlayer(LinearLayout mainLayout, String homeType, Context context){
         boolean addNulls = false;
         boolean empty = true;
         List<InsertStat> ret = new LinkedList<>();
@@ -465,7 +465,7 @@ public class FloaterApplication extends Application{
                    empty = false;
                 }
                 if (stat.compareTo("") != 0) {
-                    ret.add(new InsertStat(type, stat, val));
+                    ret.add(new InsertStat(homeType, stat, val));
                 }
             }
         }
