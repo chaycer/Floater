@@ -23,15 +23,16 @@ public class AddHitting extends Activity {
         View add = inflater.inflate(R.layout.add_season_stats, null);
 
         Button saveButton = save.findViewById(R.id.saveChangesButton);
+        FloaterApplication.setAddOnClick(mainLayout, saveButton, "player", "batting", getApplicationContext());
+
         Button hittingButton = add.findViewById(R.id.hittingAddButton);
+        FloaterApplication.setAddOnClick(mainLayout, hittingButton, "batting", "batting", getApplicationContext());
+
         Button fieldingButton = add.findViewById(R.id.fieldingAddButton);
+        FloaterApplication.setAddOnClick(mainLayout, fieldingButton, "pitching", "batting", getApplicationContext());
+
         Button pitchingButton = add.findViewById(R.id.pitchingAddButton);
-
-        FloaterApplication.setSaveButton(saveButton, this);
-        FloaterApplication.setHittingButton(hittingButton, this);
-        FloaterApplication.setFieldingButton(fieldingButton, this);
-        FloaterApplication.setPitchingButton(pitchingButton, this);
-
+        FloaterApplication.setAddOnClick(mainLayout, pitchingButton, "fielding", "batting", getApplicationContext());
         mainLayout.addView(save);
         mainLayout.addView(add);
     }
