@@ -6,6 +6,7 @@ import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteException;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.content.Context;
+import android.os.AsyncTask;
 
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -39,6 +40,32 @@ public class DBHandler extends SQLiteOpenHelper {
 
 
     }
+    private class UpdateERAAsync extends AsyncTask<Void, Boolean, Boolean> {
+        protected Boolean doInBackground(Void... v) {
+
+            boolean result = updateERA();
+            return result;
+        }
+
+        private Boolean updateERA(){
+            String myPath = DB_PATH + DB_NAME;
+            SQLiteDatabase bdb = SQLiteDatabase.openDatabase(myPath,null,SQLiteDatabase.OPEN_READWRITE);
+            Cursor eras = db.rawQuery("SELECT distinct pitching.er, pitching.ip FROM pitching WHERE NOT EXISTS (SELECT ERA_Stats.er, ERA_Stats.ip FROM ERA_Stats WHERE pitching.er = ERA_Stats.er AND pitching.ip = ERA_Stats.ip)", null);
+            eras.moveToFirst();
+            if (eras.getCount() < 1) {
+                return false;
+            }
+            do {
+                String er = eras.getString(eras.getColumnIndex("pitching.er"));
+                String ip = eras.getString(eras.getColumnIndex("pitching.ip"));
+                Integer era = Integer.getInteger(er)/Integer.getInteger(ip) * 9;
+                bdb.execSQL(String.format("INSERT INTO ERA_Stats (ER,IP,ERA) VALUES ('%s','%s','%s')",er,ip,era.toString()));
+            } while (eras.moveToNext() != false);
+
+            return true;
+        }
+    }
+
     /**
      * Create empty database in memory and fill with static database
      */
@@ -368,7 +395,7 @@ public class DBHandler extends SQLiteOpenHelper {
             db.execSQL(plQuery);
         }
         UpdateERAAsync background = new UpdateERAAsync();
-        background.execute(db);
+        background.execute();
         return this.playerTableQuery(playerID);
     }
 
@@ -397,21 +424,21 @@ public class DBHandler extends SQLiteOpenHelper {
             if (player.getTable().equals("batting")){
                 if (bQueryCol.length() == 0) {
                     bQueryCol.append("Insert into batting (player_id, year, team_id, " + player.getColumn());
-                    bQueryValues.append("(\'" + playerID + "\'," + seasonYear + ",\'" + teamID + "\',\'" + player.getValue() + "'");
+                    bQueryValues.append("('" + playerID + "'," + seasonYear + ",'" + teamID + "','" + player.getValue() + "'");
                 }
                 else {
                     bQueryCol.append(", " + player.getColumn());
-                    bQueryValues.append(", \'" + player.getValue() + "'");
+                    bQueryValues.append(", '" + player.getValue() + "'");
                 }
             }
             if (player.getTable().equals("pitching")){
                 if (pQueryCol.length() == 0) {
                     pQueryCol.append("Insert into pitching (player_id, year, team_id, " + player.getColumn());
-                    pQueryValues.append("(\'" + playerID + "\'," + seasonYear + ",\'" + teamID + "\',\'" + player.getValue() +"'");
+                    pQueryValues.append("('" + playerID + "'," + seasonYear + ",'" + teamID + "','" + player.getValue() +"'");
                 }
                 else {
                     pQueryCol.append(", " + player.getColumn());
-                    pQueryValues.append(", \'" + player.getValue() + "'");
+                    pQueryValues.append(", '" + player.getValue() + "'");
                 }
             }
             if (player.getTable().equals("fielding")){
@@ -420,22 +447,20 @@ public class DBHandler extends SQLiteOpenHelper {
                         throw new Error("Can't insert with a null position");
                     }
                     fQueryCol.append("Insert into fielding (player_id, year, team_id, pos, " + player.getColumn());
-                    fQueryValues.append("(\'" + playerID + "\'," + seasonYear + ",\'" + teamID + "\',\'" + pos + "\',\'" + player.getValue() +"'");
+                    fQueryValues.append("('" + playerID + "'," + seasonYear + ",'" + teamID + "','" + pos + "','" + player.getValue() +"'");
                 }
                 else {
                     fQueryCol.append(", " + player.getColumn());
-                    fQueryValues.append(", \'" + player.getValue() + "'");
+                    fQueryValues.append(", '" + player.getValue() + "'");
                 }
             }
+            if (firstName != "" || firstName != null || lastName != "" || lastName != null){
+                plQueryCol.append("Insert into player (player_id, name_first, name_last ");
+                plQueryValues.append("('" + playerID + "', '" + firstName + "', '" + lastName);
+            }
             if (player.getTable().equals("player")){
-                if (plQueryCol.length() == 0) {
-                    plQueryCol.append("Insert into player (player_id, name_first, name_last, " + player.getColumn());
-                    plQueryValues.append("(\'" + playerID + "\', \'" + firstName + "\', \'" + lastName + "\', \'" + player.getValue() + "'");
-                }
-                else {
                     plQueryCol.append(", " + player.getColumn());
-                    plQueryValues.append(", \'" + player.getValue()+ "'");
-                }
+                    plQueryValues.append("', '" + player.getValue() + "'");
             }
         }
 
@@ -467,7 +492,7 @@ public class DBHandler extends SQLiteOpenHelper {
             db.execSQL(plQuery);
         }
         UpdateERAAsync background = new UpdateERAAsync();
-        background.execute(db);
+        background.execute();
         return this.playerTableQuery(playerID);
     }
 
