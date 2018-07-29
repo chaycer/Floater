@@ -291,19 +291,7 @@ public class DBHandler extends SQLiteOpenHelper {
         }
 
     }
-    private void updateERA(){
-        Cursor eras = db.rawQuery("SELECT distinct pitching.er, pitching.ip FROM pitching WHERE NOT EXISTS (SELECT ERA_Stats.er, ERA_Stats.ip FROM ERA_Stats WHERE pitching.er = ERA_Stats.er AND pitching.ip = ERA_Stats.ip)", null);
-        eras.moveToFirst();
-        if (eras.getCount() < 1) {
-            return;
-        }
-        do {
-            String er = eras.getString(eras.getColumnIndex("pitching.er"));
-            String ip = eras.getString(eras.getColumnIndex("pitching.ip"));
-            Integer era = Integer.getInteger(er)/Integer.getInteger(ip) * 9;
-            db.execSQL(String.format("INSERT INTO ERA_Stats (ER,IP,ERA) VALUES ('%s','%s','%s')",er,ip,era.toString()));
-        } while (eras.moveToNext() != false);
-    }
+
     /**
      * Use to update an existing player
      * @param playerID PlayerID to use
@@ -379,7 +367,8 @@ public class DBHandler extends SQLiteOpenHelper {
             String plQuery = plQueryCol.toString() + " WHERE player.player_id = '" + playerID + "'";
             db.execSQL(plQuery);
         }
-        updateERA();
+        UpdateERAAsync background = new UpdateERAAsync();
+        background.execute(db);
         return this.playerTableQuery(playerID);
     }
 
@@ -477,7 +466,8 @@ public class DBHandler extends SQLiteOpenHelper {
             String plQuery = plQueryCol.toString() + " Values " + plQueryValues.toString();
             db.execSQL(plQuery);
         }
-        updateERA();
+        UpdateERAAsync background = new UpdateERAAsync();
+        background.execute(db);
         return this.playerTableQuery(playerID);
     }
 
