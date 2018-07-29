@@ -464,7 +464,9 @@ public class FloaterApplication extends Application{
                 if (empty && val.compareTo("") != 0){
                    empty = false;
                 }
-                ret.add(new InsertStat(type, stat, val));
+                if (stat.compareTo("") != 0) {
+                    ret.add(new InsertStat(type, stat, val));
+                }
             }
         }
 
