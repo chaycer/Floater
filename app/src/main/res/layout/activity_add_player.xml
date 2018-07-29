@@ -6,12 +6,11 @@
     android:layout_height="match_parent">
 
     <LinearLayout
-    android:id="@+id/addPlayerLayout"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:orientation="vertical"
-    tools:context=".PlayerProfile">
-    </LinearLayout>
+        android:id="@+id/addPlayerLayout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        tools:context=".PlayerProfile"></LinearLayout>
 
 </ScrollView>
 <!--

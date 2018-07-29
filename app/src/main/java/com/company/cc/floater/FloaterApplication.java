@@ -7,6 +7,7 @@ import android.database.Cursor;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.Button;
+import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.TextView;
@@ -395,63 +396,162 @@ public class FloaterApplication extends Application{
         db.close();
     }
 
-    /**
-     * Sets up the save button that will take the user to the player profile after saving to
-     * the database
-     * @param saveButton - Button to set up
-     * @param context - context of the calling function
-     */
-    public static void setSaveButton(Button saveButton, final Context context){
-        saveButton.setOnClickListener(new View.OnClickListener() {
+    public static void setAddOnClick(final LinearLayout mainLayout, Button button, final String type, final String homeType, final Context context){
+        button.setOnClickListener(new View.OnClickListener() {
+            @Override
             public void onClick(View view) {
-                Intent startIntent = new Intent(context, PlayerProfile.class);
-                context.startActivity(startIntent);
+                if (type.compareTo("player") == 0){
+                    CursorRow cursorRow = addStatsToPlayer(mainLayout, type, homeType, context);
+                    if (cursorRow != null) {
+                        Intent startIntent = new Intent(context, PlayerProfile.class);
+                        startIntent.putExtra("CursorRow", cursorRow);
+                        context.startActivity(startIntent);
+                    }
+                }
+                else if (type.compareTo("batting") == 0){
+                    if (addStatsToPlayer(mainLayout, type, homeType, context) != null) {
+                        Intent startIntent = new Intent(context, AddHitting.class);
+                        context.startActivity(startIntent);
+                    }
+                }
+                else if (type.compareTo("fielding") == 0){
+                    if (addStatsToPlayer(mainLayout, type, homeType, context) != null) {
+                        Intent startIntent = new Intent(context, AddFielding.class);
+                        context.startActivity(startIntent);
+                    }
+                }
+                else if (type.compareTo("pitching") == 0){
+                    if (addStatsToPlayer(mainLayout, type, homeType, context) != null) {
+                        Intent startIntent = new Intent(context, AddPitching.class);
+                        context.startActivity(startIntent);
+                    }
+                }
             }
         });
     }
 
-    /**
-     * Sets up the save button that will take the user to the hitting stats entry page after saving to
-     * the database
-     * @param hittingButton - Button to set up
-     * @param context - context of the calling function
-     */
-    public static void setHittingButton(Button hittingButton, final Context context){
-        hittingButton.setOnClickListener(new View.OnClickListener() {
-            public void onClick(View view) {
-                Intent startIntent = new Intent(context, AddHitting.class);
-                context.startActivity(startIntent);
+    public static CursorRow addStatsToPlayer(LinearLayout mainLayout, final String type, String homeType, Context context){
+        boolean addNulls = false;
+        boolean empty = true;
+        List<InsertStat> ret = new LinkedList<>();
+
+        int count = mainLayout.getChildCount();
+        for (int i = 0; i < count; i++){
+            View childLayout = mainLayout.getChildAt(i);
+            if (childLayout instanceof LinearLayout){
+                String stat = "";
+                String val = "";
+                LinearLayout ll = (LinearLayout) childLayout;
+
+                int childCount = ll.getChildCount();
+                for (int j = 0; j < childCount; j++){
+                    View text = ll.getChildAt(j);
+                    if (text instanceof CheckBox){
+                        CheckBox cb = (CheckBox) text;
+                        addNulls = cb.isChecked();
+                    }
+                    else if (text instanceof Button){
+                    }
+                    else if (text instanceof EditText){
+                        EditText et = (EditText) text;
+                        val = et.getText().toString();
+                    }
+                    else {
+                        TextView tv = (TextView) text;
+                        stat = tv.getText().toString();
+                    }
+                }
+                if (empty && val.compareTo("") != 0){
+                   empty = false;
+                }
+                ret.add(new InsertStat(type, stat, val));
             }
-        });
+        }
+
+        if (empty){
+            return null;
+        }
+
+        String playerId = "";
+        String teamId = "";
+        String firstName = "";
+        String lastName = "";
+        String year = "";
+        String pos = "";
+
+        Iterator<InsertStat> iterator = ret.iterator();
+        while (iterator.hasNext()){
+            InsertStat is = iterator.next();
+
+            if (homeType.compareTo("player") != 0){
+                if (is.getColumn().compareTo("player_id") == 0){
+                    if (is.getValue().compareTo("") == 0){
+                        return null;
+                    }
+                }
+                else if (is.getColumn().compareTo("year") == 0){
+                    if (is.getValue().compareTo("") == 0){
+                        return null;
+                    }
+                }
+                else if (is.getColumn().compareTo("team_id") == 0){
+                    if (is.getValue().compareTo("") == 0){
+                        return null;
+                    }
+                }
+                else if (homeType.compareTo("fielding") == 0 && is.getColumn().compareTo("pos") == 0){
+                    if (is.getValue().compareTo("") == 0){
+                        return null;
+                    }
+                }
+            }
+
+            //remove values from list if we aren't inserting them
+            if (is.getColumn().compareTo("player_id") == 0){
+                playerId = is.getValue();
+                iterator.remove();
+            }
+            else if (is.getColumn().compareTo("team_id") == 0){
+                teamId = is.getValue();
+                iterator.remove();
+            }
+            else if (is.getColumn().compareTo("year") == 0){
+                year = is.getValue();
+                iterator.remove();
+            }
+            else if (is.getColumn().compareTo("first_name") == 0){
+                firstName = is.getValue();
+                iterator.remove();
+            }
+            else if (is.getColumn().compareTo("last_name") == 0){
+                lastName = is.getValue();
+                iterator.remove();
+            }
+            else if (is.getColumn().compareTo("pos") == 0){
+                pos = is.getValue();
+                iterator.remove();
+            }
+            else if (!addNulls){
+                if (is.getValue().compareTo("") == 0){
+                    iterator.remove();
+                }
+            }
+        }
+
+        DBHandler db = new DBHandler(context);
+        int season = -1;
+        if (year.compareTo("") != 0){
+            season = Integer.parseInt(year);
+        }
+        Cursor result = db.insertPlayerData(playerId, firstName, lastName, season, teamId, pos, ret);
+        result.moveToFirst();
+        final CursorRow cursorRow = new CursorRow(result, result.getPosition());
+        result.close();
+        db.close();
+
+        return cursorRow;
     }
 
-    /**
-     * Sets up the save button that will take the user to the fielding stats entry page after saving to
-     * the database
-     * @param fieldingButton - Button to set up
-     * @param context - context of the calling function
-     */
-    public static void setFieldingButton(Button fieldingButton, final Context context){
-        fieldingButton.setOnClickListener(new View.OnClickListener() {
-            public void onClick(View view) {
-                Intent startIntent = new Intent(context, AddFielding.class);
-                context.startActivity(startIntent);
-            }
-        });
-    }
 
-    /**
-     * Sets up the save button that will take the user to the pitching stats entry page after saving to
-     * the database
-     * @param pitchingButton - Button to set up
-     * @param context - context of the calling function
-     */
-    public static void setPitchingButton(Button pitchingButton, final Context context){
-        pitchingButton.setOnClickListener(new View.OnClickListener() {
-            public void onClick(View view) {
-                Intent startIntent = new Intent(context, AddPitching.class);
-                context.startActivity(startIntent);
-            }
-        });
-    }
+
 }
