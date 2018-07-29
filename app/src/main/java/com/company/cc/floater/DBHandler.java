@@ -205,7 +205,7 @@ public class DBHandler extends SQLiteOpenHelper {
     }
 
     public Cursor playerTableQuery(String playerID){
-        String query = String.format("Select * from player where player_id = %s", playerID);
+        String query = String.format("Select * from player where player_id = '%s'", playerID);
         return db.rawQuery(query,null);
 
     }
