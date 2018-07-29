@@ -50,11 +50,12 @@ public class DBHandler extends SQLiteOpenHelper {
         private Boolean updateERA(){
             String myPath = DB_PATH + DB_NAME;
             SQLiteDatabase bdb = SQLiteDatabase.openDatabase(myPath,null,SQLiteDatabase.OPEN_READWRITE);
-            Cursor eras = db.rawQuery("SELECT distinct pitching.er, pitching.ip FROM pitching WHERE NOT EXISTS (SELECT ERA_Stats.er, ERA_Stats.ip FROM ERA_Stats WHERE pitching.er = ERA_Stats.er AND pitching.ip = ERA_Stats.ip)", null);
-            eras.moveToFirst();
+            Cursor eras = db.rawQuery("SELECT distinct er, ip FROM pitching WHERE NOT EXISTS (SELECT ERA_Stats.er, ERA_Stats.ip FROM ERA_Stats WHERE pitching.er = ERA_Stats.er AND pitching.ip = ERA_Stats.ip)", null);
             if (eras.getCount() < 1) {
                 return false;
             }
+            eras.moveToFirst();
+
             do {
                 String er = eras.getString(eras.getColumnIndex("pitching.er"));
                 String ip = eras.getString(eras.getColumnIndex("pitching.ip"));
@@ -311,7 +312,7 @@ public class DBHandler extends SQLiteOpenHelper {
             playerID = this.createPlayerID(firstName, lastName);
             return InsertNewPlayer(playerID, firstName, lastName, seasonYear, teamID, pos, playerData);
         }
-        if(this.playerStatsQuery(playerID,seasonYear,teamID,"").getCount() > 0){ //if they exist already
+        if(this.playerTableQuery(playerID).getCount() > 0){ //if they exist already
             return updatePlayer(playerID, seasonYear, teamID, pos, playerData);
         } else {
             return InsertNewPlayer(playerID, firstName, lastName, seasonYear, teamID, pos, playerData);
@@ -333,7 +334,7 @@ public class DBHandler extends SQLiteOpenHelper {
         StringBuilder pQueryCol = new StringBuilder();
         StringBuilder fQueryCol = new StringBuilder();
         StringBuilder plQueryCol = new StringBuilder();
-
+        boolean pitching = false;
         for (InsertStat player : playerData) {
             if (player.getTable().equals("batting")) {
                 if (bQueryCol.length() == 0) {
@@ -343,6 +344,9 @@ public class DBHandler extends SQLiteOpenHelper {
                 }
             }
             if (player.getTable().equals("pitching")) {
+                if(player.getColumn().equals("er") || player.getColumn().equals("ip")){
+                    pitching = true;
+                }
                 if (pQueryCol.length() == 0) {
                     pQueryCol.append("UPDATE pitching SET " + player.getColumn() + " = '" + player.getValue() + "'");
                 } else {
@@ -394,8 +398,10 @@ public class DBHandler extends SQLiteOpenHelper {
             String plQuery = plQueryCol.toString() + " WHERE player.player_id = '" + playerID + "'";
             db.execSQL(plQuery);
         }
-        UpdateERAAsync background = new UpdateERAAsync();
-        background.execute();
+        if(pitching) {
+            UpdateERAAsync background = new UpdateERAAsync();
+            background.execute();
+        }
         return this.playerTableQuery(playerID);
     }
 
@@ -419,7 +425,11 @@ public class DBHandler extends SQLiteOpenHelper {
         StringBuilder fQueryCol = new StringBuilder();
         StringBuilder plQueryCol = new StringBuilder();
         StringBuilder plQueryValues = new StringBuilder();
-
+        boolean pitching = false;
+        if (firstName != "" || firstName != null || lastName != "" || lastName != null){
+            plQueryCol.append("Insert into player (player_id, name_first, name_last ");
+            plQueryValues.append(String.format("('%s','%s','%s'",playerID,firstName,lastName));
+        }
         for (InsertStat player:playerData) {
             if (player.getTable().equals("batting")){
                 if (bQueryCol.length() == 0) {
@@ -435,6 +445,9 @@ public class DBHandler extends SQLiteOpenHelper {
                 if (pQueryCol.length() == 0) {
                     pQueryCol.append("Insert into pitching (player_id, year, team_id, " + player.getColumn());
                     pQueryValues.append("('" + playerID + "'," + seasonYear + ",'" + teamID + "','" + player.getValue() +"'");
+                    if(player.getColumn().equals("er") || player.getColumn().equals("ip")){
+                        pitching = true;
+                    }
                 }
                 else {
                     pQueryCol.append(", " + player.getColumn());
@@ -454,13 +467,9 @@ public class DBHandler extends SQLiteOpenHelper {
                     fQueryValues.append(", '" + player.getValue() + "'");
                 }
             }
-            if (firstName != "" || firstName != null || lastName != "" || lastName != null){
-                plQueryCol.append("Insert into player (player_id, name_first, name_last ");
-                plQueryValues.append("('" + playerID + "', '" + firstName + "', '" + lastName);
-            }
             if (player.getTable().equals("player")){
                     plQueryCol.append(", " + player.getColumn());
-                    plQueryValues.append("', '" + player.getValue() + "'");
+                    plQueryValues.append(", '" + player.getValue() + "'");
             }
         }
 
@@ -491,8 +500,10 @@ public class DBHandler extends SQLiteOpenHelper {
             String plQuery = plQueryCol.toString() + " Values " + plQueryValues.toString();
             db.execSQL(plQuery);
         }
-        UpdateERAAsync background = new UpdateERAAsync();
-        background.execute();
+        if (pitching) {
+            UpdateERAAsync background = new UpdateERAAsync();
+            background.execute();
+        }
         return this.playerTableQuery(playerID);
     }
 
