@@ -5,6 +5,7 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.LinearLayout;
 
 public class AddHitting extends Activity {
@@ -17,6 +18,11 @@ public class AddHitting extends Activity {
         LinearLayout mainLayout = findViewById(R.id.addHittingLayout);
         LayoutInflater inflater = getLayoutInflater();
         FloaterApplication.addStatLines(mainLayout, inflater, FloaterApplication.getBattingStats());
+
+        CursorRow playerRow = (CursorRow) getIntent().getExtras().getSerializable("CursorRow");
+        LinearLayout ll = (LinearLayout) mainLayout.getChildAt(0);
+        EditText idEdit = (EditText) ll.getChildAt(1);
+        idEdit.setText(playerRow.getValueByColumnName("player_id"));
 
         // add buttons
         View save = inflater.inflate(R.layout.save_changes_button, null);
