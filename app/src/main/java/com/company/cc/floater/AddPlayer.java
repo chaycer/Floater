@@ -37,10 +37,10 @@ public class AddPlayer extends AppCompatActivity {
         FloaterApplication.setAddOnClick(mainLayout, hittingButton, "batting", "player", getApplicationContext());
 
         Button fieldingButton = add.findViewById(R.id.fieldingAddButton);
-        FloaterApplication.setAddOnClick(mainLayout, fieldingButton, "pitching", "player", getApplicationContext());
+        FloaterApplication.setAddOnClick(mainLayout, fieldingButton, "fielding", "player", getApplicationContext());
 
         Button pitchingButton = add.findViewById(R.id.pitchingAddButton);
-        FloaterApplication.setAddOnClick(mainLayout, pitchingButton, "fielding", "player", getApplicationContext());
+        FloaterApplication.setAddOnClick(mainLayout, pitchingButton, "pitching", "player", getApplicationContext());
 
         mainLayout.addView(save);
         mainLayout.addView(add);

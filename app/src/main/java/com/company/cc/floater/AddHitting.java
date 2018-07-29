@@ -35,10 +35,10 @@ public class AddHitting extends Activity {
         FloaterApplication.setAddOnClick(mainLayout, hittingButton, "batting", "batting", getApplicationContext());
 
         Button fieldingButton = add.findViewById(R.id.fieldingAddButton);
-        FloaterApplication.setAddOnClick(mainLayout, fieldingButton, "pitching", "batting", getApplicationContext());
+        FloaterApplication.setAddOnClick(mainLayout, fieldingButton, "fielding", "batting", getApplicationContext());
 
         Button pitchingButton = add.findViewById(R.id.pitchingAddButton);
-        FloaterApplication.setAddOnClick(mainLayout, pitchingButton, "fielding", "batting", getApplicationContext());
+        FloaterApplication.setAddOnClick(mainLayout, pitchingButton, "pitching", "batting", getApplicationContext());
         mainLayout.addView(save);
         mainLayout.addView(add);
     }
