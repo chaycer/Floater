@@ -4,7 +4,6 @@ import android.app.Activity;
 import android.content.Context;
 import android.database.Cursor;
 import android.os.AsyncTask;
-import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.LinearLayout;
@@ -17,9 +16,6 @@ import static com.company.cc.floater.FloaterApplication.BATTING;
 import static com.company.cc.floater.FloaterApplication.FIELDING;
 import static com.company.cc.floater.FloaterApplication.PITCHING;
 import static com.company.cc.floater.FloaterApplication.addStatsFromRow;
-import static com.company.cc.floater.FloaterApplication.battingStatsColumns;
-import static com.company.cc.floater.FloaterApplication.fieldingStatsColumns;
-import static com.company.cc.floater.FloaterApplication.pitchingStatsColumns;
 
 public class AddStatsAsync extends AsyncTask<Object, Boolean, Boolean> {
 
@@ -74,7 +70,6 @@ public class AddStatsAsync extends AsyncTask<Object, Boolean, Boolean> {
             // Now, generate the individual stat lines
             Cursor playerStats = db.playerStatsQuery(playerId, Integer.parseInt(year), teamId, table);
 
-
             LinearLayout LL = dynamicLayout.findViewById(R.id.keyHeaderVertical);
             final LinkedList<LinkedList<View>> hiddenViews = new LinkedList<>();
 
@@ -82,13 +77,13 @@ public class AddStatsAsync extends AsyncTask<Object, Boolean, Boolean> {
             if (playerStats.moveToNext()){ // changing to if instead of while since sometimes duplicates get returned
                 CursorRow statRow = new CursorRow(playerStats, playerStats.getPosition(), true);
                 if (type == FIELDING) {
-                    hiddenViews.add(addStatsFromRow(LL, inflater, statRow, fieldExclude, true));
+                    hiddenViews.add(addStatsFromRow(LL, inflater, statRow, fieldExclude, true, null));
                     TextView pos = dynamicLayout.findViewById(R.id.keyHeaderPos);
                     pos.setText(statRow.getValueByColumnName("fielding.pos"));
                     pos.setVisibility(View.VISIBLE);
                 }
                 else{
-                    hiddenViews.add(addStatsFromRow(LL, inflater, statRow, exclude, true));
+                    hiddenViews.add(addStatsFromRow(LL, inflater, statRow, exclude, true, null));
                 }
             }
 

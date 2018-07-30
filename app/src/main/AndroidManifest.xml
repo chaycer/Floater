@@ -44,6 +44,9 @@
         <activity
             android:name=".AddPitching"
             android:label="@string/title_activity_add_pitching" />
+        <activity
+            android:name=".TeamRoster"
+            android:label="@string/title_activity_team_roster"></activity>
     </application>
 
 </manifest>

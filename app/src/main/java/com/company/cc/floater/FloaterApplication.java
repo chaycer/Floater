@@ -137,8 +137,11 @@ public class FloaterApplication extends Application{
     }
 
 
-    public static LinkedList<View> addStatsFromRow(LinearLayout mainLayout, LayoutInflater inflater, CursorRow row, String[] toExclude, boolean hide){
+    public static LinkedList<View> addStatsFromRow(LinearLayout mainLayout, LayoutInflater inflater, CursorRow row, String[] toExclude, boolean hide, View button){
         LinkedList<View> views = new LinkedList<>();
+        if (button != null){
+            views.add(button);
+        }
         for (int i = 0; i < row.getSize(); i++){
             boolean exclude = false;
             if (toExclude != null) {
@@ -167,102 +170,6 @@ public class FloaterApplication extends Application{
         return views;
     }
 
-    public static void addPlayerStatsFromCursor(LinearLayout mainLayout, LayoutInflater inflater, String playerId, int type, Context context){
-
-        DBHandler db = new DBHandler(context);
-        Cursor playerTeams = db.playerTeamsQuery(playerId, null);
-
-        LinkedList<CursorRow> rowList = new LinkedList<CursorRow>();
-        while (playerTeams.moveToNext()){
-            rowList.add(new CursorRow(playerTeams, playerTeams.getPosition()));
-        }
-        playerTeams.close();
-        Iterator<CursorRow> iterator = rowList.iterator();
-        while (iterator.hasNext()){
-
-            // First, generate the headers
-            CursorRow row = iterator.next();
-            final View dynamicLayout = inflater.inflate(R.layout.key_header, null);
-
-            String year = row.getValueByIndex(0);
-            String teamId = row.getValueByIndex(1);
-
-            TextView name = dynamicLayout.findViewById(R.id.keyHeaderTeam);
-            name.setText(year);
-
-            TextView value = dynamicLayout.findViewById(R.id.keyHeaderYear);
-            value.setText(teamId);
-
-            String stats = null;
-            String[] exclude = {"player_id", "year", "team_id"};
-            String[] fieldExclude = {"player_id", "year", "team_id", "pos"};
-            if (type == BATTING){
-                stats = battingStatsColumns();
-            }
-            else if (type == PITCHING){
-                stats = pitchingStatsColumns();
-            }
-            else if (type == FIELDING){
-                stats = fieldingStatsColumns();
-            }
-
-            // Now, generate the individual stat lines
-            Cursor playerStats = db.playerStatsQuery(playerId, Integer.parseInt(year), null, stats);
-
-
-            LinearLayout LL = dynamicLayout.findViewById(R.id.keyHeaderVertical);
-            final LinkedList<LinkedList<View>> hiddenViews = new LinkedList<>();
-
-
-            if (playerStats.moveToNext()){ // changing to if instead of while since sometimes duplicates get returned
-                CursorRow statRow = new CursorRow(playerStats, playerStats.getPosition(), true);
-                if (type == FIELDING) {
-                    hiddenViews.add(addStatsFromRow(LL, inflater, statRow, fieldExclude, true));
-                    TextView pos = dynamicLayout.findViewById(R.id.keyHeaderPos);
-                    pos.setText(statRow.getValueByColumnName("fielding.pos"));
-                    pos.setVisibility(View.VISIBLE);
-                }
-                else{
-                    hiddenViews.add(addStatsFromRow(LL, inflater, statRow, exclude, true));
-                }
-            }
-            CursorRow statRow = new CursorRow(playerStats, playerStats.getPosition(), true);
-
-            if (type == FIELDING) {
-                hiddenViews.add(addStatsFromRow(LL, inflater, statRow, fieldExclude, true));
-                TextView pos = dynamicLayout.findViewById(R.id.keyHeaderPos);
-                pos.setText(statRow.getValueByColumnName("fielding.pos"));
-                pos.setVisibility(View.VISIBLE);
-            }
-            else{
-                hiddenViews.add(addStatsFromRow(LL, inflater, statRow, exclude, true));
-            }
-
-            dynamicLayout.setOnClickListener(new View.OnClickListener() {
-                public void onClick(View v) {
-                    if (v == dynamicLayout) {
-                        Iterator<LinkedList<View>> viewIterator = hiddenViews.iterator();
-                        while (viewIterator.hasNext()){
-                            LinkedList<View> viewList = viewIterator.next();
-                            Iterator<View> listIterator = viewList.iterator();
-                            while (listIterator.hasNext()) {
-                                View nextView = listIterator.next();
-                                nextView.setVisibility(nextView.getVisibility() == View.VISIBLE ? View.GONE : View.VISIBLE);
-                            }
-                        }
-                    }
-                }
-            });
-
-            playerStats.close();
-
-            mainLayout.addView(dynamicLayout);
-
-        }
-
-        db.close();
-
-    }
 
     /**
      * Displays each player and years active from a cursor containing player information
@@ -317,83 +224,6 @@ public class FloaterApplication extends Application{
 
             mainLayout.addView(dynamicLayout);
         }
-    }
-
-    public static void addStatSearchLines(LinearLayout mainLayout, LayoutInflater inflater, final SerialList filters, final Context context, int count){
-        DBHandler db = new DBHandler(context);
-        Cursor result = db.filterSearchQuery(filters.getList());
-        String[] exclude = {"player_id", "name_first", "name_last", "year", "team_id", "pos"};
-        result.moveToPosition(count);
-        int max = count + 100;
-
-        // TODO: show "no results" if cursor empty
-        if (result == null || (result.getCount() < 1)){
-
-            result.close();
-            db.close();
-            return;
-        }
-
-        while (result.moveToNext() && count <= max){
-            final CursorRow player = new CursorRow(result, result.getPosition(), true);
-            View dynamicLayout = inflater.inflate(R.layout.stat_return_layout, null);
-            TextView name = dynamicLayout.findViewById(R.id.playerNameTextView);
-            TextView team = dynamicLayout.findViewById(R.id.teamTextView);
-            TextView year = dynamicLayout.findViewById(R.id.yearTextView);
-            TextView pos = dynamicLayout.findViewById(R.id.positionTextView);
-
-            if(player.getValueByColumnName("name_first").isEmpty()
-                    || player.getValueByColumnName("name_last").isEmpty()){
-                continue;
-            }
-
-            if (!player.getValueByColumnName("name_first").isEmpty()) {
-                name.setText(player.getValueByColumnName("name_first") + " "
-                        + player.getValueByColumnName("name_last")); // set label
-            }
-
-            team.setText(player.getValueByColumnName("team_id"));
-            year.setText(player.getValueByColumnName("year"));
-            pos.setText(player.getValueByColumnName("pos"));
-            if (pos.getText() != null){
-                pos.setVisibility(View.VISIBLE);
-                //mainLayout.findViewById(R.id.playerSearchPositionHeader).setVisibility(View.VISIBLE);
-            }
-
-            LinearLayout LL = dynamicLayout.findViewById(R.id.statResultsHorizontalLayout);
-            LL.setOnClickListener(new View.OnClickListener(){
-                @Override
-                public void onClick(View v){
-                    Intent startIntent = new Intent(context, PlayerProfile.class);
-                    startIntent.putExtra("CursorRow", player);
-                    context.startActivity(startIntent);
-                }
-            });
-
-            LinearLayout verticalLayout = dynamicLayout.findViewById(R.id.statResultsVerticalLayout);
-
-            addStatsFromRow(verticalLayout, inflater, player, exclude, false);
-            mainLayout.addView(dynamicLayout);
-
-            // add load more button after 100 rows
-            if (++count > max){
-                final int retCount = count -1;
-                View buttonLayout = inflater.inflate(R.layout.load_more_button, null);
-                Button loadButton = buttonLayout.findViewById(R.id.loadMoreButton);
-                mainLayout.addView(buttonLayout);
-
-                loadButton.setOnClickListener(new View.OnClickListener() {
-                    public void onClick(View view) {
-                        Intent startIntent = new Intent(context, StatSearchResults.class);
-                        startIntent.putExtra("filters", filters);
-                        startIntent.putExtra("count", String.format("%s", retCount));
-                        context.startActivity(startIntent);
-                    }
-                });
-            }
-        }
-        result.close();
-        db.close();
     }
 
     public static void setAddOnClick(final LinearLayout mainLayout, Button button, final String buttonType, final String homeType, final Context context){

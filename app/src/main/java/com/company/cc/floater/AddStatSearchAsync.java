@@ -11,12 +11,6 @@ import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
-import java.util.Iterator;
-import java.util.LinkedList;
-
-import static com.company.cc.floater.FloaterApplication.BATTING;
-import static com.company.cc.floater.FloaterApplication.FIELDING;
-import static com.company.cc.floater.FloaterApplication.PITCHING;
 import static com.company.cc.floater.FloaterApplication.addStatsFromRow;
 
 public class AddStatSearchAsync extends AsyncTask<Object, Boolean, Boolean> {
@@ -84,7 +78,7 @@ public class AddStatSearchAsync extends AsyncTask<Object, Boolean, Boolean> {
 
             LinearLayout verticalLayout = dynamicLayout.findViewById(R.id.statResultsVerticalLayout);
 
-            addStatsFromRow(verticalLayout, inflater, player, exclude, false);
+            addStatsFromRow(verticalLayout, inflater, player, exclude, false, null);
             activity.runOnUiThread(new Runnable() {
                @Override
                public void run() {

@@ -44,14 +44,16 @@ public class TeamSearch extends AppCompatActivity {
             View dynamicLayout = inflater.inflate(R.layout.player_search_layout, null);
             TextView name = dynamicLayout.findViewById(R.id.playerNameTextView);
             TextView id = dynamicLayout.findViewById(R.id.yearsActiveTextView);
+
+            final String teamName = result.getString(result.getColumnIndex("name"));
             final String teamId = result.getString(result.getColumnIndex("team_id"));
 
-            if(result.getString(result.getColumnIndex("name")) == null ||
+            if(teamName == null ||
                     teamId == null){
                 continue;
             }
 
-            name.setText(result.getString(result.getColumnIndex("name")));
+            name.setText(teamName);
             id.setText(teamId);
 
             LinearLayout LL = dynamicLayout.findViewById(R.id.playerSearchHorizontalLayout);
@@ -59,7 +61,8 @@ public class TeamSearch extends AppCompatActivity {
                 @Override
                 public void onClick(View v){
                     Intent startIntent = new Intent(getApplicationContext(), TeamProfile.class);
-                    startIntent.putExtra("ID", teamId);
+                    startIntent.putExtra("name", teamName);
+                    startIntent.putExtra("team_id", teamId);
                     startActivity(startIntent);
                 }
             });

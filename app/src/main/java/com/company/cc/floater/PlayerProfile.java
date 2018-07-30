@@ -1,13 +1,11 @@
 package com.company.cc.floater;
 
-import android.content.Context;
+import android.database.Cursor;
 import android.os.Bundle;
-import android.provider.ContactsContract;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
-import android.support.v4.app.FragmentStatePagerAdapter;
 import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.view.LayoutInflater;
@@ -38,9 +36,12 @@ public class PlayerProfile extends FragmentActivity {
         playerRow = (CursorRow) getIntent().getExtras().getSerializable("CursorRow");
         if (playerRow == null) {
             playerId = getIntent().getExtras().getString("playerId");
-            /*
-            TODO: add a db call to pull player info based on ID and then add to a CursorRow
-             */
+            DBHandler tempDb = new DBHandler(getApplicationContext());
+            Cursor res = tempDb.playerTableQuery(playerId);
+            res.moveToFirst();
+            playerRow = new CursorRow(res, res.getPosition());
+            res.close();
+            tempDb.close();
         }
         else{
             playerId = playerRow.getValueByColumnName("player_id");
@@ -108,7 +109,7 @@ public class PlayerProfile extends FragmentActivity {
 
             LinearLayout LL = v.findViewById(R.id.playerProfileLinearLayout);
             LayoutInflater inflater2 = getLayoutInflater();
-            FloaterApplication.addStatsFromRow(LL, inflater2, row, fullNameColumns, false);
+            FloaterApplication.addStatsFromRow(LL, inflater2, row, fullNameColumns, false, null);
             return v;
         }
 
