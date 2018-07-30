@@ -1,6 +1,5 @@
 package com.company.cc.floater;
 
-import android.database.Cursor;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
@@ -36,27 +35,11 @@ public class PlayerProfile extends FragmentActivity {
         playerRow = (CursorRow) getIntent().getExtras().getSerializable("CursorRow");
         if (playerRow == null) {
             playerId = getIntent().getExtras().getString("playerId");
-            DBHandler tempDb = new DBHandler(getApplicationContext());
-            Cursor res = tempDb.playerTableQuery(playerId);
-            res.moveToFirst();
-            playerRow = new CursorRow(res, res.getPosition());
-            res.close();
-            tempDb.close();
+            playerRow = FloaterApplication.playerTableRow(playerId, getApplicationContext());
         }
         else{
             playerId = playerRow.getValueByColumnName("player_id");
         }
-
-        /*
-        final TextView mSampleTitle = (TextView) findViewById(R.id.title);
-        final LinearLayout mSampleContent = (LinearLayout) findViewById(R.id.year);
-        mSampleTitle.setOnClickListener(new View.OnClickListener() {
-            public void onClick(View v) {
-                if (v == mSampleTitle) {
-                    mSampleContent.setVisibility(mSampleContent.getVisibility() == View.VISIBLE ? View.GONE : View.VISIBLE);
-                }
-            }
-        });*/
     }
 
     @Override
@@ -137,7 +120,6 @@ public class PlayerProfile extends FragmentActivity {
 
             LinearLayout sv = v.findViewById(R.id.statProfileVerticalLayout);
             LayoutInflater inflater2 = getLayoutInflater();
-            //FloaterApplication.addPlayerStatsFromCursor(sv, inflater2, row.getValueByColumnName("player_id"), FloaterApplication.BATTING, getActivity());
             AddStatsAsync add = new AddStatsAsync();
             add.execute(sv, inflater2, row.getValueByColumnName("player_id"), FloaterApplication.BATTING, getActivity(), getActivity());
             return v;
@@ -167,7 +149,6 @@ public class PlayerProfile extends FragmentActivity {
 
             LinearLayout sv = v.findViewById(R.id.statProfileVerticalLayout);
             LayoutInflater inflater2 = getLayoutInflater();
-            //FloaterApplication.addPlayerStatsFromCursor(sv, inflater2, row.getValueByColumnName("player_id"), FloaterApplication.PITCHING, getActivity());
             AddStatsAsync add = new AddStatsAsync();
             add.execute(sv, inflater2, row.getValueByColumnName("player_id"), FloaterApplication.PITCHING, getActivity(), getActivity());
             return v;
@@ -197,7 +178,7 @@ public class PlayerProfile extends FragmentActivity {
 
             LinearLayout sv = v.findViewById(R.id.statProfileVerticalLayout);
             LayoutInflater inflater2 = getLayoutInflater();
-            //FloaterApplication.addPlayerStatsFromCursor(sv, inflater2, row.getValueByColumnName("player_id"), FloaterApplication.FIELDING, getActivity());
+
             AddStatsAsync add = new AddStatsAsync();
             add.execute(sv, inflater2, row.getValueByColumnName("player_id"), FloaterApplication.FIELDING, getActivity(), getActivity());
             return v;
@@ -212,41 +193,4 @@ public class PlayerProfile extends FragmentActivity {
             return fragment;
         }
     }
-
-
-    /*
-        //CardView hittingCard;
-    @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_add_player);
-
-        //display stuff on click
-        final TextView mSampleTitle = (TextView) findViewById(R.id.title);
-        final LinearLayout mSampleContent = (LinearLayout) findViewById(R.id.year);
-        mSampleTitle.setOnClickListener(new View.OnClickListener() {
-            public void onClick(View v) {
-                if (v == mSampleTitle) {
-                    mSampleContent.setVisibility(mSampleContent.getVisibility() == View.VISIBLE ? View.GONE : View.VISIBLE);
-                }
-            }
-            });
-        /*
-        hittingCard = (CardView) findViewById(R.id.hittingCardView);
-        //hide until title is clicked
-        hittingCard.setVisibility(View.GONE);
-        final TextView descriptionText = (TextView) findViewById(R.id.detail_description_content);
-        final TextView showAll = (TextView) findViewById(R.id.detail_read_all);
-        showAll.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                showAll.setVisibility(View.INVISIBLE);
-                descriptionText.setMaxLines(Integer.MAX_VALUE);
-            }
-        });
-}
-    public void toggleContents(View v){
-        hittingCard.setVisibility(hittingCard.isShown() ? View.GONE : View.VISIBLE );
-    }
-*/
 }
