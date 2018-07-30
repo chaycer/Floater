@@ -1,12 +1,11 @@
 package com.company.cc.floater;
 
 import android.annotation.SuppressLint;
+import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteException;
 import android.database.sqlite.SQLiteOpenHelper;
-import android.content.Context;
-import android.os.AsyncTask;
 
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -237,7 +236,7 @@ public class DBHandler extends SQLiteOpenHelper {
     public Cursor teamSearch(String teamName) {
 
         String cTeamName = "%" + teamName + "%";
-        String query = String.format("select name, team_id, year from team where name like '%s' order by name asc",cTeamName);
+        String query = String.format("select distinct name, team_id from team where name like '%s' order by name asc",cTeamName);
         return db.rawQuery(query,null);
     }
 

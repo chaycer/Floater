@@ -20,6 +20,7 @@
     <string name="playerId">Player ID</string>
     <string name="position">Position</string>
     <string name="teamName">Team Name</string>
+    <string name="teamId">Team ID</string>
     <string name="loadMore">Load More</string>
     <string name="saveChanges">Save Changes and Go To Profile</string>
     <string name="addHittingStats">Hitting Stats</string>
