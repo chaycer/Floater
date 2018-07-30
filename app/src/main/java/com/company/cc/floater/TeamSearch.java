@@ -4,6 +4,8 @@ import android.content.Intent;
 import android.database.Cursor;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
+import android.text.SpannableString;
+import android.text.style.UnderlineSpan;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.LinearLayout;
@@ -53,7 +55,10 @@ public class TeamSearch extends AppCompatActivity {
                 continue;
             }
 
-            name.setText(teamName);
+            SpannableString tName = new SpannableString(teamName);
+            tName.setSpan(new UnderlineSpan(), 0, tName.length(), 0);
+
+            name.setText(tName);
             id.setText(teamId);
 
             LinearLayout LL = dynamicLayout.findViewById(R.id.playerSearchHorizontalLayout);

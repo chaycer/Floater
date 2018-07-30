@@ -10,7 +10,8 @@
         android:id="@+id/playerNameTextView"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_weight="1" />
+        android:layout_weight="1"
+        style="@style/link" />
 
     <TextView
         android:id="@+id/yearsActiveTextView"
@@ -18,6 +19,7 @@
         android:layout_height="wrap_content"
         android:layout_weight="0"
         android:ems="10"
-        android:inputType="textPersonName" />
+        android:inputType="textPersonName"
+        android:textSize="20sp" />
 </LinearLayout>
 

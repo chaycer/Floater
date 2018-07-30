@@ -4,6 +4,8 @@ import android.app.Application;
 import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
+import android.text.SpannableString;
+import android.text.style.UnderlineSpan;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.Button;
@@ -136,7 +138,17 @@ public class FloaterApplication extends Application{
         mainLayout.addView(dynamicLayout);
     }
 
-
+    /**
+     * Adds stats to a vertical linear layout from a CursorRow with a label/value style on the
+     * column name and value
+     * @param mainLayout - Vertical layout to add the stat lines to
+     * @param inflater - Inflater for the layout
+     * @param row - CursorRow containing all the label/values
+     * @param toExclude - Array of column names to exclude, can be null
+     * @param hide - Should the generated lines be hidden by default?
+     * @param button - A view to be added at the top if desired, can be null
+     * @return A list of all the lines (horizontal linear layouts) added
+     */
     public static LinkedList<View> addStatsFromRow(LinearLayout mainLayout, LayoutInflater inflater, CursorRow row, String[] toExclude, boolean hide, View button){
         LinkedList<View> views = new LinkedList<>();
         if (button != null){
@@ -198,8 +210,11 @@ public class FloaterApplication extends Application{
             }
 
             if (!result.getString(result.getColumnIndex("name_first")).isEmpty()) {
-                name.setText(result.getString(result.getColumnIndex("name_first")) + " "
-                        + result.getString(result.getColumnIndex("name_last"))); // set label
+                SpannableString pName = new SpannableString(
+                        result.getString(result.getColumnIndex("name_first")) + " "
+                                + result.getString(result.getColumnIndex("name_last")));
+                pName.setSpan(new UnderlineSpan(), 0, pName.length(), 0);
+                name.setText(pName); // set label
             }
             String active = result.getString(result.getColumnIndex("debut"));
             if (active != null && active.length() >= 4){
@@ -226,11 +241,19 @@ public class FloaterApplication extends Application{
         }
     }
 
+    /**
+     * Sets the buttons for the add stats screens and processes the input from those screens
+     * @param mainLayout - Layouts to get all the information from
+     * @param button - Button object to set the on click listener for
+     * @param buttonType - The actual button that was pressed: player profile, batting, pitching, fielding
+     * @param homeType - The screen the button is pressed from: player, batting, pitching, or fielding
+     * @param context - application context
+     */
     public static void setAddOnClick(final LinearLayout mainLayout, Button button, final String buttonType, final String homeType, final Context context){
         button.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                CursorRow cursorRow = addStatsToPlayer(mainLayout, buttonType, homeType, context);
+                CursorRow cursorRow = addStatsToPlayer(mainLayout, homeType, context);
                 if (buttonType.compareTo("player") == 0){
                     if (cursorRow != null) {
                         Intent startIntent = new Intent(context, PlayerProfile.class);
@@ -263,7 +286,14 @@ public class FloaterApplication extends Application{
         });
     }
 
-    public static CursorRow addStatsToPlayer(LinearLayout mainLayout, String buttonType, String homeType, Context context){
+    /**
+     * Adds the stats entered in the given layout to the database
+     * @param mainLayout - Layout to acquire the data from
+     * @param homeType - The screen the layout is from: player, batting, pitching, or fielding
+     * @param context - application context
+     * @return The CursorRow with the result of the add, or just the player row
+     */
+    public static CursorRow addStatsToPlayer(LinearLayout mainLayout, String homeType, Context context){
         boolean addNulls = false;
         boolean empty = true;
         List<InsertStat> ret = new LinkedList<>();
@@ -326,17 +356,17 @@ public class FloaterApplication extends Application{
                 }
                 else if (is.getColumn().compareTo("year") == 0){
                     if (is.getValue().compareTo("") == 0){
-                        return playerTableRow(buttonType, playerId, context);
+                        return playerTableRow(playerId, context);
                     }
                 }
                 else if (is.getColumn().compareTo("team_id") == 0){
                     if (is.getValue().compareTo("") == 0){
-                        return playerTableRow(buttonType, playerId, context);
+                        return playerTableRow(playerId, context);
                     }
                 }
                 else if (homeType.compareTo("fielding") == 0 && is.getColumn().compareTo("pos") == 0){
                     if (is.getValue().compareTo("") == 0){
-                        return playerTableRow(buttonType, playerId, context);
+                        return playerTableRow(playerId, context);
                     }
                 }
             }
@@ -398,7 +428,13 @@ public class FloaterApplication extends Application{
         return cursorRow;
     }
 
-    public static CursorRow playerTableRow(String buttonType, String playerId, Context context){
+    /**
+     * Given a playerId, returns the row from the player table for that player
+     * @param playerId - player_id from the player table
+     * @param context - application context
+     * @return A CursorRow containing the data from the player table for the given player
+     */
+    public static CursorRow playerTableRow(String playerId, Context context){
         DBHandler db = new DBHandler(context);
         Cursor result = db.playerTableQuery(playerId);
         result.moveToFirst();
