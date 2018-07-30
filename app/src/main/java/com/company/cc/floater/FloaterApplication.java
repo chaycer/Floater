@@ -4,6 +4,8 @@ import android.app.Application;
 import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
+import android.text.SpannableString;
+import android.text.style.UnderlineSpan;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.Button;
@@ -198,8 +200,11 @@ public class FloaterApplication extends Application{
             }
 
             if (!result.getString(result.getColumnIndex("name_first")).isEmpty()) {
-                name.setText(result.getString(result.getColumnIndex("name_first")) + " "
-                        + result.getString(result.getColumnIndex("name_last"))); // set label
+                SpannableString pName = new SpannableString(
+                        result.getString(result.getColumnIndex("name_first")) + " "
+                                + result.getString(result.getColumnIndex("name_last")));
+                pName.setSpan(new UnderlineSpan(), 0, pName.length(), 0);
+                name.setText(pName); // set label
             }
             String active = result.getString(result.getColumnIndex("debut"));
             if (active != null && active.length() >= 4){
