@@ -39,24 +39,6 @@ public class DBHandler extends SQLiteOpenHelper {
 
 
     }
-    private void updateERA(String playerID, int seasonYear, String teamID){
-        Cursor eras = db.rawQuery(String.format("Select er, ip from pitching where player_id = '%s' and year = %d and team_id = '%s'",playerID,seasonYear,teamID),null);
-        eras.moveToFirst();
-        String er = eras.getString(eras.getColumnIndex("er"));
-        String ip = eras.getString(eras.getColumnIndex("ip"));
-        if(er.equals("") || ip.equals("")){
-            return;
-        }
-        Integer era = Integer.getInteger(er)/Integer.getInteger(ip) * 9;
-        Cursor exists = db.rawQuery(String.format("Select * from ERA_Stats where ip = '%s' and er = '%s'",ip,er),null);
-        if(exists.getCount()>0){ //already exists, quit out
-            return;
-        }
-        db.execSQL(String.format("INSERT INTO ERA_Stats (ER,IP,ERA) VALUES ('%s','%s','%s')",er,ip,era.toString())); //doesn't exist, insert into
-
-
-    }
-
     /**
      * Create empty database in memory and fill with static database
      */
@@ -211,7 +193,7 @@ public class DBHandler extends SQLiteOpenHelper {
         String query;
         if (table.equals("pitching")) {
             query = String.format("SELECT * FROM pitching " +
-                    "INNER JOIN ERA_Stats on pitching.ip = ERA_Stats.ip and pitching.er = ERA_Stats.er " +
+                    "LEFT OUTER JOIN ERA_Stats on pitching.ip = ERA_Stats.ip and pitching.er = ERA_Stats.er " +
                     "where pitching.player_id = '%s' and pitching.year = %d and pitching.team_id = '%s'",playerID,seasonYear,teamID);
         } else {
             query = String.format("SELECT * " +
@@ -298,199 +280,67 @@ public class DBHandler extends SQLiteOpenHelper {
      * @return
      */
     public Cursor insertPlayerData(String playerID, String firstName, String lastName, int seasonYear, String teamID, String pos, List<InsertStat> playerData){
+        InsertUpdatePlayer IUP = new InsertUpdatePlayer();
         if (playerID.equals("") || playerID == null) { //No player ID passed in create a new one and insert as new player
             playerID = this.createPlayerID(firstName, lastName);
-            return InsertNewPlayer(playerID, firstName, lastName, seasonYear, teamID, pos, playerData);
-        }
-        if(this.playerTableQuery(playerID).getCount() > 0){ //if they exist already
-            return updatePlayer(playerID, seasonYear, teamID, pos, playerData);
-        } else {
-            return InsertNewPlayer(playerID, firstName, lastName, seasonYear, teamID, pos, playerData);
+            IUP.insertPlayer(playerID, firstName, lastName, playerData);
+            return this.playerTableQuery(playerID);
         }
 
-    }
-
-    /**
-     * Use to update an existing player
-     * @param playerID PlayerID to use
-     * @param seasonYear year they played in
-     * @param teamID ID of team they play for
-     * @param pos Position.  Required only if you are inserting into the fielding table
-     * @param playerData List of data that is to be inserted into the tables
-     * @return query cursor pointing to player data to be displayed
-     */
-    private Cursor updatePlayer(String playerID, int seasonYear, String teamID, String pos, List<InsertStat> playerData) {
-        StringBuilder bQueryCol = new StringBuilder();
-        StringBuilder pQueryCol = new StringBuilder();
-        StringBuilder fQueryCol = new StringBuilder();
-        StringBuilder plQueryCol = new StringBuilder();
-        boolean pitching = false;
-        for (InsertStat player : playerData) {
-            if (player.getTable().equals("batting")) {
-                if (bQueryCol.length() == 0) {
-                    bQueryCol.append("UPDATE batting SET " + player.getColumn() + " = '" + player.getValue() + "'");
-                } else {
-                    bQueryCol.append(", " + player.getColumn() + " = '" + player.getValue() + "'");
-                }
-            }
-            if (player.getTable().equals("pitching")) {
-                if(player.getColumn().equals("er") || player.getColumn().equals("ip")){
-                    pitching = true;
-                }
-                if (pQueryCol.length() == 0) {
-                    pQueryCol.append("UPDATE pitching SET " + player.getColumn() + " = '" + player.getValue() + "'");
-                } else {
-                    pQueryCol.append(", " + player.getColumn() + " = '" + player.getValue() + "'");
-                }
-            }
-            if (player.getTable().equals("fielding")) {
-                if (fQueryCol.length() == 0) {
-                    if (pos.equals("") || pos == null) {
-                        throw new Error("Can't insert with a null position");
-                    } else {
-                        fQueryCol.append("UPDATE fielding SET " + player.getColumn() + " = '" + player.getValue() + "'");
-                    }
-                } else {
-                        fQueryCol.append(", " + player.getColumn() + " = '" + player.getValue() + "'");
-                    }
-            }
-            if (player.getTable().equals("player")) {
-                if (plQueryCol.length() == 0) {
-                    plQueryCol.append("UPDATE player SET " + player.getColumn() + " = '" + player.getValue() + "'");
-                } else {
-                    plQueryCol.append(", " + player.getColumn() + " = '" + player.getValue()+ "'");
-                }
+        if(playerData.get(0).getTable().equals("player")) {
+            Cursor player = this.playerTableQuery(playerID);
+            player.moveToFirst();
+            int count = player.getCount();
+            if(count > 0) {
+                IUP.updatePlayer(playerID, playerData);
+                return this.playerTableQuery(playerID);
+            } else {
+                IUP.insertPlayer(playerID,firstName,lastName, playerData);
+                return this.playerTableQuery(playerID);
             }
         }
-        if (bQueryCol.length() != 0) {
-            String bQuery = bQueryCol.toString() + " WHERE batting.player_id = '" + playerID +
-                    "' AND batting.team_id = '" + teamID +
-                    "' AND batting.year = '" + seasonYear + "'";
-            db.execSQL(bQuery);
-        }
+        Cursor player = this.playerStatsQuery(playerID,seasonYear,teamID, playerData.get(0).getTable());
+        player.moveToFirst();
+        int count = player.getCount();
+        if (count > 0){
 
-        if (fQueryCol.length() != 0) {
-            String fQuery = fQueryCol.toString() + " WHERE fielding.player_id = '" + playerID +
-                    "' AND fielding.team_id = '" + teamID +
-                    "' AND fielding.year = '" + seasonYear +
-                    "' AND fielding.pos = '" + pos + "'";
-            db.execSQL(fQuery);
-        }
+            if(playerData.get(0).getTable().equals("pitching")) {
+                IUP.updatePitching(playerID,seasonYear,teamID,playerData);
+                return this.playerTableQuery(playerID);
 
-        if (pQueryCol.length() != 0) {
-            String pQuery = pQueryCol.toString() + " WHERE pitching.player_id = '" + playerID +
-                    "' AND pitching.team_id = '" + teamID +
-                    "' AND pitching.year = '" + seasonYear + "'";
-            db.execSQL(pQuery);
-        }
-
-        if (plQueryCol.length() != 0) {
-            String plQuery = plQueryCol.toString() + " WHERE player.player_id = '" + playerID + "'";
-            db.execSQL(plQuery);
-        }
-        if(pitching) {
-            updateERA(playerID,seasonYear,teamID);
-        }
-        return this.playerTableQuery(playerID);
-    }
-
-    /**
-     * Method for inserting a new player
-     * @param playerID PlayerID to use
-     * @param firstName First name of player
-     * @param lastName Last name of player
-     * @param seasonYear year they played in
-     * @param teamID ID of team they play for
-     * @param pos Position.  Required only if you are inserting into the fielding table
-     * @param playerData List of data that is to be inserted into the tables
-     * @return
-     */
-    private Cursor InsertNewPlayer(String playerID, String firstName, String lastName, int seasonYear, String teamID, String pos, List<InsertStat> playerData) {
-        StringBuilder bQueryValues = new StringBuilder();
-        StringBuilder bQueryCol = new StringBuilder();
-        StringBuilder pQueryValues = new StringBuilder();
-        StringBuilder pQueryCol = new StringBuilder();
-        StringBuilder fQueryValues = new StringBuilder();
-        StringBuilder fQueryCol = new StringBuilder();
-        StringBuilder plQueryCol = new StringBuilder();
-        StringBuilder plQueryValues = new StringBuilder();
-        boolean pitching = false;
-        if (firstName != "" || firstName != null || lastName != "" || lastName != null){
-            plQueryCol.append("Insert into player (player_id, name_first, name_last ");
-            plQueryValues.append(String.format("('%s','%s','%s'",playerID,firstName,lastName));
-        }
-        for (InsertStat player:playerData) {
-            if (player.getTable().equals("batting")){
-                if (bQueryCol.length() == 0) {
-                    bQueryCol.append("Insert into batting (player_id, year, team_id, " + player.getColumn());
-                    bQueryValues.append("('" + playerID + "'," + seasonYear + ",'" + teamID + "','" + player.getValue() + "'");
-                }
-                else {
-                    bQueryCol.append(", " + player.getColumn());
-                    bQueryValues.append(", '" + player.getValue() + "'");
-                }
             }
-            if (player.getTable().equals("pitching")){
-                if (pQueryCol.length() == 0) {
-                    pQueryCol.append("Insert into pitching (player_id, year, team_id, " + player.getColumn());
-                    pQueryValues.append("('" + playerID + "'," + seasonYear + ",'" + teamID + "','" + player.getValue() +"'");
-                    if(player.getColumn().equals("er") || player.getColumn().equals("ip")){
-                        pitching = true;
-                    }
-                }
-                else {
-                    pQueryCol.append(", " + player.getColumn());
-                    pQueryValues.append(", '" + player.getValue() + "'");
-                }
+            if(playerData.get(0).getTable().equals("batting")) {
+                IUP.updateBatting(playerID,seasonYear,teamID,playerData);
+                return this.playerTableQuery(playerID);
+
             }
-            if (player.getTable().equals("fielding")){
-                if (fQueryCol.length() == 0) {
-                    if(pos.equals("")||pos == null){
-                        throw new Error("Can't insert with a null position");
-                    }
-                    fQueryCol.append("Insert into fielding (player_id, year, team_id, pos, " + player.getColumn());
-                    fQueryValues.append("('" + playerID + "'," + seasonYear + ",'" + teamID + "','" + pos + "','" + player.getValue() +"'");
-                }
-                else {
-                    fQueryCol.append(", " + player.getColumn());
-                    fQueryValues.append(", '" + player.getValue() + "'");
-                }
-            }
-            if (player.getTable().equals("player")){
-                    plQueryCol.append(", " + player.getColumn());
-                    plQueryValues.append(", '" + player.getValue() + "'");
+            if(playerData.get(0).getTable().equals("fielding")) {
+                IUP.updateFielding(playerID,seasonYear,teamID,pos,playerData);
+                return this.playerTableQuery(playerID);
+
             }
         }
+        else {
+            if(playerData.get(0).getTable().equals("player")) {
+                IUP.insertPlayer(playerID,firstName,lastName,playerData);
+                return this.playerTableQuery(playerID);
 
-        if(bQueryCol.length() != 0) {
-            bQueryCol.append(")");
-            bQueryValues.append(")");
-            String bQuery = bQueryCol.toString() + " Values " + bQueryValues.toString();
-            db.execSQL(bQuery);
-        }
+            }
+            if(playerData.get(0).getTable().equals("pitching")) {
+                IUP.insertPitching(playerID,seasonYear,teamID,playerData);
+                return this.playerTableQuery(playerID);
 
-        if(fQueryCol.length() != 0) {
-            fQueryCol.append(")");
-            fQueryValues.append(")");
-            String fQuery = fQueryCol.toString() + " Values " + fQueryValues.toString();
-            db.execSQL(fQuery);
-        }
+            }
+            if(playerData.get(0).getTable().equals("batting")) {
+                IUP.insertBatting(playerID,seasonYear,teamID,playerData);
+                return this.playerTableQuery(playerID);
 
-        if(pQueryCol.length() != 0) {
-            pQueryCol.append(")");
-            pQueryValues.append(")");
-            String pQuery = pQueryCol.toString() + " Values " + pQueryValues.toString();
-            db.execSQL(pQuery);
-        }
+            }
+            if(playerData.get(0).getTable().equals("fielding")) {
+                IUP.insertFielding(playerID,seasonYear,teamID,pos,playerData);
+                return this.playerTableQuery(playerID);
 
-        if(plQueryCol.length() != 0) {
-            plQueryCol.append(")");
-            plQueryValues.append(")");
-            String plQuery = plQueryCol.toString() + " Values " + plQueryValues.toString();
-            db.execSQL(plQuery);
-        }
-        if (pitching) {
-            updateERA(playerID,seasonYear,teamID);
+            }
         }
         return this.playerTableQuery(playerID);
     }
@@ -597,5 +447,210 @@ public class DBHandler extends SQLiteOpenHelper {
     @Override
     public void onUpgrade(SQLiteDatabase mdb, int oldVersion, int newVersion) {
 
+    }
+    private class InsertUpdatePlayer {
+
+        public InsertUpdatePlayer(){
+
+        }
+
+        private void insertPlayer(String playerID, String firstName, String lastName, List<InsertStat> playerData){
+            StringBuilder plQueryCol = new StringBuilder();
+            StringBuilder plQueryValues = new StringBuilder();
+            plQueryCol.append("Insert into player (player_id, name_first, name_last ");
+            plQueryValues.append(String.format("('%s','%s','%s'",playerID,firstName,lastName));
+            for (InsertStat player:playerData) {
+                if (player.getTable().equals("player")){
+                    plQueryCol.append(", " + player.getColumn());
+                    plQueryValues.append(", '" + player.getValue() + "'");
+                }
+            }
+            plQueryCol.append(")");
+            plQueryValues.append(")");
+            String plQuery = plQueryCol.toString() + " Values " + plQueryValues.toString();
+            db.execSQL(plQuery);
+        }
+
+        private void updatePlayer(String playerID, List<InsertStat> playerData){
+            StringBuilder plQueryCol = new StringBuilder();
+            for (InsertStat player : playerData) {
+                if (player.getTable().equals("player")) {
+                    if (plQueryCol.length() == 0) {
+                        plQueryCol.append("UPDATE player SET " + player.getColumn() + " = '" + player.getValue() + "'");
+                    } else {
+                        plQueryCol.append(", " + player.getColumn() + " = '" + player.getValue()+ "'");
+                    }
+                }
+            }
+            if (plQueryCol.length() != 0) {
+                String plQuery = plQueryCol.toString() + " WHERE player.player_id = '" + playerID + "'";
+                db.execSQL(plQuery);
+            }
+        }
+
+        private void insertPitching(String playerID, int seasonYear, String teamID, List<InsertStat> playerData){
+            StringBuilder pQueryValues = new StringBuilder();
+            StringBuilder pQueryCol = new StringBuilder();
+            boolean pitching = false;
+            for (InsertStat player:playerData) {
+                if (player.getTable().equals("pitching")){
+                    if(player.getColumn().equals("er") || player.getColumn().equals("ip")){
+                        pitching = true;
+                    }
+                    if (pQueryCol.length() == 0) {
+                        pQueryCol.append("Insert into pitching (player_id, year, team_id, " + player.getColumn());
+                        pQueryValues.append("('" + playerID + "'," + seasonYear + ",'" + teamID + "','" + player.getValue() +"'");
+                    }
+                    else {
+                        pQueryCol.append(", " + player.getColumn());
+                        pQueryValues.append(", '" + player.getValue() + "'");
+                    }
+                }
+            }
+            if(pQueryCol.length() != 0) {
+                pQueryCol.append(")");
+                pQueryValues.append(")");
+                String pQuery = pQueryCol.toString() + " Values " + pQueryValues.toString();
+                db.execSQL(pQuery);
+            }
+            if (pitching) {
+                updateERA(playerID,seasonYear,teamID);
+            }
+        }
+
+        private void updatePitching(String playerID, int seasonYear, String teamID, List<InsertStat> playerData){
+            StringBuilder pQueryCol = new StringBuilder();
+            boolean pitching = false;
+            for (InsertStat player : playerData) {
+                if (player.getTable().equals("pitching")) {
+                    if (player.getColumn().equals("er") || player.getColumn().equals("ip")) {
+                        pitching = true;
+                    }
+                    if (pQueryCol.length() == 0) {
+                        pQueryCol.append("UPDATE pitching SET " + player.getColumn() + " = '" + player.getValue() + "'");
+                    } else {
+                        pQueryCol.append(", " + player.getColumn() + " = '" + player.getValue() + "'");
+                    }
+                }
+            }
+            if (pQueryCol.length() != 0) {
+                String pQuery = pQueryCol.toString() + " WHERE pitching.player_id = '" + playerID +
+                        "' AND pitching.team_id = '" + teamID +
+                        "' AND pitching.year = '" + seasonYear + "'";
+                db.execSQL(pQuery);
+            }
+            if(pitching) {
+                updateERA(playerID,seasonYear,teamID);
+            }
+
+        }
+
+        private void insertBatting(String playerID, int seasonYear, String teamID, List<InsertStat> playerData){
+            StringBuilder bQueryValues = new StringBuilder();
+            StringBuilder bQueryCol = new StringBuilder();
+            for (InsertStat player:playerData) {
+                if (player.getTable().equals("batting")) {
+                    if (bQueryCol.length() == 0) {
+                        bQueryCol.append("Insert into batting (player_id, year, team_id, " + player.getColumn());
+                        bQueryValues.append("('" + playerID + "'," + seasonYear + ",'" + teamID + "','" + player.getValue() + "'");
+                    } else {
+                        bQueryCol.append(", " + player.getColumn());
+                        bQueryValues.append(", '" + player.getValue() + "'");
+                    }
+                }
+            }
+            if(bQueryCol.length() != 0) {
+                bQueryCol.append(")");
+                bQueryValues.append(")");
+                String bQuery = bQueryCol.toString() + " Values " + bQueryValues.toString();
+                db.execSQL(bQuery);
+            }
+        }
+
+        private void updateBatting(String playerID, int seasonYear, String teamID, List<InsertStat> playerData){
+            StringBuilder bQueryCol = new StringBuilder();
+            for (InsertStat player : playerData) {
+                if (player.getTable().equals("batting")) {
+                    if (bQueryCol.length() == 0) {
+                        bQueryCol.append("UPDATE batting SET " + player.getColumn() + " = '" + player.getValue() + "'");
+                    } else {
+                        bQueryCol.append(", " + player.getColumn() + " = '" + player.getValue() + "'");
+                    }
+                }
+            }
+            if (bQueryCol.length() != 0) {
+                String bQuery = bQueryCol.toString() + " WHERE batting.player_id = '" + playerID +
+                        "' AND batting.team_id = '" + teamID +
+                        "' AND batting.year = '" + seasonYear + "'";
+                db.execSQL(bQuery);
+            }
+        }
+
+        private void insertFielding(String playerID, int seasonYear, String teamID, String pos, List<InsertStat> playerData){
+            StringBuilder fQueryValues = new StringBuilder();
+            StringBuilder fQueryCol = new StringBuilder();
+            for (InsertStat player:playerData) {
+                if (player.getTable().equals("fielding")){
+                    if (fQueryCol.length() == 0) {
+                        if(pos.equals("")||pos == null){
+                            throw new Error("Can't insert with a null position");
+                        }
+                        fQueryCol.append("Insert into fielding (player_id, year, team_id, pos, " + player.getColumn());
+                        fQueryValues.append("('" + playerID + "'," + seasonYear + ",'" + teamID + "','" + pos + "','" + player.getValue() +"'");
+                    }
+                    else {
+                        fQueryCol.append(", " + player.getColumn());
+                        fQueryValues.append(", '" + player.getValue() + "'");
+                    }
+                }
+            }
+            if(fQueryCol.length() != 0) {
+                fQueryCol.append(")");
+                fQueryValues.append(")");
+                String fQuery = fQueryCol.toString() + " Values " + fQueryValues.toString();
+                db.execSQL(fQuery);
+            }
+        }
+
+        private void updateFielding(String playerID, int seasonYear, String teamID, String pos, List<InsertStat> playerData){
+            StringBuilder fQueryCol = new StringBuilder();
+            for (InsertStat player : playerData) {
+                if (player.getTable().equals("fielding")) {
+                    if (fQueryCol.length() == 0) {
+                        if (pos.equals("") || pos == null) {
+                            throw new Error("Can't insert with a null position");
+                        } else {
+                            fQueryCol.append("UPDATE fielding SET " + player.getColumn() + " = '" + player.getValue() + "'");
+                        }
+                    } else {
+                        fQueryCol.append(", " + player.getColumn() + " = '" + player.getValue() + "'");
+                    }
+                }
+            }
+            if (fQueryCol.length() != 0) {
+                String fQuery = fQueryCol.toString() + " WHERE fielding.player_id = '" + playerID +
+                        "' AND fielding.team_id = '" + teamID +
+                        "' AND fielding.year = '" + seasonYear +
+                        "' AND fielding.pos = '" + pos + "'";
+                db.execSQL(fQuery);
+            }
+        }
+        private void updateERA(String playerID, int seasonYear, String teamID){
+            Cursor eras = db.rawQuery(String.format("Select er, ip from pitching where player_id = '%s' and year = %d and team_id = '%s'",playerID,seasonYear,teamID),null);
+            eras.moveToFirst();
+            String er = eras.getString(eras.getColumnIndex("er"));
+            String ip = eras.getString(eras.getColumnIndex("ip"));
+            if(er == null || ip == null || er.equals("") || ip.equals("")){
+                return;
+            }
+            Integer era = Integer.valueOf(Integer.valueOf(er)/Integer.valueOf(ip) * Integer.valueOf(9));
+            Cursor exists = db.rawQuery(String.format("Select * from ERA_Stats where ip = '%s' and er = '%s'",ip,er),null);
+            if(exists.getCount()>0){ //already exists, quit out
+                return;
+            }
+            db.execSQL(String.format("INSERT INTO ERA_Stats (ER,IP,ERA) VALUES ('%s','%s','%s')",er,ip,era.toString())); //doesn't exist, insert into
+
+
+        }
     }
 }
