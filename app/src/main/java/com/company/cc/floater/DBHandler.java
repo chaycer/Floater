@@ -426,8 +426,8 @@ public class DBHandler extends SQLiteOpenHelper {
         String query =  "select home_game.year,home_game.team_id,home_game.park_id,home_game.span_first,home_game.span_last,home_game.games,home_game.openings,home_game.attendance," +
                 "park.park_name,park.park_alias,park.city,park.state,park.country " +
                 "from home_game " +
-                "INNER JOIN team on home_game.team_id = team.team_id and home_game.year = team.year " +
-                "INNER JOIN park on park.park_id = home_game.park_id " + where + " ORDER BY team.year asc";
+                "LEFT OUTER JOIN team on home_game.team_id = team.team_id and home_game.year = team.year " +
+                "LEFT OUTER JOIN park on park.park_id = home_game.park_id " + where + " ORDER BY team.year asc";
         return db.rawQuery(query, null);
     }
     //Override methods
