@@ -20,10 +20,6 @@ public class DBHandler extends SQLiteOpenHelper {
     private static String DB_PATH;
     private static String DB_NAME = "baseball_database.sqlite";
     private final Context myContext;
-    private String[] battingTable;
-    private String[] pitchingTable;
-    private String[] fieldingTable;
-    private String selectAll;
 
     /**
      * Open connection to database
@@ -35,7 +31,6 @@ public class DBHandler extends SQLiteOpenHelper {
         this.myContext = context;
         this.createDatabase();
         this.openDatabase();
-        this.getColumns();
 
 
     }
@@ -95,30 +90,6 @@ public class DBHandler extends SQLiteOpenHelper {
         db = SQLiteDatabase.openDatabase(myPath,null,SQLiteDatabase.OPEN_READWRITE);
     }
 
-    /**
-     * gets columns from database
-     */
-    private void getColumns() {
-        Cursor setColumns = db.rawQuery("select * from batting", null);
-        battingTable = setColumns.getColumnNames();
-        setColumns = db.rawQuery("select * from pitching", null);
-        pitchingTable = setColumns.getColumnNames();
-        setColumns = db.rawQuery("select * from fielding", null);
-        fieldingTable = setColumns.getColumnNames();
-        StringBuilder select = new StringBuilder();
-        for (String col: battingTable){
-            select.append("batting." + col + " AS 'batting." + col + "',");
-        }
-        for (String col: pitchingTable){
-            select.append("pitching." + col + " AS 'pitching." + col + "',");
-        }
-        for (String col: fieldingTable){
-            select.append("fielding." + col + " AS 'fielding." + col + "',");
-        }
-        select.append("ERA_Stats.era as 'ERA_Stats.era'");
-        selectAll = select.toString();
-
-    }
 
     /**
      * Searches for player based on provided name
@@ -279,7 +250,7 @@ public class DBHandler extends SQLiteOpenHelper {
      * @param playerData List of data that is to be inserted into the tables
      * @return
      */
-    public Cursor insertPlayerData(String playerID, String firstName, String lastName, int seasonYear, String teamID, String pos, List<InsertStat> playerData){
+    public Cursor insertPlayerData(String playerID, String firstName, String lastName, int seasonYear, String teamID, String pos, List<InsertStat> playerData, String table){
         InsertUpdatePlayer IUP = new InsertUpdatePlayer();
         if (playerID.equals("") || playerID == null) { //No player ID passed in create a new one and insert as new player
             playerID = this.createPlayerID(firstName, lastName);
@@ -287,7 +258,7 @@ public class DBHandler extends SQLiteOpenHelper {
             return this.playerTableQuery(playerID);
         }
 
-        if(playerData.get(0).getTable().equals("player")) {
+        if(table.equals("player")) {
             Cursor player = this.playerTableQuery(playerID);
             player.moveToFirst();
             int count = player.getCount();
@@ -299,44 +270,44 @@ public class DBHandler extends SQLiteOpenHelper {
                 return this.playerTableQuery(playerID);
             }
         }
-        Cursor player = this.playerStatsQuery(playerID,seasonYear,teamID, playerData.get(0).getTable());
+        Cursor player = this.playerStatsQuery(playerID,seasonYear,teamID, table);
         player.moveToFirst();
         int count = player.getCount();
         if (count > 0){
 
-            if(playerData.get(0).getTable().equals("pitching")) {
+            if(table.equals("pitching")) {
                 IUP.updatePitching(playerID,seasonYear,teamID,playerData);
                 return this.playerTableQuery(playerID);
 
             }
-            if(playerData.get(0).getTable().equals("batting")) {
+            if(table.equals("batting")) {
                 IUP.updateBatting(playerID,seasonYear,teamID,playerData);
                 return this.playerTableQuery(playerID);
 
             }
-            if(playerData.get(0).getTable().equals("fielding")) {
+            if(table.equals("fielding")) {
                 IUP.updateFielding(playerID,seasonYear,teamID,pos,playerData);
                 return this.playerTableQuery(playerID);
 
             }
         }
         else {
-            if(playerData.get(0).getTable().equals("player")) {
+            if(table.equals("player")) {
                 IUP.insertPlayer(playerID,firstName,lastName,playerData);
                 return this.playerTableQuery(playerID);
 
             }
-            if(playerData.get(0).getTable().equals("pitching")) {
+            if(table.equals("pitching")) {
                 IUP.insertPitching(playerID,seasonYear,teamID,playerData);
                 return this.playerTableQuery(playerID);
 
             }
-            if(playerData.get(0).getTable().equals("batting")) {
+            if(table.equals("batting")) {
                 IUP.insertBatting(playerID,seasonYear,teamID,playerData);
                 return this.playerTableQuery(playerID);
 
             }
-            if(playerData.get(0).getTable().equals("fielding")) {
+            if(table.equals("fielding")) {
                 IUP.insertFielding(playerID,seasonYear,teamID,pos,playerData);
                 return this.playerTableQuery(playerID);
 

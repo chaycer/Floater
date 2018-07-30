@@ -419,7 +419,7 @@ public class FloaterApplication extends Application{
         if (year.compareTo("") != 0){
             season = Integer.parseInt(year);
         }
-        Cursor result = db.insertPlayerData(playerId, firstName, lastName, season, teamId, pos, ret);
+        Cursor result = db.insertPlayerData(playerId, firstName, lastName, season, teamId, pos, ret, homeType);
         result.moveToFirst();
         final CursorRow cursorRow = new CursorRow(result, result.getPosition());
         result.close();
