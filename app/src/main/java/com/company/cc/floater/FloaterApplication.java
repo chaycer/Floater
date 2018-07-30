@@ -295,10 +295,10 @@ public class FloaterApplication extends Application{
                         + result.getString(result.getColumnIndex("name_last"))); // set label
             }
             String active = result.getString(result.getColumnIndex("debut"));
-            if (!active.isEmpty() && active.length() >= 4){
+            if (active != null && active.length() >= 4){
                 active = active.substring(0, 4);
             }
-            if (!active.isEmpty() && !result.getString(result.getColumnIndex("final_game")).isEmpty()
+            if (active != null&& result.getString(result.getColumnIndex("final_game")) != null
                     && result.getString(result.getColumnIndex("final_game")).length() >= 4){
                 active = active + " - " + result.getString(result.getColumnIndex("final_game")).substring(0, 4);
             }
@@ -409,21 +409,21 @@ public class FloaterApplication extends Application{
                     }
                 }
                 else if (buttonType.compareTo("batting") == 0){
-                    if (addStatsToPlayer(mainLayout, buttonType, homeType, context) != null) {
+                    if (cursorRow != null) {
                         Intent startIntent = new Intent(context, AddHitting.class);
                         startIntent.putExtra("CursorRow", cursorRow);
                         context.startActivity(startIntent);
                     }
                 }
                 else if (buttonType.compareTo("fielding") == 0){
-                    if (addStatsToPlayer(mainLayout, buttonType, homeType, context) != null) {
+                    if (cursorRow != null) {
                         Intent startIntent = new Intent(context, AddFielding.class);
                         startIntent.putExtra("CursorRow", cursorRow);
                         context.startActivity(startIntent);
                     }
                 }
                 else if (buttonType.compareTo("pitching") == 0){
-                    if (addStatsToPlayer(mainLayout, buttonType, homeType, context) != null) {
+                    if (cursorRow != null) {
                         Intent startIntent = new Intent(context, AddPitching.class);
                         startIntent.putExtra("CursorRow", cursorRow);
                         context.startActivity(startIntent);
@@ -510,7 +510,18 @@ public class FloaterApplication extends Application{
                     }
                 }
             }
-
+            else{
+                if (is.getColumn().compareTo("first_name") == 0){
+                    if (is.getValue().compareTo("") == 0){
+                        return null;
+                    }
+                }
+                else if (is.getColumn().compareTo("last_name") == 0){
+                    if (is.getValue().compareTo("") == 0){
+                        return null;
+                    }
+                }
+            }
             //remove values from list if we aren't inserting them
             if (is.getColumn().compareTo("player_id") == 0){
                 playerId = is.getValue();
@@ -558,16 +569,13 @@ public class FloaterApplication extends Application{
     }
 
     public static CursorRow playerTableRow(String buttonType, String playerId, Context context){
-        if (buttonType.compareTo("player") == 0 && playerId.compareTo("") != 0) {
-            DBHandler db = new DBHandler(context);
-            Cursor result = db.playerTableQuery(playerId);
-            result.moveToFirst();
-            CursorRow cursorRow = new CursorRow(result, result.getPosition());
-            result.close();
-            db.close();
-            return cursorRow;
-        }
-        return null;
+        DBHandler db = new DBHandler(context);
+        Cursor result = db.playerTableQuery(playerId);
+        result.moveToFirst();
+        CursorRow cursorRow = new CursorRow(result, result.getPosition());
+        result.close();
+        db.close();
+        return cursorRow;
     }
 
 }
