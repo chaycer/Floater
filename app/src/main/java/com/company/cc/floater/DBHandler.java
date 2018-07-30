@@ -42,8 +42,8 @@ public class DBHandler extends SQLiteOpenHelper {
     private void updateERA(String playerID, int seasonYear, String teamID){
         Cursor eras = db.rawQuery(String.format("Select er, ip from pitching where player_id = '%s' and year = %d and team_id = '%s'",playerID,seasonYear,teamID),null);
         eras.moveToFirst();
-        String er = eras.getString(eras.getColumnIndex("pitching.er"));
-        String ip = eras.getString(eras.getColumnIndex("pitching.ip"));
+        String er = eras.getString(eras.getColumnIndex("er"));
+        String ip = eras.getString(eras.getColumnIndex("ip"));
         if(er.equals("") || ip.equals("")){
             return;
         }
@@ -508,7 +508,11 @@ public class DBHandler extends SQLiteOpenHelper {
         } else {
             playerID.append(firstName.substring(0, 5));
         }
-        playerID.append(lastName.substring(0,2));
+        if(lastName.length() < 2) {
+            playerID.append(lastName);
+        } else {
+            playerID.append(lastName.substring(0, 2));
+        }
         String query = "select * from player where player_id like '" + playerID + "%'";
         Cursor result = db.rawQuery(query,null);
         int id = result.getCount() + 1;
