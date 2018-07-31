@@ -379,7 +379,7 @@ public class DBHandler extends SQLiteOpenHelper {
                         "AND pitching.player_id = fielding.player_id AND pitching.year = fielding.year and pitching.team_id = fielding.team_id " +
                         "AND pitching.ip = ERA_Stats.ip AND pitching.er = ERA_Stats.er " +
                         "AND player.player_id = fielding.player_id " +
-                        "AND %s",fPos,select,where);
+                        "AND %s order by player.name_first",fPos,select,where);
 
         return db.rawQuery(query.toString(), null);
 
