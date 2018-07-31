@@ -29,9 +29,11 @@ public class AddTeamProfileAsync extends AsyncTask<Object, Boolean, Boolean> {
         return true;
     }
 
-    public void addTeamInfo(final LinearLayout mainLayout, LayoutInflater inflater, Cursor result,
+    private void addTeamInfo(final LinearLayout mainLayout, LayoutInflater inflater, Cursor result,
                             final Context context, String teamName, final String teamId,
                             Activity activity, DBHandler db, Integer yearOfTeam){
+        String[] exclude = {"name", "year"};
+        String[] parkExclude = {"team_id", "attendance"};
 
         while (result.moveToNext()){
             CursorRow cursorRow = new CursorRow(result, result.getPosition());
@@ -67,11 +69,19 @@ public class AddTeamProfileAsync extends AsyncTask<Object, Boolean, Boolean> {
                 }
             });
 
-            String[] exclude = {"name", "year"};
+
             final LinearLayout ll = dynamicLayout.findViewById(R.id.yearHeaderVertical);
 
-            // generate lines
+            // generate team lines
             final LinkedList<View> views = FloaterApplication.addStatsFromRow(ll, inflater, cursorRow, exclude, true, rosterButton, null);
+
+            // generate park lines
+            Cursor parks = db.parkQuery(teamId, Integer.parseInt(yearStr));
+            final LinkedList<LinkedList<View>> parksList = new LinkedList<>();
+            while(parks.moveToNext()){
+                CursorRow parkRow = new CursorRow(parks, parks.getPosition());
+                parksList.add(FloaterApplication.addStatsFromRow(ll, inflater, parkRow, parkExclude, true, null, null));
+            }
 
             dynamicLayout.setOnClickListener(new View.OnClickListener() {
                 @Override
@@ -81,6 +91,17 @@ public class AddTeamProfileAsync extends AsyncTask<Object, Boolean, Boolean> {
                         while (iterator.hasNext()) {
                             View nextView = iterator.next();
                             nextView.setVisibility(nextView.getVisibility() == View.VISIBLE ? View.GONE : View.VISIBLE);
+                        }
+
+                        Iterator<LinkedList<View>> parkIterator = parksList.iterator();
+                        while(parkIterator.hasNext()) {
+                            LinkedList<View> park = parkIterator.next();
+                            iterator = park.iterator();
+
+                            while (iterator.hasNext()) {
+                                View nextView = iterator.next();
+                                nextView.setVisibility(nextView.getVisibility() == View.VISIBLE ? View.GONE : View.VISIBLE);
+                            }
                         }
                     }
                 }
