@@ -32,50 +32,8 @@ public class TeamProfile extends Activity {
         LinearLayout mainLayout = findViewById(R.id.teamProfileLinearLayout);
         LayoutInflater inflater = getLayoutInflater();
 
-        // TODO: move to async
-        while (result.moveToNext()){
-            CursorRow cursorRow = new CursorRow(result, result.getPosition());
-            final View dynamicLayout = inflater.inflate(R.layout.year_header, null);
-            TextView year = dynamicLayout.findViewById(R.id.yearHeader);
-            final String yearStr = cursorRow.getValueByColumnName("year");
-            year.setText(yearStr); // set row header
-
-            Button rosterButton = dynamicLayout.findViewById(R.id.rosterButton);
-            rosterButton.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view){
-                    Intent startIntent = new Intent(getApplicationContext(), TeamRoster.class);
-                    startIntent.putExtra("name", teamName);
-                    startIntent.putExtra("team_id", teamId);
-                    startIntent.putExtra("year", yearStr);
-                    startActivity(startIntent);
-                }
-            });
-
-            String[] exclude = {"name", "year"};
-            final LinearLayout ll = dynamicLayout.findViewById(R.id.yearHeaderVertical);
-
-            // generate lines
-            final LinkedList<View> views = FloaterApplication.addStatsFromRow(ll, inflater, cursorRow, exclude, true, rosterButton, null);
-
-            dynamicLayout.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    if (view == dynamicLayout) {
-                        Iterator<View> iterator = views.iterator();
-                        while (iterator.hasNext()) {
-                            View nextView = iterator.next();
-                            nextView.setVisibility(nextView.getVisibility() == View.VISIBLE ? View.GONE : View.VISIBLE);
-                        }
-                    }
-                }
-            });
-
-            mainLayout.addView(dynamicLayout);
-        }
-
-        result.close();
-        db.close();
+        AddTeamProfileAsync add = new AddTeamProfileAsync();
+        add.execute(mainLayout, inflater, result, getApplicationContext(), teamName, teamId, this, db);
     }
 
 }

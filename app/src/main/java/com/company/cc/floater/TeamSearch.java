@@ -36,7 +36,6 @@ public class TeamSearch extends AppCompatActivity {
     public void addTeamLines(LinearLayout mainLayout, LayoutInflater inflater, final Cursor result){
         if (result == null || (result.getCount() < 1)){
             FloaterApplication.addSingleTextView(inflater, mainLayout, null);
-            result.close();
             return;
         }
 
@@ -69,7 +68,6 @@ public class TeamSearch extends AppCompatActivity {
                     startActivity(startIntent);
                 }
             });
-
             mainLayout.addView(dynamicLayout);
         }
     }
