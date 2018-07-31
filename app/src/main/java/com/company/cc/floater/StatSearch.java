@@ -196,4 +196,8 @@ public class StatSearch extends AppCompatActivity {
         }
         return dynamicLayout;
     }
+    @Override
+    public void onBackPressed() {
+        startActivity(new Intent(this, HomeScreen.class));
+    }
 }
