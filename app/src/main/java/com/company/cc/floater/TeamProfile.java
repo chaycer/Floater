@@ -56,7 +56,7 @@ public class TeamProfile extends Activity {
             final LinearLayout ll = dynamicLayout.findViewById(R.id.yearHeaderVertical);
 
             // generate lines
-            final LinkedList<View> views = FloaterApplication.addStatsFromRow(ll, inflater, cursorRow, exclude, true, rosterButton);
+            final LinkedList<View> views = FloaterApplication.addStatsFromRow(ll, inflater, cursorRow, exclude, true, rosterButton, null);
 
             dynamicLayout.setOnClickListener(new View.OnClickListener() {
                 @Override

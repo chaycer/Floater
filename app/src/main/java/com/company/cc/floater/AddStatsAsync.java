@@ -28,7 +28,7 @@ public class AddStatsAsync extends AsyncTask<Object, Boolean, Boolean> {
         return true;
     }
 
-    public static void addStats(final LinearLayout mainLayout, LayoutInflater inflater, String playerId, int type, Context context, Activity activity){
+    public static void addStats(final LinearLayout mainLayout, final LayoutInflater inflater, String playerId, int type, Context context, Activity activity){
 
         DBHandler db = new DBHandler(context);
         Cursor playerTeams = db.playerTeamsQuery(playerId, null);
@@ -39,6 +39,36 @@ public class AddStatsAsync extends AsyncTask<Object, Boolean, Boolean> {
         }
         playerTeams.close();
         Iterator<CursorRow> iterator = rowList.iterator();
+
+        boolean hasItems = false;
+
+        String table = null;
+        String header = null;
+        String[] exclude = {"player_id", "year", "team_id"};
+        String[] fieldExclude = {"player_id", "year", "team_id"};
+        String[] headerRow = {"pos"};
+        if (type == BATTING){
+            table = "batting";
+            header = "Batting Stats";
+        }
+        else if (type == PITCHING){
+            table = "pitching";
+            header = "Pitching Stats";
+        }
+        else if (type == FIELDING){
+            table = "fielding";
+            header = "Fielding Stats";
+        }
+
+        final String pageHeader = header;
+        activity.runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                FloaterApplication.addSingleTextView(inflater, mainLayout, pageHeader);
+            }
+        });
+
+
         while (iterator.hasNext()){
 
             // First, generate the headers
@@ -54,19 +84,6 @@ public class AddStatsAsync extends AsyncTask<Object, Boolean, Boolean> {
             TextView value = dynamicLayout.findViewById(R.id.keyHeaderYear);
             value.setText(teamId);
 
-            String table = null;
-            String[] exclude = {"player_id", "year", "team_id"};
-            String[] fieldExclude = {"player_id", "year", "team_id", "pos"};
-            if (type == BATTING){
-                table = "batting";
-            }
-            else if (type == PITCHING){
-                table = "pitching";
-            }
-            else if (type == FIELDING){
-                table = "fielding";
-            }
-
             // Now, generate the individual stat lines
             Cursor playerStats = db.playerStatsQuery(playerId, Integer.parseInt(year), teamId, table);
 
@@ -74,43 +91,52 @@ public class AddStatsAsync extends AsyncTask<Object, Boolean, Boolean> {
             final LinkedList<LinkedList<View>> hiddenViews = new LinkedList<>();
 
 
-            if (playerStats.moveToNext()){ // changing to if instead of while since sometimes duplicates get returned
+            while (playerStats.moveToNext()){
                 CursorRow statRow = new CursorRow(playerStats, playerStats.getPosition(), true);
                 if (type == FIELDING) {
-                    hiddenViews.add(addStatsFromRow(LL, inflater, statRow, fieldExclude, true, null));
-                    TextView pos = dynamicLayout.findViewById(R.id.keyHeaderPos);
-                    pos.setText(statRow.getValueByColumnName("fielding.pos"));
-                    pos.setVisibility(View.VISIBLE);
+                    hiddenViews.add(addStatsFromRow(LL, inflater, statRow, fieldExclude, true, null, headerRow));
                 }
                 else{
-                    hiddenViews.add(addStatsFromRow(LL, inflater, statRow, exclude, true, null));
+                    hiddenViews.add(addStatsFromRow(LL, inflater, statRow, exclude, true, null, null));
+                    break; // prevent duplicate rows
                 }
             }
 
-            activity.runOnUiThread(new Runnable() {
-                @Override
-                public void run() {
-                    dynamicLayout.setOnClickListener(new View.OnClickListener() {
-                        public void onClick(View v) {
-                            if (v == dynamicLayout) {
-                                Iterator<LinkedList<View>> viewIterator = hiddenViews.iterator();
-                                while (viewIterator.hasNext()){
-                                    LinkedList<View> viewList = viewIterator.next();
-                                    Iterator<View> listIterator = viewList.iterator();
-                                    while (listIterator.hasNext()) {
-                                        View nextView = listIterator.next();
-                                        nextView.setVisibility(nextView.getVisibility() == View.VISIBLE ? View.GONE : View.VISIBLE);
+            if (!hiddenViews.isEmpty()){
+                hasItems = true;
+                activity.runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        dynamicLayout.setOnClickListener(new View.OnClickListener() {
+                            public void onClick(View v) {
+                                if (v == dynamicLayout) {
+                                    Iterator<LinkedList<View>> viewIterator = hiddenViews.iterator();
+                                    while (viewIterator.hasNext()) {
+                                        LinkedList<View> viewList = viewIterator.next();
+                                        Iterator<View> listIterator = viewList.iterator();
+                                        while (listIterator.hasNext()) {
+                                            View nextView = listIterator.next();
+                                            nextView.setVisibility(nextView.getVisibility() == View.VISIBLE ? View.GONE : View.VISIBLE);
+                                        }
                                     }
                                 }
                             }
-                        }
-                    });mainLayout.addView(dynamicLayout);
-                }
-            });
+                        });
+                        mainLayout.addView(dynamicLayout);
+                    }
+                });
+            }
             playerStats.close();
         }
-
         db.close();
 
+        if (!hasItems){
+            activity.runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    FloaterApplication.addSingleTextView(inflater, mainLayout, null);
+                }
+            });
+        }
     }
 }

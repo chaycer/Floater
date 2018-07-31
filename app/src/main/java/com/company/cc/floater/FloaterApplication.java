@@ -4,6 +4,7 @@ import android.app.Application;
 import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
+import android.text.Layout;
 import android.text.SpannableString;
 import android.text.style.UnderlineSpan;
 import android.view.LayoutInflater;
@@ -147,26 +148,40 @@ public class FloaterApplication extends Application{
      * @param toExclude - Array of column names to exclude, can be null
      * @param hide - Should the generated lines be hidden by default?
      * @param button - A view to be added at the top if desired, can be null
+     * @param headers - Array of column names to make into subheaders
      * @return A list of all the lines (horizontal linear layouts) added
      */
-    public static LinkedList<View> addStatsFromRow(LinearLayout mainLayout, LayoutInflater inflater, CursorRow row, String[] toExclude, boolean hide, View button){
+    public static LinkedList<View> addStatsFromRow(LinearLayout mainLayout, LayoutInflater inflater, CursorRow row, String[] toExclude, boolean hide, View button, String[] headers){
         LinkedList<View> views = new LinkedList<>();
         if (button != null){
             views.add(button);
         }
         for (int i = 0; i < row.getSize(); i++){
             boolean exclude = false;
+            int layout = R.layout.stat_line_no_edit;
+
+            // exclude rows based on toExclude array
             if (toExclude != null) {
                 for (int j = 0; j < toExclude.length; j++) {
                     if (row.getColumnNameByIndex(i).compareTo(toExclude[j]) == 0) {
                         exclude = true;
+                        break;
                     }
                 }
             }
             if (exclude){
                 continue;
             }
-            View dynamicLayout = inflater.inflate(R.layout.stat_line_no_edit, null);
+
+            // make rows in headers array look like headers
+            if (headers != null){
+                for (int j = 0; j < headers.length; j++) {
+                    if (row.getColumnNameByIndex(i).compareTo(headers[j]) == 0) {
+                        layout = R.layout.stat_line_no_edit_header;
+                    }
+                }
+            }
+            View dynamicLayout = inflater.inflate(layout, null);
             TextView name = dynamicLayout.findViewById(R.id.statNameNoEditTextView);
             name.setText(row.getColumnNameByIndex(i));
 
@@ -191,10 +206,8 @@ public class FloaterApplication extends Application{
      * @param context - context of the calling function
      */
     public static void addPlayerLines(LinearLayout mainLayout, LayoutInflater inflater, final Cursor result, final Context context){
-
-        // TODO: show "no results" if cursor empty
         if (result == null || (result.getCount() < 1)){
-
+            addSingleTextView(inflater, mainLayout, null);
             result.close();
             return;
         }
@@ -442,6 +455,21 @@ public class FloaterApplication extends Application{
         result.close();
         db.close();
         return cursorRow;
+    }
+
+    /**
+     * Adds a single text view to a vertical linear layout.
+     * @param inflater - inflater to inflate
+     * @param mainLayout - Vertical linear layout to add the text view to
+     * @param header - String to set the view to. If null, will show "no results found"
+     */
+    public static void addSingleTextView(LayoutInflater inflater, LinearLayout mainLayout, String header){
+        final View tableName = inflater.inflate(R.layout.no_results, null);
+        if (header != null) {
+            TextView tv = tableName.findViewById(R.id.noResultsTextView);
+            tv.setText(header);
+        }
+        mainLayout.addView(tableName);
     }
 
 }

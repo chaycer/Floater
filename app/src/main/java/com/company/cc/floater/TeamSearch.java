@@ -34,10 +34,8 @@ public class TeamSearch extends AppCompatActivity {
     }
 
     public void addTeamLines(LinearLayout mainLayout, LayoutInflater inflater, final Cursor result){
-
-        // TODO: show "no results" if cursor empty
         if (result == null || (result.getCount() < 1)){
-
+            FloaterApplication.addSingleTextView(inflater, mainLayout, null);
             result.close();
             return;
         }

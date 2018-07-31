@@ -1,8 +1,10 @@
 package com.company.cc.floater;
 
 import android.app.Activity;
+import android.content.Intent;
 import android.database.Cursor;
 import android.os.Bundle;
+import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.widget.Filter;
 import android.widget.LinearLayout;
@@ -24,9 +26,12 @@ public class StatSearchResults extends Activity {
 
         AddStatSearchAsync add = new AddStatSearchAsync();
         add.execute(mainLayout, inflater, filters, getApplicationContext(), count, this);
+    }
 
-        //FloaterApplication.addStatSearchLines(mainLayout, inflater, filters, getApplicationContext(), count);
-
+    //Force restart of statsearch when pressing back to avoid ugly looking bug
+    @Override
+    public void onBackPressed() {
+        startActivity(new Intent(this, StatSearch.class));
     }
 
 }

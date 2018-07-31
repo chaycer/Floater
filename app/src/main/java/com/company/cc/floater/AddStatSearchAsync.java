@@ -32,9 +32,13 @@ public class AddStatSearchAsync extends AsyncTask<Object, Boolean, Boolean> {
         result.moveToPosition(count);
         int max = count + 100;
 
-        // TODO: show "no results" if cursor empty
         if (result == null || (result.getCount() < 1)){
-
+            activity.runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    FloaterApplication.addSingleTextView(inflater, mainLayout, null);
+                }
+            });
             result.close();
             db.close();
             return;
@@ -78,7 +82,7 @@ public class AddStatSearchAsync extends AsyncTask<Object, Boolean, Boolean> {
 
             LinearLayout verticalLayout = dynamicLayout.findViewById(R.id.statResultsVerticalLayout);
 
-            addStatsFromRow(verticalLayout, inflater, player, exclude, false, null);
+            addStatsFromRow(verticalLayout, inflater, player, exclude, false, null, null);
             activity.runOnUiThread(new Runnable() {
                @Override
                public void run() {

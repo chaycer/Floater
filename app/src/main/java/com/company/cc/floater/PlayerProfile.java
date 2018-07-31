@@ -92,7 +92,7 @@ public class PlayerProfile extends FragmentActivity {
 
             LinearLayout LL = v.findViewById(R.id.playerProfileLinearLayout);
             LayoutInflater inflater2 = getLayoutInflater();
-            FloaterApplication.addStatsFromRow(LL, inflater2, row, fullNameColumns, false, null);
+            FloaterApplication.addStatsFromRow(LL, inflater2, row, fullNameColumns, false, null, null);
             return v;
         }
 
