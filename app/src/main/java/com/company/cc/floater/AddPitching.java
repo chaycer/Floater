@@ -17,7 +17,7 @@ public class AddPitching extends Activity {
 
         LinearLayout mainLayout = findViewById(R.id.addPitchingLayout);
         LayoutInflater inflater = getLayoutInflater();
-        FloaterApplication.addStatLines(mainLayout, inflater, FloaterApplication.getPitchingStats());
+        FloaterApplication.addStatLines(mainLayout, inflater, FloaterApplication.getPitchingStatsNoEra());
 
         CursorRow playerRow = (CursorRow) getIntent().getExtras().getSerializable("CursorRow");
         LinearLayout ll = (LinearLayout) mainLayout.getChildAt(0);

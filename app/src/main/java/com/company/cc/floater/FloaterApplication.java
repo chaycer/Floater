@@ -23,6 +23,7 @@ public class FloaterApplication extends Application{
     static CharSequence battingStats[] = new CharSequence[] {"player_id", "year", "team_id", "g", "ab", "r", "h", "double", "triple", "hr", "rbi", "sb", "cs", "bb", "so", "ibb", "sh", "sf", "g_idp"};
     static CharSequence fieldingStats[] = new CharSequence[] {"player_id", "year", "team_id", "pos", "g", "gs", "inn_outs", "po", "a", "e", "dp", "pb", "wp", "sb", "cs", "zr"};
     static CharSequence pitchingStats[] = new CharSequence[] {"player_id", "year", "team_id", "w", "l", "g", "gs", "cg", "sho", "sv", "ip", "h", "er", "hr", "bb", "so", "baopp", "era", "ibb", "wp", "hbp", "bk", "bfp", "gf", "r", "sh", "sf", "g_idp"};
+    static CharSequence pitchingStatsNoEra[] = new CharSequence[] {"player_id", "year", "team_id", "w", "l", "g", "gs", "cg", "sho", "sv", "ip", "h", "er", "hr", "bb", "so", "baopp", "ibb", "wp", "hbp", "bk", "bfp", "gf", "r", "sh", "sf", "g_idp"};
 
     static CharSequence playerStats[] = new CharSequence[] {"player_id", "first_name", "last_name", "birth_day", "birth_month", "birth_year", "birth_country", "death_day", "death_month", "death_year", "bats", "throws", "debut", "final_game"};
     static CharSequence teamStats[] = new CharSequence[] {"team_id", "name", "year", "league", "div_id", "rank", "g", "w", "l", "ws_win", "attendance"};
@@ -49,6 +50,8 @@ public class FloaterApplication extends Application{
     public static CharSequence[] getPitchingStats() {
         return pitchingStats;
     }
+
+    public static CharSequence[] getPitchingStatsNoEra() { return  pitchingStatsNoEra; }
 
     public static CharSequence[] getPlayerStats() {
         return playerStats;
@@ -130,7 +133,6 @@ public class FloaterApplication extends Application{
         for (int i = 0; i < stats.length; i++){
             View dynamicLayout = inflater.inflate(R.layout.stat_line, null);
             TextView tv = dynamicLayout.findViewById(R.id.statNameTextView);
-            EditText et = dynamicLayout.findViewById(R.id.statInputEditText);
 
             tv.setText(stats[i]); // set label
             mainLayout.addView(dynamicLayout);
