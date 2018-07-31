@@ -41,4 +41,11 @@
         android:layout_weight="2"
         android:ems="10"
         android:inputType="text" />
+
+    <TextView
+        android:id="@+id/statPrefix"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:visibility="gone" />
 </LinearLayout>
