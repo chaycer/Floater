@@ -163,7 +163,7 @@ public class DBHandler extends SQLiteOpenHelper {
     public Cursor playerStatsQuery(String playerID, int seasonYear, String teamID, String table) {
         String query;
         if (table.equals("pitching")) {
-            query = String.format("SELECT * FROM pitching " +
+            query = String.format("SELECT player_id,year,team_id,w,l,g,gs,cg,sho,sv,pitching.ip,h,pitching.er,hr,bb,so,baopp,ibb,wp,hbp,bk,bfp,gf,r,sh,sf,g_idp,era FROM pitching " +
                     "LEFT OUTER JOIN ERA_Stats on pitching.ip = ERA_Stats.ip and pitching.er = ERA_Stats.er " +
                     "where pitching.player_id = '%s' and pitching.year = %d and pitching.team_id = '%s'",playerID,seasonYear,teamID);
         } else {
@@ -374,12 +374,12 @@ public class DBHandler extends SQLiteOpenHelper {
                         "END as 'team_id' " +
                         "%s" +
                         "%s " +
-                        "FROM fielding " +
-                        "LEFT OUTER JOIN batting on batting.player_id = fielding.player_id AND batting.year = fielding.year and batting.team_id = fielding.team_id " +
-                        "LEFT OUTER JOIN pitching on pitching.player_id = fielding.player_id AND pitching.year = fielding.year and pitching.team_id = fielding.team_id " +
-                        "LEFT OUTER JOIN ERA_Stats on pitching.ip = ERA_Stats.ip AND pitching.er = ERA_Stats.er " +
-                        "LEFT OUTER JOIN player on player.player_id = fielding.player_id " +
-                        "where %s",fPos,select,where);
+                        "FROM fielding, batting, pitching, ERA_Stats, player " +
+                        "where batting.player_id = fielding.player_id AND batting.year = fielding.year and batting.team_id = fielding.team_id " +
+                        "AND pitching.player_id = fielding.player_id AND pitching.year = fielding.year and pitching.team_id = fielding.team_id " +
+                        "AND pitching.ip = ERA_Stats.ip AND pitching.er = ERA_Stats.er " +
+                        "AND player.player_id = fielding.player_id " +
+                        "AND %s",fPos,select,where);
 
         return db.rawQuery(query.toString(), null);
 
