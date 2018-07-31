@@ -20,11 +20,15 @@ public class TeamProfile extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_team_profile);
 
-        final String teamName = getIntent().getExtras().getString("name");
-        final String teamId = getIntent().getExtras().getString("team_id");
+        String teamName = getIntent().getExtras().getString("name");
+        String teamId = getIntent().getExtras().getString("team_id");
+        String year = getIntent().getExtras().getString("year");
 
-        TextView name = findViewById(R.id.teamName);
-        name.setText(teamName);
+        Integer yearInt = null;
+
+        if (year != null){
+            yearInt = Integer.parseInt(year);
+        }
 
         DBHandler db = new DBHandler(this);
         Cursor result = db.teamStatsQuery(teamId, null);
@@ -33,7 +37,7 @@ public class TeamProfile extends Activity {
         LayoutInflater inflater = getLayoutInflater();
 
         AddTeamProfileAsync add = new AddTeamProfileAsync();
-        add.execute(mainLayout, inflater, result, getApplicationContext(), teamName, teamId, this, db);
+        add.execute(mainLayout, inflater, result, getApplicationContext(), teamName, teamId, this, db, yearInt);
     }
 
 }

@@ -19,10 +19,10 @@ public class AddPitching extends Activity {
         LayoutInflater inflater = getLayoutInflater();
         FloaterApplication.addStatLines(mainLayout, inflater, FloaterApplication.getPitchingStatsNoEra());
 
-        CursorRow playerRow = (CursorRow) getIntent().getExtras().getSerializable("CursorRow");
+        String playerId = getIntent().getExtras().getString("playerId");
         LinearLayout ll = (LinearLayout) mainLayout.getChildAt(0);
         EditText idEdit = (EditText) ll.getChildAt(1);
-        idEdit.setText(playerRow.getValueByColumnName("player_id"));
+        idEdit.setText(playerId);
 
         // add buttons
         View save = inflater.inflate(R.layout.save_changes_button, null);

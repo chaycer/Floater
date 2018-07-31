@@ -18,6 +18,7 @@ import android.widget.TextView;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.zip.Inflater;
 
 public class FloaterApplication extends Application{
     static CharSequence battingStats[] = new CharSequence[] {"player_id", "year", "team_id", "g", "ab", "r", "h", "double", "triple", "hr", "rbi", "sb", "cs", "bb", "so", "ibb", "sh", "sf", "g_idp"};
@@ -279,21 +280,21 @@ public class FloaterApplication extends Application{
                 else if (buttonType.compareTo("batting") == 0){
                     if (cursorRow != null) {
                         Intent startIntent = new Intent(context, AddHitting.class);
-                        startIntent.putExtra("CursorRow", cursorRow);
+                        startIntent.putExtra("playerId", cursorRow.getValueByColumnName("player_id"));
                         context.startActivity(startIntent);
                     }
                 }
                 else if (buttonType.compareTo("fielding") == 0){
                     if (cursorRow != null) {
                         Intent startIntent = new Intent(context, AddFielding.class);
-                        startIntent.putExtra("CursorRow", cursorRow);
+                        startIntent.putExtra("playerId", cursorRow.getValueByColumnName("player_id"));
                         context.startActivity(startIntent);
                     }
                 }
                 else if (buttonType.compareTo("pitching") == 0){
                     if (cursorRow != null) {
                         Intent startIntent = new Intent(context, AddPitching.class);
-                        startIntent.putExtra("CursorRow", cursorRow);
+                        startIntent.putExtra("playerId", cursorRow.getValueByColumnName("player_id"));
                         context.startActivity(startIntent);
                     }
                 }
@@ -472,6 +473,34 @@ public class FloaterApplication extends Application{
             tv.setText(header);
         }
         mainLayout.addView(tableName);
+    }
+
+    public static View startTeamProfileButton(LinearLayout mainLayout, LayoutInflater inflater,
+                                              final String teamId, final Context context, final String year){
+        View dynamicLayout = inflater.inflate(R.layout.single_button, null);
+        Button button = dynamicLayout.findViewById(R.id.blankButton);
+        button.setText("Go to Team Profile");
+
+        button.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View view){
+                Intent startIntent = new Intent(context, TeamProfile.class);
+                startIntent.putExtra("team_id", teamId);
+                startIntent.putExtra("year", year);
+                context.startActivity(startIntent);
+            }
+        });
+        dynamicLayout.setVisibility(View.GONE);
+        mainLayout.addView(dynamicLayout);
+
+        return dynamicLayout;
+    }
+
+    public static LinkedList<View> singleButtonList(LinearLayout mainLayout, LayoutInflater inflater, String teamId,
+                                                    Context context, String year){
+        LinkedList<View> list = new LinkedList<>();
+        list.add(startTeamProfileButton(mainLayout, inflater, teamId, context, year));
+
+        return list;
     }
 
 }

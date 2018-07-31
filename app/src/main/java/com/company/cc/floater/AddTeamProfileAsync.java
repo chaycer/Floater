@@ -21,20 +21,35 @@ import static com.company.cc.floater.FloaterApplication.addStatsFromRow;
 public class AddTeamProfileAsync extends AsyncTask<Object, Boolean, Boolean> {
 
     protected Boolean doInBackground(Object... params){
-        if (params.length < 8){
+        if (params.length < 9){
             return false;
         }
         addTeamInfo((LinearLayout) params[0], (LayoutInflater) params[1], (Cursor) params[2],
-                (Context) params[3], (String) params[4], (String) params[5], (Activity) params[6], (DBHandler) params[7]);
+                (Context) params[3], (String) params[4], (String) params[5], (Activity) params[6], (DBHandler) params[7], (Integer) params[8]);
         return true;
     }
 
     public void addTeamInfo(final LinearLayout mainLayout, LayoutInflater inflater, Cursor result,
-                            final Context context, final String teamName, final String teamId,
-                            Activity activity, DBHandler db){
+                            final Context context, String teamName, final String teamId,
+                            Activity activity, DBHandler db, Integer yearOfTeam){
 
         while (result.moveToNext()){
             CursorRow cursorRow = new CursorRow(result, result.getPosition());
+
+            final String tName = cursorRow.getValueByColumnName("name");
+
+            if (yearOfTeam != null || teamName == null || teamName.equals("") || teamName.isEmpty()){
+                teamName = tName;
+            }
+
+            // find the right name for the team based on the year
+            if (yearOfTeam == null || yearOfTeam == Integer.parseInt(cursorRow.getValueByColumnName("year"))) {
+                yearOfTeam = Integer.parseInt(cursorRow.getValueByColumnName("year"));
+                TextView name = mainLayout.findViewById(R.id.teamName);
+                name.setText(teamName);
+            }
+
+
             final View dynamicLayout = inflater.inflate(R.layout.year_header, null);
             TextView year = dynamicLayout.findViewById(R.id.yearHeader);
             final String yearStr = cursorRow.getValueByColumnName("year");
@@ -45,7 +60,7 @@ public class AddTeamProfileAsync extends AsyncTask<Object, Boolean, Boolean> {
                 @Override
                 public void onClick(View view){
                     Intent startIntent = new Intent(context, TeamRoster.class);
-                    startIntent.putExtra("name", teamName);
+                    startIntent.putExtra("name", tName);
                     startIntent.putExtra("team_id", teamId);
                     startIntent.putExtra("year", yearStr);
                     context.startActivity(startIntent);
