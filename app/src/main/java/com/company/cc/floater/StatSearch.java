@@ -145,7 +145,11 @@ public class StatSearch extends AppCompatActivity {
                 @Override
                 public void onClick(DialogInterface dialogInterface, int i) {
                     tvPrev.setText(stats[i]);
-                    prefixPrev.setText(prefix);
+                    String actualPrefix = prefix;
+                    if (stats[i].equals("era")){
+                        actualPrefix = "ERA_stats.";
+                    }
+                    prefixPrev.setText(actualPrefix);
                     prev.findViewById(R.id.dynamicBattingButton).setVisibility(View.GONE); // hide add stat button
                     tvPrev.setVisibility(View.VISIBLE);
                 }

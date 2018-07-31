@@ -44,11 +44,18 @@ public class AddTeamProfileAsync extends AsyncTask<Object, Boolean, Boolean> {
                 teamName = tName;
             }
 
+            final String tempName = teamName;
+
             // find the right name for the team based on the year
             if (yearOfTeam == null || yearOfTeam == Integer.parseInt(cursorRow.getValueByColumnName("year"))) {
                 yearOfTeam = Integer.parseInt(cursorRow.getValueByColumnName("year"));
-                TextView name = mainLayout.findViewById(R.id.teamName);
-                name.setText(teamName);
+                final TextView name = mainLayout.findViewById(R.id.teamName);
+                activity.runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        name.setText(tempName);
+                    }
+                });
             }
 
 

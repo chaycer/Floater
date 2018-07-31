@@ -503,4 +503,10 @@ public class FloaterApplication extends Application{
         return list;
     }
 
+    public static SpannableString linkifyString(String link){
+        SpannableString underline = new SpannableString(link);
+        underline.setSpan(new UnderlineSpan(), 0, underline.length(), 0);
+        return underline;
+    }
+
 }

@@ -19,7 +19,8 @@
             android:layout_width="206dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:visibility="visible" />
+            android:visibility="visible"
+            style="@style/link" />
 
         <TextView
             android:id="@+id/teamTextView"
@@ -28,7 +29,8 @@
             android:layout_weight="1"
             android:ems="10"
             android:inputType="textPersonName"
-            android:visibility="visible" />
+            android:visibility="visible"
+            style="@style/link" />
 
         <TextView
             android:id="@+id/yearTextView"
@@ -37,7 +39,8 @@
             android:layout_weight="1"
             android:ems="10"
             android:inputType="textPersonName"
-            android:visibility="visible" />
+            android:visibility="visible"
+            style="@style/blackNBold"/>
 
         <TextView
             android:id="@+id/positionTextView"

@@ -58,20 +58,11 @@ public class AddStatSearchAsync extends AsyncTask<Object, Boolean, Boolean> {
             }
 
             if (!player.getValueByColumnName("name_first").isEmpty()) {
-                name.setText(player.getValueByColumnName("name_first") + " "
-                        + player.getValueByColumnName("name_last")); // set label
+                name.setText(FloaterApplication.linkifyString(player.getValueByColumnName("name_first") + " "
+                        + player.getValueByColumnName("name_last"))); // set label
             }
 
-            team.setText(player.getValueByColumnName("team_id"));
-            year.setText(player.getValueByColumnName("year"));
-            pos.setText(player.getValueByColumnName("pos"));
-            if (pos.getText() != null){
-                pos.setVisibility(View.VISIBLE);
-                //mainLayout.findViewById(R.id.playerSearchPositionHeader).setVisibility(View.VISIBLE);
-            }
-
-            LinearLayout LL = dynamicLayout.findViewById(R.id.statResultsHorizontalLayout);
-            LL.setOnClickListener(new View.OnClickListener(){
+            name.setOnClickListener(new View.OnClickListener(){
                 @Override
                 public void onClick(View v){
                     Intent startIntent = new Intent(context, PlayerProfile.class);
@@ -79,6 +70,24 @@ public class AddStatSearchAsync extends AsyncTask<Object, Boolean, Boolean> {
                     context.startActivity(startIntent);
                 }
             });
+
+            team.setText(FloaterApplication.linkifyString(player.getValueByColumnName("team_id")));
+            team.setOnClickListener(new View.OnClickListener(){
+                @Override
+                public void onClick(View v){
+                    Intent startIntent = new Intent(context, TeamProfile.class);
+                    startIntent.putExtra("team_id", player.getValueByColumnName("team_id"));
+                    startIntent.putExtra("year", player.getValueByColumnName("year"));
+                    context.startActivity(startIntent);
+                }
+            });
+
+            year.setText(player.getValueByColumnName("year"));
+            pos.setText(player.getValueByColumnName("pos"));
+            if (pos.getText() != null){
+                pos.setVisibility(View.VISIBLE);
+                //mainLayout.findViewById(R.id.playerSearchPositionHeader).setVisibility(View.VISIBLE);
+            }
 
             LinearLayout verticalLayout = dynamicLayout.findViewById(R.id.statResultsVerticalLayout);
 
