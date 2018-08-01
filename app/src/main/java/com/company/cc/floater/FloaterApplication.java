@@ -508,5 +508,4 @@ public class FloaterApplication extends Application{
         underline.setSpan(new UnderlineSpan(), 0, underline.length(), 0);
         return underline;
     }
-
 }

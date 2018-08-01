@@ -60,12 +60,6 @@ public class HomeScreen extends AppCompatActivity {
             public void onClick(View view) {
                 if (!TextUtils.isEmpty(searchET.getText())){
                     String searchString = searchET.getText().toString(); // User-provided string to search on
-
-                    /*
-                    DATABASE CONNECTION HERE WITH searchString AND type
-                     */
-
-
                     Intent startIntent = new Intent(getApplicationContext(), newActivity);
                     startIntent.putExtra(getString(R.string.company_name), searchString);
                     startActivity(startIntent);
