@@ -436,27 +436,27 @@ public class FloaterApplication extends Application{
             //remove values from list if we aren't inserting them
             if (is.getColumn().compareTo("player_id") == 0){
                 playerId = is.getValue();
-                //iterator.remove();
+                iterator.remove();
             }
             else if (is.getColumn().compareTo("team_id") == 0){
                 teamId = is.getValue();
-                //iterator.remove();
+                iterator.remove();
             }
             else if (is.getColumn().compareTo("year") == 0){
                 year = is.getValue();
-                //iterator.remove();
+                iterator.remove();
             }
             else if (is.getColumn().compareTo("name_first") == 0){
                 firstName = is.getValue();
-                //iterator.remove();
+                iterator.remove();
             }
             else if (is.getColumn().compareTo("name_last") == 0){
                 lastName = is.getValue();
-                //iterator.remove();
+                iterator.remove();
             }
             else if (is.getColumn().compareTo("pos") == 0){
                 pos = is.getValue();
-                //iterator.remove();
+                iterator.remove();
             }
             if (!addNulls){
                 if (is.getValue().compareTo("") == 0){
