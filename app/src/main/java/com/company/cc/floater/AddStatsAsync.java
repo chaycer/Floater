@@ -93,7 +93,7 @@ public class AddStatsAsync extends AsyncTask<Object, Boolean, Boolean> {
 
             final LinkedList<LinkedList<View>> hiddenViews = new LinkedList<>();
 
-            hiddenViews.add(FloaterApplication.singleButtonList(LL, inflater, teamId, context, year));
+
 
             // Add stat lines to view
             while (playerStats.moveToNext()){
@@ -109,6 +109,7 @@ public class AddStatsAsync extends AsyncTask<Object, Boolean, Boolean> {
 
             if (!hiddenViews.isEmpty()){
                 hasItems = true;
+                hiddenViews.add(0, FloaterApplication.singleButtonList(LL, inflater, teamId, context, year));
                 activity.runOnUiThread(new Runnable() {
                     @Override
                     public void run() {

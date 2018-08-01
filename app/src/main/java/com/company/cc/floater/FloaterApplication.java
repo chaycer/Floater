@@ -156,9 +156,6 @@ public class FloaterApplication extends Application{
      */
     public static LinkedList<View> addStatsFromRow(LinearLayout mainLayout, LayoutInflater inflater, CursorRow row, String[] toExclude, boolean hide, View button, String[] headers){
         LinkedList<View> views = new LinkedList<>();
-        if (button != null){
-            views.add(button);
-        }
         for (int i = 0; i < row.getSize(); i++){
             boolean exclude = false;
             int layout = R.layout.stat_line_no_edit;
@@ -197,6 +194,10 @@ public class FloaterApplication extends Application{
             mainLayout.addView(dynamicLayout);
             views.add(dynamicLayout);
         }
+        if (button != null && !views.isEmpty()){
+            views.add(0, button);
+        }
+
         return views;
     }
 
