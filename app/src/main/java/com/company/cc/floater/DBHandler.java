@@ -11,6 +11,8 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.text.DecimalFormat;
+import java.text.NumberFormat;
 import java.util.List;
 
 
@@ -513,18 +515,20 @@ public class DBHandler extends SQLiteOpenHelper {
             StringBuilder pQueryValues = new StringBuilder();
             StringBuilder pQueryCol = new StringBuilder();
             boolean pitching = false;
+            NumberFormat formatter = new DecimalFormat("#.##");
             for (InsertStat player:playerData) {
                 if (player.getTable().equals("pitching")){
+                    String value = formatter.format(Float.valueOf(player.getValue()));
                     if(player.getColumn().equals("er") || player.getColumn().equals("ip")){
                         pitching = true;
                     }
                     if (pQueryCol.length() == 0) {
                         pQueryCol.append("Insert into pitching (player_id, year, team_id, " + player.getColumn());
-                        pQueryValues.append("('" + playerID + "'," + seasonYear + ",'" + teamID + "','" + player.getValue() +"'");
+                        pQueryValues.append("('" + playerID + "'," + seasonYear + ",'" + teamID + "','" + value +"'");
                     }
                     else {
                         pQueryCol.append(", " + player.getColumn());
-                        pQueryValues.append(", '" + player.getValue() + "'");
+                        pQueryValues.append(", '" + value + "'");
                     }
                 }
             }
@@ -542,15 +546,17 @@ public class DBHandler extends SQLiteOpenHelper {
         private void updatePitching(String playerID, int seasonYear, String teamID, List<InsertStat> playerData){
             StringBuilder pQueryCol = new StringBuilder();
             boolean pitching = false;
+            NumberFormat formatter = new DecimalFormat("#.##");
             for (InsertStat player : playerData) {
+                String value = formatter.format(Float.valueOf(player.getValue()));
                 if (player.getTable().equals("pitching")) {
                     if (player.getColumn().equals("er") || player.getColumn().equals("ip")) {
                         pitching = true;
                     }
                     if (pQueryCol.length() == 0) {
-                        pQueryCol.append("UPDATE pitching SET " + player.getColumn() + " = '" + player.getValue() + "'");
+                        pQueryCol.append("UPDATE pitching SET " + player.getColumn() + " = '" + value + "'");
                     } else {
-                        pQueryCol.append(", " + player.getColumn() + " = '" + player.getValue() + "'");
+                        pQueryCol.append(", " + player.getColumn() + " = '" + value + "'");
                     }
                 }
             }
@@ -659,17 +665,30 @@ public class DBHandler extends SQLiteOpenHelper {
         private void updateERA(String playerID, int seasonYear, String teamID){
             Cursor eras = db.rawQuery(String.format("Select er, ip from pitching where player_id = '%s' and year = %d and team_id = '%s'",playerID,seasonYear,teamID),null);
             eras.moveToFirst();
-            String er = eras.getString(eras.getColumnIndex("er"));
-            String ip = eras.getString(eras.getColumnIndex("ip"));
-            if(er == null || ip == null || er.equals("") || ip.equals("")){
+            float er;
+            float ip;
+            if(!eras.isNull(eras.getColumnIndex("er"))) {
+                er = eras.getFloat(eras.getColumnIndex("er"));
+            } else {
                 return;
             }
-            Integer era = Integer.valueOf(Integer.valueOf(er)/Integer.valueOf(ip) * Integer.valueOf(9));
-            Cursor exists = db.rawQuery(String.format("Select * from ERA_Stats where ip = '%s' and er = '%s'",ip,er),null);
+            if(!eras.isNull(eras.getColumnIndex("ip"))) {
+                ip = eras.getFloat(eras.getColumnIndex("ip"));
+            } else {
+                return;
+            }
+
+
+            float era = er/ip*(float)9;
+            NumberFormat formatter = new DecimalFormat("#.##");
+            String ser = formatter.format(er);
+            String sip = formatter.format(ip);
+            String sera = formatter.format(era);
+            Cursor exists = db.rawQuery(String.format("Select * from ERA_Stats where ip = '%s' and er = '%s'",sip,ser),null);
             if(exists.getCount()>0){ //already exists, quit out
                 return;
             }
-            db.execSQL(String.format("INSERT INTO ERA_Stats (ER,IP,ERA) VALUES ('%s','%s','%s')",er,ip,era.toString())); //doesn't exist, insert into
+            db.execSQL(String.format("INSERT INTO ERA_Stats (ER,IP,ERA) VALUES ('%s','%s','%s')",ser,sip,sera)); //doesn't exist, insert into
 
 
         }
