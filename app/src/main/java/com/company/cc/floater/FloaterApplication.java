@@ -181,6 +181,7 @@ public class FloaterApplication extends Application{
                     }
                 }
             }
+            // set label and value texts
             View dynamicLayout = inflater.inflate(layout, null);
             TextView name = dynamicLayout.findViewById(R.id.statNameNoEditTextView);
             name.setText(row.getColumnNameByIndex(i));
@@ -188,12 +189,16 @@ public class FloaterApplication extends Application{
             TextView value = dynamicLayout.findViewById(R.id.statValueNoEditTextView);
             value.setText(row.getValueByIndex(i));
 
+            // hide row if needed
             if (hide){
                 dynamicLayout.setVisibility(View.GONE);
             }
+            // add to the vertical layout
             mainLayout.addView(dynamicLayout);
             views.add(dynamicLayout);
         }
+
+        // add the button if needed
         if (button != null && !views.isEmpty()){
             views.add(0, button);
         }
@@ -210,29 +215,33 @@ public class FloaterApplication extends Application{
      * @param context - context of the calling function
      */
     public static void addPlayerLines(LinearLayout mainLayout, LayoutInflater inflater, final Cursor result, final Context context){
+        // if cursor has no data, display error and return
         if (result == null || (result.getCount() < 1)){
             addSingleTextView(inflater, mainLayout, null);
             result.close();
             return;
         }
 
+        // add each row
         while (result.moveToNext()){
             View dynamicLayout = inflater.inflate(R.layout.player_search_layout, null);
             TextView name = dynamicLayout.findViewById(R.id.playerNameTextView);
             TextView years = dynamicLayout.findViewById(R.id.yearsActiveTextView);
 
+            // if player is missing name for some reason, skip
             if(result.getString(result.getColumnIndex("name_first")).isEmpty()
                     || result.getString(result.getColumnIndex("name_last")).isEmpty()){
                 continue;
             }
 
+            // set player name and linkify it
             if (!result.getString(result.getColumnIndex("name_first")).isEmpty()) {
-                SpannableString pName = new SpannableString(
+                SpannableString pName = linkifyString(
                         result.getString(result.getColumnIndex("name_first")) + " "
                                 + result.getString(result.getColumnIndex("name_last")));
-                pName.setSpan(new UnderlineSpan(), 0, pName.length(), 0);
                 name.setText(pName); // set label
             }
+            // set years active text view based on debut and final game
             String active = result.getString(result.getColumnIndex("debut"));
             if (active != null && active.length() >= 4){
                 active = active.substring(0, 4);
@@ -243,8 +252,11 @@ public class FloaterApplication extends Application{
             }
             years.setText(active);
 
+            // add row to search results
             final CursorRow player = new CursorRow(result, result.getPosition());
             LinearLayout LL = dynamicLayout.findViewById(R.id.playerSearchHorizontalLayout);
+
+            // make clicking row launch player profile
             LL.setOnClickListener(new View.OnClickListener(){
                 @Override
                 public void onClick(View v){
@@ -271,10 +283,12 @@ public class FloaterApplication extends Application{
         button.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                // add stats to database or display error and return if failed
                 CursorRow cursorRow = addStatsToPlayer(mainLayout, homeType, context, inflater);
                 if (cursorRow == null || cursorRow.isEmpty()){
                     return;
                 }
+                // set each button type
                 if (buttonType.compareTo("player") == 0){
                     Intent startIntent = new Intent(context, PlayerProfile.class);
                     startIntent.putExtra("CursorRow", cursorRow);
@@ -307,11 +321,12 @@ public class FloaterApplication extends Application{
      * @return The CursorRow with the result of the add, or just the player row
      */
     public static CursorRow addStatsToPlayer(LinearLayout mainLayout, String homeType, Context context, LayoutInflater inflater){
-        boolean addNulls = false;
-        boolean empty = true;
-        List<InsertStat> ret = new LinkedList<>();
+        boolean addNulls = false; // do we overwrite existing values with null?
+        boolean empty = true; // were stats not added to player?
+        List<InsertStat> ret = new LinkedList<>(); // list of stats to insert in queryable form
 
         int count = mainLayout.getChildCount();
+        // loop through all the fields in the layout to get user input
         for (int i = 0; i < count; i++){
             View childLayout = mainLayout.getChildAt(i);
             if (childLayout instanceof LinearLayout){
@@ -320,17 +335,19 @@ public class FloaterApplication extends Application{
                 LinearLayout ll = (LinearLayout) childLayout;
 
                 int childCount = ll.getChildCount();
+                // loop through all the fields in the linear layout to get the values
                 for (int j = 0; j < childCount; j++){
                     View text = ll.getChildAt(j);
-                    if (text instanceof CheckBox){
+                    if (text instanceof CheckBox){ // add nulls checkbox
                         CheckBox cb = (CheckBox) text;
                         addNulls = cb.isChecked();
                     }
                     else if (text instanceof Button){
                     }
-                    else if (text instanceof EditText){
+                    else if (text instanceof EditText){ // user input
                         EditText et = (EditText) text;
                         val = et.getText().toString();
+                        // if input is invalid, display error and return
                         if (!FloaterApplication.validString(val)){
                             View dynamicLayout = inflater.inflate(R.layout.error_layout, null);
                             TextView tv = dynamicLayout.findViewById(R.id.errorText);
@@ -339,24 +356,25 @@ public class FloaterApplication extends Application{
                             return null;
                         }
                     }
-                    else {
+                    else { // stat label
                         TextView tv = (TextView) text;
                         stat = tv.getText().toString();
                     }
                 }
-                if (empty && val.compareTo("") != 0){
+                if (empty && !val.equals("")){ // user inputted something
                    empty = false;
                 }
-                if (stat.compareTo("") != 0) {
+                if (!stat.equals("")) {
                     ret.add(new InsertStat(homeType, stat, val));
                 }
             }
         }
 
-        if (empty){
+        if (empty){ // don't do anything if the user didn't input anything
             return null;
         }
 
+        // set up variables to be sent to query
         String playerId = "";
         String teamId = "";
         String firstName = "";
@@ -364,53 +382,53 @@ public class FloaterApplication extends Application{
         String year = "";
         String pos = "";
 
+        // loop through stats to validate input and pull out key values
         Iterator<InsertStat> iterator = ret.iterator();
         while (iterator.hasNext()){
             InsertStat is = iterator.next();
 
-            if (homeType.compareTo("player") != 0){
+            // if this is a stat entry screen, verify we have a player id
+            if (!homeType.equals("player")){
                 String error = context.getString(R.string.statInvalid);
                 if (homeType.equals("fielding")){
                     error = context.getString(R.string.fieldingInvalid);
                 }
-                if (is.getColumn().compareTo("player_id") == 0){
-                    if (is.getValue().compareTo("") == 0){
+                if (is.getColumn().equals("player_id")){ // no player id is an error
+                    if (is.getValue().equals("")){
                         addError(mainLayout, inflater, error);
                         return null;
                     }
                 }
-                else if (is.getColumn().compareTo("year") == 0){
-                    if (is.getValue().compareTo("") == 0){
+                else if (is.getColumn().equals("year")){ //missing other values is ok - we just won't actually input anything (eases navigation)
+                    if (is.getValue().equals("")){
                         return playerTableRow(playerId, context);
-                        //addError(mainLayout, inflater, error);
-                        //return null;
                     }
                 }
-                else if (is.getColumn().compareTo("team_id") == 0){
-                    if (is.getValue().compareTo("") == 0){
+                else if (is.getColumn().equals("team_id")){
+                    if (is.getValue().equals("")){
                         return playerTableRow(playerId, context);
-                        //addError(mainLayout, inflater, error);
-                        //return null;
                     }
                 }
-                else if (homeType.compareTo("fielding") == 0 && is.getColumn().compareTo("pos") == 0){
-                    if (is.getValue().compareTo("") == 0){
+                // fielding is special since pos is also part of the key
+                else if (homeType.equals("fielding") && is.getColumn().equals("pos")){
+                    if (is.getValue().equals("")){
                         return playerTableRow(playerId, context);
-                        //addError(mainLayout, inflater, error);
-                        //return null;
                     }
                 }
             }
-            else{
-                if (is.getColumn().compareTo("name_first") == 0){
-                    if (is.getValue().compareTo("") == 0){
+            else{ // player entry screen, first and last name OR existing player ID is required
+                if (is.getColumn().equals("name_first")){
+                    // if the name is missing, we need an existing ID
+                    if (is.getValue().equals("")){
                         if (playerId != ""){
+                            //check if inputted ID already exists, display error if not
                             CursorRow row = playerTableRow(playerId, context);
                             if (row ==  null || row.getValueByColumnName("name_first").equals("")){
                                 addError(mainLayout, inflater, context.getString(R.string.playerInvalid));
                                 return null;
                             }
                         }
+                        // didn't input name or ID, that's a paddlin'
                         else{
                             addError(mainLayout, inflater, context.getString(R.string.playerInvalid));
                             return null;
@@ -418,15 +436,18 @@ public class FloaterApplication extends Application{
 
                     }
                 }
-                else if (is.getColumn().compareTo("name_last") == 0){
-                    if (is.getValue().compareTo("") == 0){
+                else if (is.getColumn().equals("name_last")){
+                    // if the name is missing, we need an existing ID
+                    if (is.getValue().equals("")){
                         if (playerId != ""){
+                            //check if inputted ID already exists, display error if not
                             CursorRow row = playerTableRow(playerId, context);
                             if (row ==  null || row.getValueByColumnName("name_first").equals("")){
                                 addError(mainLayout, inflater, context.getString(R.string.playerInvalid));
                                 return null;
                             }
                         }
+                        // didn't input name or ID, that's a paddlin'
                         else {
                             addError(mainLayout, inflater, context.getString(R.string.playerInvalid));
                             return null;
@@ -434,38 +455,39 @@ public class FloaterApplication extends Application{
                     }
                 }
             }
-            //remove values from list if we aren't inserting them
-            if (is.getColumn().compareTo("player_id") == 0){
+            //remove values from list that we aren't inserting (keys and potentially nulls)
+            if (is.getColumn().equals("player_id")){
                 playerId = is.getValue();
                 iterator.remove();
             }
-            else if (is.getColumn().compareTo("team_id") == 0){
+            else if (is.getColumn().equals("team_id")){
                 teamId = is.getValue();
                 iterator.remove();
             }
-            else if (is.getColumn().compareTo("year") == 0){
+            else if (is.getColumn().equals("year")){
                 year = is.getValue();
                 iterator.remove();
             }
-            else if (is.getColumn().compareTo("name_first") == 0){
+            else if (is.getColumn().equals("name_first")){
                 firstName = is.getValue();
                 iterator.remove();
             }
-            else if (is.getColumn().compareTo("name_last") == 0){
+            else if (is.getColumn().equals("name_last")){
                 lastName = is.getValue();
                 iterator.remove();
             }
-            else if (is.getColumn().compareTo("pos") == 0){
+            else if (is.getColumn().equals("pos")){
                 pos = is.getValue();
                 iterator.remove();
             }
-            if (!addNulls){
-                if (is.getValue().compareTo("") == 0){
+            else if (!addNulls){
+                if (is.getValue().equals("")){
                     iterator.remove();
                 }
             }
         }
 
+        //create DBHandler and query database
         DBHandler db = new DBHandler(context);
         int season = -1;
         if (year.compareTo("") != 0){
@@ -514,6 +536,15 @@ public class FloaterApplication extends Application{
         mainLayout.addView(tableName);
     }
 
+    /**
+     * Creates a layout containing a Go to Team Profile button and adds to a stat layout
+     * @param mainLayout - Vertical linear layout to add button to
+     * @param inflater - inflater for activity
+     * @param teamId - ID of team
+     * @param context - application context
+     * @param year - year of team for pulling the name, can be null
+     * @return A new horizontal linear layout containing a team profile button
+     */
     public static View startTeamProfileButton(LinearLayout mainLayout, LayoutInflater inflater,
                                               final String teamId, final Context context, final String year){
         View dynamicLayout = inflater.inflate(R.layout.single_button, null);
@@ -534,20 +565,38 @@ public class FloaterApplication extends Application{
         return dynamicLayout;
     }
 
+    /**
+     * Returns a list containing a button horizontal layout in case this is needed in list form
+     * @param mainLayout - Vertical linear layout to add button to
+     * @param inflater - inflater for activity
+     * @param teamId - ID of team
+     * @param context - application context
+     * @param year - year of team for pulling the name, can be null
+     * @return a list containing a single entry with a horizontal layout containing a button
+     */
     public static LinkedList<View> singleButtonList(LinearLayout mainLayout, LayoutInflater inflater, String teamId,
                                                     Context context, String year){
         LinkedList<View> list = new LinkedList<>();
         list.add(startTeamProfileButton(mainLayout, inflater, teamId, context, year));
-
         return list;
     }
 
+    /**
+     * Makes a string look like a link by underlining it
+     * @param link - String to underline
+     * @return the underlined string
+     */
     public static SpannableString linkifyString(String link){
         SpannableString underline = new SpannableString(link);
         underline.setSpan(new UnderlineSpan(), 0, underline.length(), 0);
         return underline;
     }
 
+    /**
+     * Checks to see if a string is valid (only uses alphanumeric characters, period, or space
+     * @param string - the string to check
+     * @return true if the string is valid, false if not
+     */
     public static boolean validString(String string){
         for (int i = 0; i < string.length(); i++){
             char c = string.charAt(i);
@@ -560,6 +609,12 @@ public class FloaterApplication extends Application{
         return true;
     }
 
+    /**
+     * Adds the error string to a linear layout
+     * @param mainLayout- linear layout to add error to
+     * @param inflater - inflater for activity
+     * @param error - error to display
+     */
     public static void addError(LinearLayout mainLayout, LayoutInflater inflater, String error){
         View dynamicLayout = inflater.inflate(R.layout.error_layout, null);
         TextView tv = dynamicLayout.findViewById(R.id.errorText);
