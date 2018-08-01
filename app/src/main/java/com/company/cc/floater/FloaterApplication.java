@@ -487,6 +487,24 @@ public class FloaterApplication extends Application{
             }
         }
 
+        // if our list is empty, we should only update if we are updating the player name
+        if (ret.isEmpty()){
+            if (homeType.equals("player")){
+                // if player ID is null, we need both a first and a last name, if the ID is not null,
+                // we need one at least one of the name
+                if ((playerId.equals("") && (firstName.equals("") || lastName.equals(""))) ||
+                        (!playerId.equals("") && firstName.equals("") && lastName.equals(""))){
+                    return null;
+                }
+            }
+            else{
+                if (!playerId.equals("")){
+                    return playerTableRow(playerId, context);
+                }
+                return null;
+            }
+        }
+
         //create DBHandler and query database
         DBHandler db = new DBHandler(context);
         int season = -1;
