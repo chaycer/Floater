@@ -401,6 +401,45 @@ public class DBHandler extends SQLiteOpenHelper {
                 "LEFT OUTER JOIN park on park.park_id = home_game.park_id " + where + " ORDER BY team.year asc";
         return db.rawQuery(query, null);
     }
+
+    /**
+     * Used to return aggregate stats for the player
+     * @param playerID playerID to collect stats from
+     * @param table Table to be used.  If table = fielding, stats are aggregated by position.
+     * @return Cursor with the requested aggregated stats
+     */
+    public Cursor careerStats(String playerID, String table) {
+        if(table.equals("fielding")){
+            return careerFieldingStats(playerID);
+        } else if (table.equals("batting")){
+            return careerBattingStats(playerID);
+        } else { //pitching
+            return careerPitchingStats(playerID);
+        }
+    }
+    private Cursor careerFieldingStats(String playerID){
+        String query = String.format("select player_id, pos, sum(g) as g, sum(gs) as gs, sum(inn_outs) as inn_outs, sum(po) as po, sum(a) as a, sum(e) as e, sum(dp) as dp, sum(pb) as pb, sum(wp) as wp, sum(sb) as sb, sum(cs) as cs, sum(zr) as zr " +
+                        "from fielding " +
+                        "where player_id = '%s' " +
+                        "group by player_id, pos",playerID);
+        return db.rawQuery(query,null);
+    }
+    private Cursor careerBattingStats(String playerID) {
+        String query = String.format("select player_id, sum(g) as g, sum(ab) as ab, sum(r) as r, sum(h) as h, sum(double) as double, sum(triple) as triple, sum(hr) as hr, sum(rbi) as rbi, sum(sb) as sb, sum(cs) as cs, sum(bb) as bb, sum(so) as so, sum(ibb) as ibb, sum(hbp) as hbp, sum(sh) as sh, sum(sf) as sf, sum(g_idp) as g_idp " +
+                        "from batting " +
+                        "where player_id = '%s' " +
+                        "group by player_id",playerID);
+        return db.rawQuery(query,null);
+
+    }
+    private Cursor careerPitchingStats(String playerID) {
+        String query = String.format("select player_id, sum(w) as w, sum(l) as l, sum(g) as g, sum(gs) as gs, sum(cg) as cg, sum(sho) as sho, sum(sv) as sv, sum(ip) as ip, sum(h) as h, sum(er) as er, sum(hr) as hr, sum(bb) as bb, sum(so) as so, sum(baopp) as baopp, sum(ibb) as ibb, sum(wp) as wp, sum(hbp) as hbp, sum(bk) as bk, sum(bfp) as bfp, sum(gf) as gf, sum(r) as r, sum(sh) as sh, sum(sf) as sf, sum(g_idp) as g_idp " +
+                        "from pitching " +
+                        "where player_id = '%s' " +
+                        "group by player_id", playerID);
+        return db.rawQuery(query,null);
+
+    }
     //Override methods
 
     @Override
