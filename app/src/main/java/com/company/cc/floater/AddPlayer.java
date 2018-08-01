@@ -31,16 +31,16 @@ public class AddPlayer extends AppCompatActivity {
         View add = inflater.inflate(R.layout.add_season_stats, null);
 
         Button saveButton = save.findViewById(R.id.saveChangesButton);
-        FloaterApplication.setAddOnClick(mainLayout, saveButton, "player", "player", getApplicationContext());
+        FloaterApplication.setAddOnClick(mainLayout, saveButton, "player", "player", getApplicationContext(), inflater);
 
         Button hittingButton = add.findViewById(R.id.hittingAddButton);
-        FloaterApplication.setAddOnClick(mainLayout, hittingButton, "batting", "player", getApplicationContext());
+        FloaterApplication.setAddOnClick(mainLayout, hittingButton, "batting", "player", getApplicationContext(), inflater);
 
         Button fieldingButton = add.findViewById(R.id.fieldingAddButton);
-        FloaterApplication.setAddOnClick(mainLayout, fieldingButton, "fielding", "player", getApplicationContext());
+        FloaterApplication.setAddOnClick(mainLayout, fieldingButton, "fielding", "player", getApplicationContext(), inflater);
 
         Button pitchingButton = add.findViewById(R.id.pitchingAddButton);
-        FloaterApplication.setAddOnClick(mainLayout, pitchingButton, "pitching", "player", getApplicationContext());
+        FloaterApplication.setAddOnClick(mainLayout, pitchingButton, "pitching", "player", getApplicationContext(), inflater);
 
         mainLayout.addView(save);
         mainLayout.addView(add);

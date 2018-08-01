@@ -13,6 +13,12 @@ public class CursorRow implements Serializable {
     private ArrayList<String> values;
     private int size;
 
+    public CursorRow(){
+        this.columnNames = new ArrayList<String>();
+        this.values = new ArrayList<String>();
+        this.size = 0;
+    }
+
     public CursorRow(Cursor result, int position){
         this.size = result.getColumnCount();
         this.columnNames = new ArrayList<String>();

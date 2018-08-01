@@ -10,5 +10,12 @@
         android:id="@+id/addHittingLayout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="vertical"></LinearLayout>
+        android:orientation="vertical">
+
+        <TextView
+            android:id="@+id/instructions"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/statInvalid" />
+    </LinearLayout>
 </android.support.v4.widget.NestedScrollView>

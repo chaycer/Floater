@@ -27,7 +27,6 @@ public class StatSearch extends AppCompatActivity {
     List<TextView> statStrings = new ArrayList<>();
     List<TextView> prefixes = new ArrayList<>();
     List<EditText> ets = new ArrayList<>();
-    SerialList filters = new SerialList(new ArrayList<FilterSearch>());
 
     @Override
     protected void onCreate(final Bundle savedInstanceState) {
@@ -48,7 +47,7 @@ public class StatSearch extends AppCompatActivity {
         searchButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                createFilters();
+                SerialList filters = createFilters(statSearchLayout);
                 if (!filters.isEmpty()){
                     Intent startIntent = new Intent(getApplicationContext(), StatSearchResults.class);
 
@@ -60,7 +59,8 @@ public class StatSearch extends AppCompatActivity {
         });
     }
 
-    void createFilters(){
+    private SerialList createFilters(LinearLayout statSearchLayout){
+        SerialList filters = new SerialList(new ArrayList<FilterSearch>());
         Iterator<TextView> statStringsIterator = statStrings.iterator();
         Iterator<TextView> operatorIterator = operatorStrings.iterator();
         Iterator<TextView> prefixesIterator = prefixes.iterator();
@@ -74,11 +74,17 @@ public class StatSearch extends AppCompatActivity {
 
             if (!TextUtils.isEmpty(stat.getText()) && !TextUtils.isEmpty(op.getText()) &&
                     !TextUtils.isEmpty(pre.getText()) && !TextUtils.isEmpty(et.getText())){
+                if (!FloaterApplication.validString(et.getText().toString())){
+                    TextView tv = statSearchLayout.findViewById(R.id.errorText);
+                    tv.setVisibility(View.VISIBLE);
+                    return new SerialList(new ArrayList<FilterSearch>());
+                }
                 String fullStat = pre.getText().toString() + stat.getText().toString();
                 FilterSearch fs = new FilterSearch(fullStat, op.getText().toString(), et.getText().toString());
                 filters.add(fs);
             }
         }
+        return filters;
     }
 
     /**

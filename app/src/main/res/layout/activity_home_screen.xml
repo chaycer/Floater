@@ -66,5 +66,22 @@
         app:layout_constraintHorizontal_bias="0.351"
         app:layout_constraintStart_toStartOf="parent" />
 
+    <TextView
+        android:id="@+id/errorText"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="8dp"
+        android:layout_marginEnd="8dp"
+        android:layout_marginLeft="8dp"
+        android:layout_marginRight="8dp"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="8dp"
+        android:text="@string/badChars"
+        android:visibility="gone"
+        app:layout_constraintBottom_toTopOf="@+id/statSearchButton"
+        app:layout_constraintEnd_toEndOf="@+id/teamSearchEditText"
+        app:layout_constraintStart_toStartOf="@+id/teamSearchEditText"
+        app:layout_constraintTop_toBottomOf="@+id/teamSearchEditText" />
+
 </android.support.constraint.ConstraintLayout>
 

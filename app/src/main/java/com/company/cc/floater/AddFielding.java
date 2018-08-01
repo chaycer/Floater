@@ -20,7 +20,7 @@ public class AddFielding extends Activity {
         FloaterApplication.addStatLines(mainLayout, inflater, FloaterApplication.getFieldingStats());
 
         String playerId = getIntent().getExtras().getString("playerId");
-        LinearLayout ll = (LinearLayout) mainLayout.getChildAt(0);
+        LinearLayout ll = (LinearLayout) mainLayout.getChildAt(1);
         EditText idEdit = (EditText) ll.getChildAt(1);
         idEdit.setText(playerId);
 
@@ -29,16 +29,16 @@ public class AddFielding extends Activity {
         View add = inflater.inflate(R.layout.add_season_stats, null);
 
         Button saveButton = save.findViewById(R.id.saveChangesButton);
-        FloaterApplication.setAddOnClick(mainLayout, saveButton, "player", "fielding", getApplicationContext());
+        FloaterApplication.setAddOnClick(mainLayout, saveButton, "player", "fielding", getApplicationContext(), inflater);
 
         Button hittingButton = add.findViewById(R.id.hittingAddButton);
-        FloaterApplication.setAddOnClick(mainLayout, hittingButton, "batting", "fielding", getApplicationContext());
+        FloaterApplication.setAddOnClick(mainLayout, hittingButton, "batting", "fielding", getApplicationContext(), inflater);
 
         Button fieldingButton = add.findViewById(R.id.fieldingAddButton);
-        FloaterApplication.setAddOnClick(mainLayout, fieldingButton, "fielding", "fielding", getApplicationContext());
+        FloaterApplication.setAddOnClick(mainLayout, fieldingButton, "fielding", "fielding", getApplicationContext(), inflater);
 
         Button pitchingButton = add.findViewById(R.id.pitchingAddButton);
-        FloaterApplication.setAddOnClick(mainLayout, pitchingButton, "pitching", "fielding", getApplicationContext());
+        FloaterApplication.setAddOnClick(mainLayout, pitchingButton, "pitching", "fielding", getApplicationContext(), inflater);
 
         mainLayout.addView(save);
         mainLayout.addView(add);

@@ -32,6 +32,10 @@
     <string name="yearsActiveHeader">Years Active</string>
     <string name="yearHeader">Year</string>
     <string name="noResults">No Results Found!</string>
+    <string name="badChars">Enter only alphanumeric characters, spaces, or periods</string>
+    <string name="playerInvalid">Must enter a first name and last name, or an existing player ID</string>
+    <string name="statInvalid">Must enter a player ID, team ID, and year</string>
+    <string name="fieldingInvalid">Must enter a player ID, team ID, year, and pos</string>
     <string name="nullOverwriteCheckbox">Blank fields overwrite existing values</string>
     <string name="large_text">
         "Material is the metaphor.\n\n"

@@ -44,4 +44,11 @@
         android:text="@string/searchButton"
         android:visibility="invisible" />
 
+    <TextView
+        android:id="@+id/errorText"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/badChars"
+        android:visibility="gone" />
+
 </LinearLayout>

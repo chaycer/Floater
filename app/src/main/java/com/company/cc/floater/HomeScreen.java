@@ -7,6 +7,7 @@ import android.text.TextUtils;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.TextView;
 
 public class HomeScreen extends AppCompatActivity {
     @Override
@@ -60,6 +61,12 @@ public class HomeScreen extends AppCompatActivity {
             public void onClick(View view) {
                 if (!TextUtils.isEmpty(searchET.getText())){
                     String searchString = searchET.getText().toString(); // User-provided string to search on
+                    if (!FloaterApplication.validString(searchString)){
+                        TextView error = findViewById(R.id.errorText);
+                        error.setVisibility(View.VISIBLE);
+                        return;
+                    }
+
                     Intent startIntent = new Intent(getApplicationContext(), newActivity);
                     startIntent.putExtra(getString(R.string.company_name), searchString);
                     startActivity(startIntent);

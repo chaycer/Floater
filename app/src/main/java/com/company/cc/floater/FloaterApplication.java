@@ -26,7 +26,7 @@ public class FloaterApplication extends Application{
     static CharSequence pitchingStats[] = new CharSequence[] {"player_id", "year", "team_id", "w", "l", "g", "gs", "cg", "sho", "sv", "ip", "h", "er", "hr", "bb", "so", "baopp", "era", "ibb", "wp", "hbp", "bk", "bfp", "gf", "r", "sh", "sf", "g_idp"};
     static CharSequence pitchingStatsNoEra[] = new CharSequence[] {"player_id", "year", "team_id", "w", "l", "g", "gs", "cg", "sho", "sv", "ip", "h", "er", "hr", "bb", "so", "baopp", "ibb", "wp", "hbp", "bk", "bfp", "gf", "r", "sh", "sf", "g_idp"};
 
-    static CharSequence playerStats[] = new CharSequence[] {"player_id", "first_name", "last_name", "birth_day", "birth_month", "birth_year", "birth_country", "death_day", "death_month", "death_year", "bats", "throws", "debut", "final_game"};
+    static CharSequence playerStats[] = new CharSequence[] {"player_id", "name_first", "name_last", "birth_day", "birth_month", "birth_year", "birth_country", "death_day", "death_month", "death_year", "bats", "throws", "debut", "final_game"};
     static CharSequence teamStats[] = new CharSequence[] {"team_id", "name", "year", "league", "div_id", "rank", "g", "w", "l", "ws_win", "attendance"};
     static CharSequence parkStats[] = new CharSequence[] {"park_id", "park_name", "park_alias", "city", "state", "country"};
 
@@ -265,38 +265,34 @@ public class FloaterApplication extends Application{
      * @param homeType - The screen the button is pressed from: player, batting, pitching, or fielding
      * @param context - application context
      */
-    public static void setAddOnClick(final LinearLayout mainLayout, Button button, final String buttonType, final String homeType, final Context context){
+    public static void setAddOnClick(final LinearLayout mainLayout, Button button, final String buttonType,
+                                     final String homeType, final Context context, final LayoutInflater inflater){
         button.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                CursorRow cursorRow = addStatsToPlayer(mainLayout, homeType, context);
+                CursorRow cursorRow = addStatsToPlayer(mainLayout, homeType, context, inflater);
+                if (cursorRow == null || cursorRow.isEmpty()){
+                    return;
+                }
                 if (buttonType.compareTo("player") == 0){
-                    if (cursorRow != null) {
-                        Intent startIntent = new Intent(context, PlayerProfile.class);
-                        startIntent.putExtra("CursorRow", cursorRow);
-                        context.startActivity(startIntent);
-                    }
+                    Intent startIntent = new Intent(context, PlayerProfile.class);
+                    startIntent.putExtra("CursorRow", cursorRow);
+                    context.startActivity(startIntent);
                 }
                 else if (buttonType.compareTo("batting") == 0){
-                    if (cursorRow != null) {
-                        Intent startIntent = new Intent(context, AddHitting.class);
-                        startIntent.putExtra("playerId", cursorRow.getValueByColumnName("player_id"));
-                        context.startActivity(startIntent);
-                    }
+                    Intent startIntent = new Intent(context, AddHitting.class);
+                    startIntent.putExtra("playerId", cursorRow.getValueByColumnName("player_id"));
+                    context.startActivity(startIntent);
                 }
                 else if (buttonType.compareTo("fielding") == 0){
-                    if (cursorRow != null) {
-                        Intent startIntent = new Intent(context, AddFielding.class);
-                        startIntent.putExtra("playerId", cursorRow.getValueByColumnName("player_id"));
-                        context.startActivity(startIntent);
-                    }
+                    Intent startIntent = new Intent(context, AddFielding.class);
+                    startIntent.putExtra("playerId", cursorRow.getValueByColumnName("player_id"));
+                    context.startActivity(startIntent);
                 }
                 else if (buttonType.compareTo("pitching") == 0){
-                    if (cursorRow != null) {
-                        Intent startIntent = new Intent(context, AddPitching.class);
-                        startIntent.putExtra("playerId", cursorRow.getValueByColumnName("player_id"));
-                        context.startActivity(startIntent);
-                    }
+                    Intent startIntent = new Intent(context, AddPitching.class);
+                    startIntent.putExtra("playerId", cursorRow.getValueByColumnName("player_id"));
+                    context.startActivity(startIntent);
                 }
             }
         });
@@ -309,7 +305,7 @@ public class FloaterApplication extends Application{
      * @param context - application context
      * @return The CursorRow with the result of the add, or just the player row
      */
-    public static CursorRow addStatsToPlayer(LinearLayout mainLayout, String homeType, Context context){
+    public static CursorRow addStatsToPlayer(LinearLayout mainLayout, String homeType, Context context, LayoutInflater inflater){
         boolean addNulls = false;
         boolean empty = true;
         List<InsertStat> ret = new LinkedList<>();
@@ -334,6 +330,13 @@ public class FloaterApplication extends Application{
                     else if (text instanceof EditText){
                         EditText et = (EditText) text;
                         val = et.getText().toString();
+                        if (!FloaterApplication.validString(val)){
+                            View dynamicLayout = inflater.inflate(R.layout.error_layout, null);
+                            TextView tv = dynamicLayout.findViewById(R.id.errorText);
+                            tv.setText(context.getString(R.string.badChars));
+                            mainLayout.addView(dynamicLayout);
+                            return null;
+                        }
                     }
                     else {
                         TextView tv = (TextView) text;
@@ -365,65 +368,97 @@ public class FloaterApplication extends Application{
             InsertStat is = iterator.next();
 
             if (homeType.compareTo("player") != 0){
+                String error = context.getString(R.string.statInvalid);
+                if (homeType.equals("fielding")){
+                    error = context.getString(R.string.fieldingInvalid);
+                }
                 if (is.getColumn().compareTo("player_id") == 0){
                     if (is.getValue().compareTo("") == 0){
+                        addError(mainLayout, inflater, error);
                         return null;
                     }
                 }
                 else if (is.getColumn().compareTo("year") == 0){
                     if (is.getValue().compareTo("") == 0){
                         return playerTableRow(playerId, context);
+                        //addError(mainLayout, inflater, error);
+                        //return null;
                     }
                 }
                 else if (is.getColumn().compareTo("team_id") == 0){
                     if (is.getValue().compareTo("") == 0){
                         return playerTableRow(playerId, context);
+                        //addError(mainLayout, inflater, error);
+                        //return null;
                     }
                 }
                 else if (homeType.compareTo("fielding") == 0 && is.getColumn().compareTo("pos") == 0){
                     if (is.getValue().compareTo("") == 0){
                         return playerTableRow(playerId, context);
+                        //addError(mainLayout, inflater, error);
+                        //return null;
                     }
                 }
             }
             else{
-                if (is.getColumn().compareTo("first_name") == 0){
+                if (is.getColumn().compareTo("name_first") == 0){
                     if (is.getValue().compareTo("") == 0){
-                        return null;
+                        if (playerId != ""){
+                            CursorRow row = playerTableRow(playerId, context);
+                            if (row ==  null || row.getValueByColumnName("name_first").equals("")){
+                                addError(mainLayout, inflater, context.getString(R.string.playerInvalid));
+                                return null;
+                            }
+                        }
+                        else{
+                            addError(mainLayout, inflater, context.getString(R.string.playerInvalid));
+                            return null;
+                        }
+
                     }
                 }
-                else if (is.getColumn().compareTo("last_name") == 0){
+                else if (is.getColumn().compareTo("name_last") == 0){
                     if (is.getValue().compareTo("") == 0){
-                        return null;
+                        if (playerId != ""){
+                            CursorRow row = playerTableRow(playerId, context);
+                            if (row ==  null || row.getValueByColumnName("name_first").equals("")){
+                                addError(mainLayout, inflater, context.getString(R.string.playerInvalid));
+                                return null;
+                            }
+                        }
+                        else {
+                            addError(mainLayout, inflater, context.getString(R.string.playerInvalid));
+                            return null;
+                        }
                     }
                 }
             }
             //remove values from list if we aren't inserting them
             if (is.getColumn().compareTo("player_id") == 0){
                 playerId = is.getValue();
-                iterator.remove();
+                //iterator.remove();
             }
             else if (is.getColumn().compareTo("team_id") == 0){
                 teamId = is.getValue();
-                iterator.remove();
+                //iterator.remove();
             }
             else if (is.getColumn().compareTo("year") == 0){
                 year = is.getValue();
-                iterator.remove();
+                //iterator.remove();
             }
-            else if (is.getColumn().compareTo("first_name") == 0){
+            else if (is.getColumn().compareTo("name_first") == 0){
                 firstName = is.getValue();
-                iterator.remove();
+                //iterator.remove();
             }
-            else if (is.getColumn().compareTo("last_name") == 0){
+            else if (is.getColumn().compareTo("name_last") == 0){
                 lastName = is.getValue();
-                iterator.remove();
+                //iterator.remove();
             }
             else if (is.getColumn().compareTo("pos") == 0){
                 pos = is.getValue();
-                iterator.remove();
+                //iterator.remove();
             }
-            else if (!addNulls){
+            if (!addNulls){
                 if (is.getValue().compareTo("") == 0){
                     iterator.remove();
                 }
@@ -453,6 +488,9 @@ public class FloaterApplication extends Application{
     public static CursorRow playerTableRow(String playerId, Context context){
         DBHandler db = new DBHandler(context);
         Cursor result = db.playerTableQuery(playerId);
+        if (result.getCount() < 1){
+            return null;
+        }
         result.moveToFirst();
         CursorRow cursorRow = new CursorRow(result, result.getPosition());
         result.close();
@@ -507,5 +545,24 @@ public class FloaterApplication extends Application{
         SpannableString underline = new SpannableString(link);
         underline.setSpan(new UnderlineSpan(), 0, underline.length(), 0);
         return underline;
+    }
+
+    public static boolean validString(String string){
+        for (int i = 0; i < string.length(); i++){
+            char c = string.charAt(i);
+            if (!Character.isLetterOrDigit(c)){
+                if (c != '.' && c != ' '){
+                    return false;
+                }
+            }
+        }
+        return true;
+    }
+
+    public static void addError(LinearLayout mainLayout, LayoutInflater inflater, String error){
+        View dynamicLayout = inflater.inflate(R.layout.error_layout, null);
+        TextView tv = dynamicLayout.findViewById(R.id.errorText);
+        tv.setText(error);
+        mainLayout.addView(dynamicLayout);
     }
 }
