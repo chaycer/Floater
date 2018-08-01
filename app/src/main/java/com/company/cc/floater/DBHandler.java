@@ -263,7 +263,7 @@ public class DBHandler extends SQLiteOpenHelper {
             player.moveToFirst();
             int count = player.getCount();
             if(count > 0) {
-                IUP.updatePlayer(playerID, playerData);
+                IUP.updatePlayer(playerID, playerData, firstName, lastName);
                 return this.playerTableQuery(playerID);
             } else {
                 IUP.insertPlayer(playerID,firstName,lastName, playerData);
@@ -442,16 +442,27 @@ public class DBHandler extends SQLiteOpenHelper {
             db.execSQL(plQuery);
         }
 
-        private void updatePlayer(String playerID, List<InsertStat> playerData){
-            StringBuilder plQueryCol = new StringBuilder();
-            for (InsertStat player : playerData) {
-                if (player.getTable().equals("player")) {
-                    if (plQueryCol.length() == 0) {
-                        plQueryCol.append("UPDATE player SET " + player.getColumn() + " = '" + player.getValue() + "'");
-                    } else {
-                        plQueryCol.append(", " + player.getColumn() + " = '" + player.getValue()+ "'");
-                    }
+        private void updatePlayer(String playerID, List<InsertStat> playerData, String firstName, String lastName){
+            StringBuilder plQueryCol = new StringBuilder("UPDATE player SET ");
+            Boolean first = true;
+            if (firstName != null && !firstName.equals("")){
+                plQueryCol.append(String.format("name_first = '%s'",firstName));
+                first = false;
+            }
+            if (lastName != null && !lastName.equals("")){
+                if (!first) {
+                    plQueryCol.append(",");
                 }
+                plQueryCol.append(String.format("name_last = '%s'",lastName));
+                first = false;
+            }
+            for (InsertStat player : playerData) {
+                if (!first) {
+                    plQueryCol.append(",");
+                }
+                plQueryCol.append(player.getColumn() + " = '" + player.getValue() + "'");
+                first = false;
+
             }
             if (plQueryCol.length() != 0) {
                 String plQuery = plQueryCol.toString() + " WHERE player.player_id = '" + playerID + "'";
