@@ -342,7 +342,7 @@ public class AddStatsAsync extends AsyncTask<Object, Boolean, Boolean> {
                 String value = row.getValueByIndex(k);
 
                 // turn value into double if needed
-                if (value != null) {
+                if (value != null && !value.equals("")) {
                     if (buttonType == AVG) {
                         value = df.format(Double.parseDouble(value));
                     }
@@ -427,7 +427,7 @@ public class AddStatsAsync extends AsyncTask<Object, Boolean, Boolean> {
 
             View dynamicLayout = addLabelValue(inflater, layout, nameString, valueString, hide);
 
-            if (valueString != null){
+            if (valueString != null && !valueString.equals("")){
                 if (nameString.equals("ip")) {
                     ip = Double.parseDouble(valueString);
                 } else if (nameString.equals("er")) {
