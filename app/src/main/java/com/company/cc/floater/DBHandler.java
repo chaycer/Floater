@@ -444,10 +444,10 @@ public class DBHandler extends SQLiteOpenHelper {
     }
 
     /**
-     *
+     * Return max of each stat across players career
      * @param playerID
      * @param table
-     * @return
+     * @return Cursor pointing to DB result
      */
     public Cursor maxStats(String playerID, String table) {
         if(table.equals("fielding")){
@@ -483,10 +483,10 @@ public class DBHandler extends SQLiteOpenHelper {
     }
 
     /**
-     *
+     * Returns average stats for player over their career
      * @param playerID
      * @param table
-     * @return
+     * @return Cursor with pointer to db result
      */
     public Cursor avgStats(String playerID, String table) {
         if(table.equals("fielding")){
