@@ -306,7 +306,7 @@ public class AddStatsAsync extends AsyncTask<Object, Boolean, Boolean> {
 
         int sub = 2; // child indices displaying stats start at 2
 
-        if (type == PITCHING){ //&& (buttonType == AVG || buttonType == TOT)){ //era not in cursor
+        if (type == PITCHING){
             sub = 3;
         }
         int i = 0; // counter to get correct linear layout
@@ -379,9 +379,7 @@ public class AddStatsAsync extends AsyncTask<Object, Boolean, Boolean> {
                     else{
                         eraResult = db.maxERA(playerId);
                     }
-                    if (!era.equals("")) {
-                        era = df.format(eraResult);
-                    }
+                    era = df.format(eraResult);
                 }
                 LinearLayout layout = (LinearLayout) LL.getChildAt(i);
                 TextView valueTv = (TextView) layout.getChildAt(1);
