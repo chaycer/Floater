@@ -444,6 +444,41 @@ public class DBHandler extends SQLiteOpenHelper {
     }
 
     /**
+     * Function to return the max ERA that a player had throughout their career
+     * @param playerID to return
+     * @return Highest ERA player had across all seasons
+     */
+    public double maxERA(String playerID) {
+        String query = String.format("select ERA from ERA_Stats, pitching where ERA_Stats.ip = pitching.ip and ERA_Stats.er = pitching.er and pitching.player_id = '%s'",playerID);
+        Cursor results = db.rawQuery(query,null);
+        double hERA = results.getDouble(results.getColumnIndex("ERA")); //highest era
+        while(results.moveToNext()){
+            double era = results.getDouble(results.getColumnIndex("ERA"));
+            if (era > hERA){
+                hERA = era;
+            }
+        }
+        return hERA;
+    }
+    /**
+     * Function to return the mmin ERA that a player had throughout their career
+     * @param playerID to return
+     * @return Lowest ERA player had across all seasons
+     */
+    public double minERA(String playerID) {
+        String query = String.format("select ERA from ERA_Stats, pitching where ERA_Stats.ip = pitching.ip and ERA_Stats.er = pitching.er and pitching.player_id = '%s'",playerID);
+        Cursor results = db.rawQuery(query,null);
+        results.moveToFirst();
+        double mERA = results.getDouble(results.getColumnIndex("ERA")); //highest era
+        while(results.moveToNext()){
+            double era = results.getDouble(results.getColumnIndex("ERA"));
+            if (era < mERA){
+                mERA = era;
+            }
+        }
+        return mERA;
+    }
+    /**
      * Return max of each stat across players career
      * @param playerID
      * @param table
