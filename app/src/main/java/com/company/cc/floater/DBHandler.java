@@ -451,6 +451,7 @@ public class DBHandler extends SQLiteOpenHelper {
     public double maxERA(String playerID) {
         String query = String.format("select ERA from ERA_Stats, pitching where ERA_Stats.ip = pitching.ip and ERA_Stats.er = pitching.er and pitching.player_id = '%s'",playerID);
         Cursor results = db.rawQuery(query,null);
+        results.moveToFirst();
         double hERA = results.getDouble(results.getColumnIndex("ERA")); //highest era
         while(results.moveToNext()){
             double era = results.getDouble(results.getColumnIndex("ERA"));
