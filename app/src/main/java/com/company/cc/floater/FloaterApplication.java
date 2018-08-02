@@ -182,17 +182,11 @@ public class FloaterApplication extends Application{
                 }
             }
             // set label and value texts
-            View dynamicLayout = inflater.inflate(layout, null);
-            TextView name = dynamicLayout.findViewById(R.id.statNameNoEditTextView);
-            name.setText(row.getColumnNameByIndex(i));
+            String nameString = row.getColumnNameByIndex(i);
+            String valueString = row.getValueByIndex(i);
 
-            TextView value = dynamicLayout.findViewById(R.id.statValueNoEditTextView);
-            value.setText(row.getValueByIndex(i));
+            View dynamicLayout = addLabelValue(inflater, layout, nameString, valueString, hide);
 
-            // hide row if needed
-            if (hide){
-                dynamicLayout.setVisibility(View.GONE);
-            }
             // add to the vertical layout
             mainLayout.addView(dynamicLayout);
             views.add(dynamicLayout);
@@ -206,6 +200,32 @@ public class FloaterApplication extends Application{
         return views;
     }
 
+    /**
+     * Adds a label/value pair to a linear layout
+     * @param inflater - Inflater to create new view
+     * @param layout - layout of new view
+     * @param nameString - Label name
+     * @param valueString - Value name
+     * @param hide - whether or not to hide the returned layout
+     * @return new view with texts set
+     */
+    public static View addLabelValue(LayoutInflater inflater, int layout, String nameString,
+                                     String valueString, boolean hide){
+        View dynamicLayout = inflater.inflate(layout, null);
+        TextView name = dynamicLayout.findViewById(R.id.statNameNoEditTextView);
+
+        name.setText(nameString);
+
+        TextView value = dynamicLayout.findViewById(R.id.statValueNoEditTextView);
+        value.setText(valueString);
+
+        // hide row if needed
+        if (hide){
+            dynamicLayout.setVisibility(View.GONE);
+        }
+
+        return dynamicLayout;
+    }
 
     /**
      * Displays each player and years active from a cursor containing player information

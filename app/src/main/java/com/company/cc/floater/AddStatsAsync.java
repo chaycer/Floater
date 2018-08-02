@@ -9,9 +9,11 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import java.text.DecimalFormat;
 import java.util.Iterator;
 import java.util.LinkedList;
 
@@ -19,9 +21,12 @@ import static android.view.View.GONE;
 import static com.company.cc.floater.FloaterApplication.BATTING;
 import static com.company.cc.floater.FloaterApplication.FIELDING;
 import static com.company.cc.floater.FloaterApplication.PITCHING;
-import static com.company.cc.floater.FloaterApplication.addStatsFromRow;
+import static com.company.cc.floater.FloaterApplication.addLabelValue;
 
 public class AddStatsAsync extends AsyncTask<Object, Boolean, Boolean> {
+
+    private static double ip = -1;
+    private static double er = -1;
 
     protected Boolean doInBackground(Object... params){
         if (params.length < 6){
@@ -116,9 +121,9 @@ public class AddStatsAsync extends AsyncTask<Object, Boolean, Boolean> {
      * @param career - true to show career values, false for single season
      * @return true if any stats added, false otherwise
      */
-    private static boolean generateSeason(final LinearLayout mainLayout, CursorRow row, LayoutInflater inflater,
-                                       DBHandler db, String playerId, String table, int type,
-                                       Context context, Activity activity, boolean career){
+    private static boolean generateSeason(final LinearLayout mainLayout, CursorRow row, final LayoutInflater inflater,
+                                          DBHandler db, String playerId, String table, final int type,
+                                          Context context, Activity activity, final boolean career){
         boolean hasItems = false;
         String[] exclude = {"player_id", "year", "team_id"};
         String[] fieldExclude = {"player_id", "year", "team_id"};
@@ -164,6 +169,17 @@ public class AddStatsAsync extends AsyncTask<Object, Boolean, Boolean> {
             if (!career) {
                 hiddenViews.add(0, FloaterApplication.singleButtonList(LL, inflater, teamId, context, year));
             }
+
+            else if (type == PITCHING){ // if adding career pitching stats, need to show career ERA
+                if (ip > 0 && er > -1) {
+                    DecimalFormat df = new DecimalFormat("#.##");
+                    String era = df.format(9.00 * (er/ip));
+                    LinkedList<View> temp = new LinkedList<>();
+                    temp.add(FloaterApplication.addLabelValue(inflater, R.layout.stat_line_no_edit, "ERA", era, true));
+                    LL.addView(temp.get(0));
+                    hiddenViews.add(temp);
+                }
+            }
             activity.runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
@@ -184,5 +200,71 @@ public class AddStatsAsync extends AsyncTask<Object, Boolean, Boolean> {
         }
         playerStats.close();
         return hasItems;
+    }
+
+
+    /**
+     * Adds stats to a vertical linear layout from a CursorRow with a label/value style on the
+     * column name and value
+     * @param mainLayout - Vertical layout to add the stat lines to
+     * @param inflater - Inflater for the layout
+     * @param row - CursorRow containing all the label/values
+     * @param toExclude - Array of column names to exclude, can be null
+     * @param hide - Should the generated lines be hidden by default?
+     * @param button - A view to be added at the top if desired, can be null
+     * @param headers - Array of column names to make into subheaders
+     * @return A list of all the lines (horizontal linear layouts) added
+     */
+    public static LinkedList<View> addStatsFromRow(LinearLayout mainLayout, LayoutInflater inflater, CursorRow row, String[] toExclude, boolean hide, View button, String[] headers){
+        LinkedList<View> views = new LinkedList<>();
+        for (int i = 0; i < row.getSize(); i++){
+            boolean exclude = false;
+            int layout = R.layout.stat_line_no_edit;
+
+            // exclude rows based on toExclude array
+            if (toExclude != null) {
+                for (int j = 0; j < toExclude.length; j++) {
+                    if (row.getColumnNameByIndex(i).compareTo(toExclude[j]) == 0) {
+                        exclude = true;
+                        break;
+                    }
+                }
+            }
+            if (exclude){
+                continue;
+            }
+
+            // make rows in headers array look like headers
+            if (headers != null){
+                for (int j = 0; j < headers.length; j++) {
+                    if (row.getColumnNameByIndex(i).compareTo(headers[j]) == 0) {
+                        layout = R.layout.stat_line_no_edit_header;
+                    }
+                }
+            }
+            // set label and value texts
+            String nameString = row.getColumnNameByIndex(i);
+            String valueString = row.getValueByIndex(i);
+
+            View dynamicLayout = addLabelValue(inflater, layout, nameString, valueString, hide);
+
+            if (nameString.equals("ip")){
+                ip = Double.parseDouble(valueString);
+            }
+            else if (nameString.equals("er")){
+                er = Double.parseDouble(valueString);
+            }
+
+            // add to the vertical layout
+            mainLayout.addView(dynamicLayout);
+            views.add(dynamicLayout);
+        }
+
+        // add the button if needed
+        if (button != null && !views.isEmpty()){
+            views.add(0, button);
+        }
+
+        return views;
     }
 }
