@@ -204,11 +204,11 @@ public class DBHandler extends SQLiteOpenHelper {
     public Cursor teamStatsQuery(String teamID, Integer seasonYear) {
         String where;
         if (seasonYear == null || seasonYear.equals("")) {
-            where = String.format("team_id = '%s", teamID);
+            where = String.format("team_id = '%s'", teamID);
         } else {
-            where = String.format("team_id = %s AND year = %d", teamID, seasonYear);
+            where = String.format("team_id = '%s' AND year = %d", teamID, seasonYear);
         }
-        String query = "select * from team where " + where + "'";
+        String query = "select * from team where " + where;
 
         return db.rawQuery(query, null);
     }

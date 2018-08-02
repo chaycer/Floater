@@ -57,29 +57,6 @@ public class AddTeamProfileAsync extends AsyncTask<Object, Boolean, Boolean> {
         while (result.moveToNext()){
             CursorRow cursorRow = new CursorRow(result, result.getPosition());
 
-            /*
-            final String tName = cursorRow.getValueByColumnName("name");
-
-            if (yearOfTeam != null || teamName == null || teamName.equals("") || teamName.isEmpty()){
-                teamName = tName;
-            }
-
-            final String tempName = teamName;
-
-
-            // find the right name for the team based on the year
-            if (yearOfTeam == null || yearOfTeam == Integer.parseInt(cursorRow.getValueByColumnName("year"))) {
-                yearOfTeam = Integer.parseInt(cursorRow.getValueByColumnName("year"));
-                final TextView name = mainLayout.findViewById(R.id.teamName);
-                activity.runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        name.setText(tempName);
-                    }
-                });
-            }*/
-
-
             final View dynamicLayout = inflater.inflate(R.layout.year_header, null);
             TextView year = dynamicLayout.findViewById(R.id.yearHeader);
             final String yearStr = cursorRow.getValueByColumnName("year");

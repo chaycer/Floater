@@ -127,8 +127,8 @@ public class AddStatsAsync extends AsyncTask<Object, Boolean, Boolean> {
      * @return true if any stats added, false otherwise
      */
     private static boolean generateSeason(final LinearLayout mainLayout, CursorRow row, final LayoutInflater inflater,
-                                          DBHandler db, String playerId, String table, final int type,
-                                          Context context, Activity activity, final boolean career){
+                                          DBHandler db, final String playerId, final String table, final int type,
+                                          final Context context, final Activity activity, final boolean career){
         boolean hasItems = false;
         String[] exclude = {"player_id", "year", "team_id"};
         String[] fieldExclude = {"player_id", "year", "team_id"};
@@ -154,7 +154,7 @@ public class AddStatsAsync extends AsyncTask<Object, Boolean, Boolean> {
             playerStats = db.playerStatsQuery(playerId, Integer.parseInt(year), teamId, table);
         }
 
-        final LinearLayout LL = dynamicLayout.findViewById(R.id.keyHeaderVertical);
+        LinearLayout LL = dynamicLayout.findViewById(R.id.keyHeaderVertical);
         final LinkedList<LinkedList<View>> hiddenViews = new LinkedList<>();
 
         // Add stat lines to view
@@ -186,7 +186,7 @@ public class AddStatsAsync extends AsyncTask<Object, Boolean, Boolean> {
                     }
                 }
                 //TODO finish adding aggregate buttons
-                //hiddenViews.add(setupAggregateButtons(LL, inflater, type, table, playerId, context));
+                hiddenViews.add(setupAggregateButtons(LL, inflater, type, table, playerId, context));
             }
             activity.runOnUiThread(new Runnable() {
                 @Override
@@ -251,33 +251,29 @@ public class AddStatsAsync extends AsyncTask<Object, Boolean, Boolean> {
             result = db.careerStats(playerId, table);
         }
 
+        String[] exclude = {"player_id", "year", "team_id"};
         result.moveToFirst();
-        CursorRow row = new CursorRow(result, result.getPosition());
+        CursorRow row = new CursorRow(result, result.getPosition(), exclude);
 
         double tempIp = -1;
         double tempEr = -1;
 
-        String[] exclude = {"player_id", "year", "team_id"};
+        //TODO get Chayce to go to 2 decimals on the averages and give working era aggregates
+        //TODO also fix the fielding part and figure out max wins
 
-        int max = LL.getChildCount();
+        int sub = 2;
+
         if (type == PITCHING){
-            max--;
+            sub = 3;
         }
         int i;
-        for (i = 0; i < max; i++) {
-            LinearLayout layout = (LinearLayout) LL.getChildAt(i);
+        for (i = 0; i < LL.getChildCount() - sub; i++) {
+            LinearLayout layout = (LinearLayout) LL.getChildAt(i + 1);
 
             TextView statTv = (TextView) layout.getChildAt(0);
             String stat = statTv.getText().toString();
 
             boolean ex = false;
-            for (int j = 0; j < exclude.length; j++){
-                if (stat.equals(exclude[j])){
-                    ex = true;
-                    max++;
-                    break;
-                }
-            }
             if (stat.equals("pos")){
                 ex = true;
             }
@@ -299,13 +295,15 @@ public class AddStatsAsync extends AsyncTask<Object, Boolean, Boolean> {
             }
         }
 
+        /*
         if (type == PITCHING && tempEr >= 0 && tempIp > 0){
+            i++;
             DecimalFormat df = new DecimalFormat("#.##");
             String era = df.format(9.00 * (tempEr/tempIp));
             LinearLayout layout = (LinearLayout) LL.getChildAt(i);
             TextView valueTv = (TextView) layout.getChildAt(1);
             valueTv.setText(era);
-        }
+        }*/
     }
 
     /**
