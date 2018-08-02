@@ -239,7 +239,7 @@ public class AddStatsAsync extends AsyncTask<Object, Boolean, Boolean> {
         Button maxButton = view.findViewById(R.id.max);
         setupSingleButton(LL, maxButton, type, table, MAX, playerId, context);
         Button minButton = view.findViewById(R.id.min);
-        //setupSingleButton(LL, minButton, type, table, MIN, playerId, context);
+        setupSingleButton(LL, minButton, type, table, MIN, playerId, context);
         Button avgButton = view.findViewById(R.id.average);
         setupSingleButton(LL, avgButton, type, table, AVG, playerId, context);
         Button totButton = view.findViewById(R.id.totals);
@@ -286,10 +286,10 @@ public class AddStatsAsync extends AsyncTask<Object, Boolean, Boolean> {
         // do the query
         if (buttonType == MAX){
             result = db.maxStats(playerId, table);
-        }/*
+        }
         else if (buttonType == MIN){
             result = db.minStats(playerId, table);
-        }*/
+        }
         else if (buttonType == AVG){
             result = db.avgStats(playerId, table);
         }
@@ -366,8 +366,23 @@ public class AddStatsAsync extends AsyncTask<Object, Boolean, Boolean> {
             i++;
 
             // calculate era
-            if (type == PITCHING && (buttonType == AVG || buttonType == TOT) && tempEr >= 0 && tempIp > 0) {
-                String era = df.format(9.00 * (tempEr / tempIp));
+            if (type == PITCHING){
+                String era = "";
+                if ((buttonType == AVG || buttonType == TOT) && tempEr >= 0 && tempIp > 0){
+                     era = df.format(9.00 * (tempEr / tempIp));
+                }
+                else{
+                    double eraResult;
+                    if (buttonType == MIN) {
+                        eraResult = db.minERA(playerId);
+                    }
+                    else{
+                        eraResult = db.maxERA(playerId);
+                    }
+                    if (!era.equals("")) {
+                        era = df.format(eraResult);
+                    }
+                }
                 LinearLayout layout = (LinearLayout) LL.getChildAt(i);
                 TextView valueTv = (TextView) layout.getChildAt(1);
                 valueTv.setText(era);
@@ -378,6 +393,9 @@ public class AddStatsAsync extends AsyncTask<Object, Boolean, Boolean> {
                 break; // sanity check
             }
         }
+
+        result.close();
+        db.close();
     }
 
     /**
