@@ -442,6 +442,84 @@ public class DBHandler extends SQLiteOpenHelper {
         return db.rawQuery(query,null);
 
     }
+
+    /**
+     *
+     * @param playerID
+     * @param table
+     * @return
+     */
+    public Cursor maxStats(String playerID, String table) {
+        if(table.equals("fielding")){
+            return maxFieldingStats(playerID);
+        } else if (table.equals("batting")){
+            return maxBattingStats(playerID);
+        } else { //pitching
+            return maxPitchingStats(playerID);
+        }
+    }
+    private Cursor maxFieldingStats(String playerID){
+        String query = String.format("select player_id, pos, max(g) as g, max(gs) as gs, max(inn_outs) as inn_outs, max(po) as po, max(a) as a, max(e) as e, max(dp) as dp, max(pb) as pb, max(wp) as wp, max(sb) as sb, max(cs) as cs, max(zr) as zr " +
+                "from fielding " +
+                "where player_id = '%s' " +
+                "group by player_id, pos",playerID);
+        return db.rawQuery(query,null);
+    }
+    private Cursor maxBattingStats(String playerID) {
+        String query = String.format("select player_id, max(g) as g, max(ab) as ab, max(r) as r, max(h) as h, max(double) as double, max(triple) as triple, max(hr) as hr, max(rbi) as rbi, max(sb) as sb, max(cs) as cs, max(bb) as bb, max(so) as so, max(ibb) as ibb, max(hbp) as hbp, max(sh) as sh, max(sf) as sf, max(g_idp) as g_idp " +
+                "from batting " +
+                "where player_id = '%s' " +
+                "group by player_id",playerID);
+        return db.rawQuery(query,null);
+
+    }
+    private Cursor maxPitchingStats(String playerID) {
+        String query = String.format("select player_id, max(w) as w, max(l) as l, max(g) as g, max(gs) as gs, max(cg) as cg, max(sho) as sho, max(sv) as sv, max(ip) as ip, max(h) as h, max(er) as er, max(hr) as hr, max(bb) as bb, max(so) as so, max(baopp) as baopp, max(ibb) as ibb, max(wp) as wp, max(hbp) as hbp, max(bk) as bk, max(bfp) as bfp, max(gf) as gf, max(r) as r, max(sh) as sh, max(sf) as sf, max(g_idp) as g_idp " +
+                "from pitching " +
+                "where player_id = '%s' " +
+                "group by player_id", playerID);
+        return db.rawQuery(query,null);
+
+    }
+
+    /**
+     *
+     * @param playerID
+     * @param table
+     * @return
+     */
+    public Cursor avgStats(String playerID, String table) {
+        if(table.equals("fielding")){
+            return avgFieldingStats(playerID);
+        } else if (table.equals("batting")){
+            return avgBattingStats(playerID);
+        } else { //pitching
+            return avgPitchingStats(playerID);
+        }
+    }
+    private Cursor avgFieldingStats(String playerID){
+        String query = String.format("select player_id, pos, avg(g) as g, avg(gs) as gs, avg(inn_outs) as inn_outs, avg(po) as po, avg(a) as a, avg(e) as e, avg(dp) as dp, avg(pb) as pb, avg(wp) as wp, avg(sb) as sb, avg(cs) as cs, avg(zr) as zr " +
+                "from fielding " +
+                "where player_id = '%s' " +
+                "group by player_id, pos",playerID);
+        return db.rawQuery(query,null);
+    }
+    private Cursor avgBattingStats(String playerID) {
+        String query = String.format("select player_id, avg(g) as g, avg(ab) as ab, avg(r) as r, avg(h) as h, avg(double) as double, avg(triple) as triple, avg(hr) as hr, avg(rbi) as rbi, avg(sb) as sb, avg(cs) as cs, avg(bb) as bb, avg(so) as so, avg(ibb) as ibb, avg(hbp) as hbp, avg(sh) as sh, avg(sf) as sf, avg(g_idp) as g_idp " +
+                "from batting " +
+                "where player_id = '%s' " +
+                "group by player_id",playerID);
+        return db.rawQuery(query,null);
+
+    }
+    private Cursor avgPitchingStats(String playerID) {
+        String query = String.format("select player_id, avg(w) as w, avg(l) as l, avg(g) as g, avg(gs) as gs, avg(cg) as cg, avg(sho) as sho, avg(sv) as sv, avg(ip) as ip, avg(h) as h, avg(er) as er, avg(hr) as hr, avg(bb) as bb, avg(so) as so, avg(baopp) as baopp, avg(ibb) as ibb, avg(wp) as wp, avg(hbp) as hbp, avg(bk) as bk, avg(bfp) as bfp, avg(gf) as gf, avg(r) as r, avg(sh) as sh, avg(sf) as sf, avg(g_idp) as g_idp " +
+                "from pitching " +
+                "where player_id = '%s' " +
+                "group by player_id", playerID);
+        return db.rawQuery(query,null);
+
+    }
     //Override methods
 
     @Override
