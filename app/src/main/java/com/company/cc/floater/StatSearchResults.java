@@ -24,11 +24,8 @@ public class StatSearchResults extends Activity {
         SerialList filters = (SerialList) getIntent().getExtras().getSerializable("filters");
         int count = Integer.parseInt(getIntent().getStringExtra("count"));
 
-        DBHandler db = new DBHandler(this);
-        Cursor result = db.filterSearchQuery(filters.getList());
-
         AddStatSearchAsync add = new AddStatSearchAsync();
-        add.execute(mainLayout, inflater, filters, getApplicationContext(), count, this, db, result);
+        add.execute(mainLayout, inflater, filters, getApplicationContext(), count, this);
     }
 
     //Force restart of statsearch when pressing back to avoid ugly looking bug
