@@ -20,7 +20,7 @@ public class AddFielding extends Activity {
         FloaterApplication.addStatLines(mainLayout, inflater, FloaterApplication.getFieldingStats());
 
         String playerId = getIntent().getExtras().getString("playerId");
-        LinearLayout ll = (LinearLayout) mainLayout.getChildAt(1);
+        LinearLayout ll = (LinearLayout) mainLayout.getChildAt(2);
         EditText idEdit = (EditText) ll.getChildAt(1);
         idEdit.setText(playerId);
 

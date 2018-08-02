@@ -490,11 +490,13 @@ public class FloaterApplication extends Application{
         // if our list is empty, we should only update if we are updating the player name
         if (ret.isEmpty()){
             if (homeType.equals("player")){
-                // if player ID is null, we need both a first and a last name, if the ID is not null,
-                // we need one at least one of the name
-                if ((playerId.equals("") && (firstName.equals("") || lastName.equals(""))) ||
-                        (!playerId.equals("") && firstName.equals("") && lastName.equals(""))){
+                // if player ID is null, we need both a first and a last name
+                if ((playerId.equals("") && (firstName.equals("") || lastName.equals("")))){
                     return null;
+                }
+                // if the ID is not null, we need one at least one of the names, else we'll just move on to the next screen
+                if (!playerId.equals("") && firstName.equals("") && lastName.equals("")){
+                    return playerTableRow(playerId, context);
                 }
             }
             else{
@@ -637,6 +639,35 @@ public class FloaterApplication extends Application{
         View dynamicLayout = inflater.inflate(R.layout.error_layout, null);
         TextView tv = dynamicLayout.findViewById(R.id.errorText);
         tv.setText(error);
+        mainLayout.addView(dynamicLayout);
+    }
+
+    public static void createAddStatsButton(LinearLayout mainLayout, LayoutInflater inflater,
+                                            final int type, final Context context, final String playerId){
+        View dynamicLayout = inflater.inflate(R.layout.single_button, null);
+        Button button = dynamicLayout.findViewById(R.id.blankButton);
+        button.setText("Add/edit Player Stats");
+        button.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View v) {
+                Class statScreen;
+                if (type == BATTING){
+                    statScreen = AddHitting.class;
+                }
+                else if (type == PITCHING){
+                    statScreen = AddPitching.class;
+                }
+                else if (type == PLAYER){
+                    statScreen = AddPlayer.class;
+                }
+                else {
+                    statScreen = AddFielding.class;
+                }
+
+                Intent startIntent = new Intent(context, statScreen);
+                startIntent.putExtra("playerId", playerId);
+                context.startActivity(startIntent);
+            }
+        });
         mainLayout.addView(dynamicLayout);
     }
 }

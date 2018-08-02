@@ -20,7 +20,7 @@ public class PlayerProfile extends FragmentActivity {
 
     private CursorRow playerRow;
 
-    private String playerId;
+    private static String playerId;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -93,6 +93,7 @@ public class PlayerProfile extends FragmentActivity {
             LinearLayout LL = v.findViewById(R.id.playerProfileLinearLayout);
             LayoutInflater inflater2 = getLayoutInflater();
             FloaterApplication.addStatsFromRow(LL, inflater2, row, fullNameColumns, false, null, null);
+            FloaterApplication.createAddStatsButton(LL, inflater, FloaterApplication.PLAYER, getContext(), playerId);
             return v;
         }
 
