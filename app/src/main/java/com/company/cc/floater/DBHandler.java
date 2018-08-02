@@ -516,7 +516,44 @@ public class DBHandler extends SQLiteOpenHelper {
         return db.rawQuery(query,null);
 
     }
+    /**
+     * Return min of each stat across players career
+     * @param playerID
+     * @param table
+     * @return Cursor pointing to DB result
+     */
+    public Cursor minStats(String playerID, String table) {
+        if(table.equals("fielding")){
+            return minFieldingStats(playerID);
+        } else if (table.equals("batting")){
+            return minBattingStats(playerID);
+        } else { //pitching
+            return minPitchingStats(playerID);
+        }
+    }
+    private Cursor minFieldingStats(String playerID){
+        String query = String.format("select player_id, pos, min(g) as g, min(gs) as gs, min(inn_outs) as inn_outs, min(po) as po, min(a) as a, min(e) as e, min(dp) as dp, min(pb) as pb, min(wp) as wp, min(sb) as sb, min(cs) as cs, min(zr) as zr " +
+                "from fielding " +
+                "where player_id = '%s' " +
+                "group by player_id, pos",playerID);
+        return db.rawQuery(query,null);
+    }
+    private Cursor minBattingStats(String playerID) {
+        String query = String.format("select player_id, min(g) as g, min(ab) as ab, min(r) as r, min(h) as h, min(double) as double, min(triple) as triple, min(hr) as hr, min(rbi) as rbi, min(sb) as sb, min(cs) as cs, min(bb) as bb, min(so) as so, min(ibb) as ibb, min(hbp) as hbp, min(sh) as sh, min(sf) as sf, min(g_idp) as g_idp " +
+                "from batting " +
+                "where player_id = '%s' " +
+                "group by player_id",playerID);
+        return db.rawQuery(query,null);
 
+    }
+    private Cursor minPitchingStats(String playerID) {
+        String query = String.format("select player_id, min(w) as w, min(l) as l, min(g) as g, min(gs) as gs, min(cg) as cg, min(sho) as sho, min(sv) as sv, min(ip) as ip, min(h) as h, min(er) as er, min(hr) as hr, min(bb) as bb, min(so) as so, min(baopp) as baopp, min(ibb) as ibb, min(wp) as wp, min(hbp) as hbp, min(bk) as bk, min(bfp) as bfp, min(gf) as gf, min(r) as r, min(sh) as sh, min(sf) as sf, min(g_idp) as g_idp " +
+                "from pitching " +
+                "where player_id = '%s' " +
+                "group by player_id", playerID);
+        return db.rawQuery(query,null);
+
+    }
     /**
      * Returns average stats for player over their career
      * @param playerID
