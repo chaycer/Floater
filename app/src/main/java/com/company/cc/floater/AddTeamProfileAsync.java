@@ -35,11 +35,29 @@ public class AddTeamProfileAsync extends AsyncTask<Object, Boolean, Boolean> {
         String[] exclude = {"name", "year"};
         String[] parkExclude = {"team_id", "attendance"};
 
-        //TODO: faster name retrieval
+        // If we don't have a name but do have a year, find the name from the year
+        if ((teamName == null || teamName.equals("") || teamName.isEmpty()) && yearOfTeam != null){
+            Cursor tmp = db.teamStatsQuery(teamId, yearOfTeam);
+            tmp.moveToFirst();
+            CursorRow tmpRow = new CursorRow(tmp, tmp.getPosition());
+            teamName = tmpRow.getValueByColumnName("name");
+        }
 
+        // Set team name header
+        final String tempName = teamName;
+        final TextView name = mainLayout.findViewById(R.id.teamName);
+        activity.runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                name.setText(tempName);
+            }
+        });
+
+        // Populate team stat rows
         while (result.moveToNext()){
             CursorRow cursorRow = new CursorRow(result, result.getPosition());
 
+            /*
             final String tName = cursorRow.getValueByColumnName("name");
 
             if (yearOfTeam != null || teamName == null || teamName.equals("") || teamName.isEmpty()){
@@ -47,6 +65,7 @@ public class AddTeamProfileAsync extends AsyncTask<Object, Boolean, Boolean> {
             }
 
             final String tempName = teamName;
+
 
             // find the right name for the team based on the year
             if (yearOfTeam == null || yearOfTeam == Integer.parseInt(cursorRow.getValueByColumnName("year"))) {
@@ -58,13 +77,14 @@ public class AddTeamProfileAsync extends AsyncTask<Object, Boolean, Boolean> {
                         name.setText(tempName);
                     }
                 });
-            }
+            }*/
 
 
             final View dynamicLayout = inflater.inflate(R.layout.year_header, null);
             TextView year = dynamicLayout.findViewById(R.id.yearHeader);
             final String yearStr = cursorRow.getValueByColumnName("year");
             year.setText(yearStr); // set row header
+            final String tName = cursorRow.getValueByColumnName("name");
 
             Button rosterButton = dynamicLayout.findViewById(R.id.rosterButton);
             rosterButton.setOnClickListener(new View.OnClickListener() {
