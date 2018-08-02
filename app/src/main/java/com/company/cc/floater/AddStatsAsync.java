@@ -340,19 +340,23 @@ public class AddStatsAsync extends AsyncTask<Object, Boolean, Boolean> {
                 // get stat value from cursorrow
                 TextView valueTv = (TextView) layout.getChildAt(1);
                 String value = row.getValueByIndex(k);
-                if (buttonType == AVG) {
-                    value = df.format(Double.parseDouble(value));
-                }
-                valueTv.setText(value);
 
-                // set era stats
-                if (type == PITCHING) {
-                    if (stat.equals("ip")) {
-                        tempIp = Double.parseDouble(value);
-                    } else if (stat.equals("er")) {
-                        tempEr = Double.parseDouble(value);
+                // turn value into double if needed
+                if (value != null) {
+                    if (buttonType == AVG) {
+                        value = df.format(Double.parseDouble(value));
+                    }
+                    // set era stats
+                    if (type == PITCHING) {
+                        if (stat.equals("ip")) {
+                            tempIp = Double.parseDouble(value);
+                        }
+                        else if (stat.equals("er")) {
+                            tempEr = Double.parseDouble(value);
+                        }
                     }
                 }
+                valueTv.setText(value);
 
                 i++;
                 k++;
@@ -420,13 +424,15 @@ public class AddStatsAsync extends AsyncTask<Object, Boolean, Boolean> {
             String nameString = row.getColumnNameByIndex(i);
             String valueString = row.getValueByIndex(i);
 
+
             View dynamicLayout = addLabelValue(inflater, layout, nameString, valueString, hide);
 
-            if (nameString.equals("ip")){
-                ip = Double.parseDouble(valueString);
-            }
-            else if (nameString.equals("er")){
-                er = Double.parseDouble(valueString);
+            if (valueString != null){
+                if (nameString.equals("ip")) {
+                    ip = Double.parseDouble(valueString);
+                } else if (nameString.equals("er")) {
+                    er = Double.parseDouble(valueString);
+                }
             }
 
             // add to the vertical layout

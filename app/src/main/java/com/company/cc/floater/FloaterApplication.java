@@ -1,9 +1,11 @@
 package com.company.cc.floater;
 
+import android.app.Activity;
 import android.app.Application;
 import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
+import android.os.Bundle;
 import android.text.Layout;
 import android.text.SpannableString;
 import android.text.style.UnderlineSpan;
@@ -21,7 +23,7 @@ import java.util.List;
 import java.util.zip.Inflater;
 
 public class FloaterApplication extends Application{
-    static CharSequence battingStats[] = new CharSequence[] {"player_id", "year", "team_id", "g", "ab", "r", "h", "double", "triple", "hr", "rbi", "sb", "cs", "bb", "so", "ibb", "sh", "sf", "g_idp"};
+    static CharSequence battingStats[] = new CharSequence[] {"player_id", "year", "team_id", "g", "ab", "r", "h", "double", "triple", "hr", "rbi", "sb", "cs", "bb", "so", "ibb", "hbp", "sh", "sf", "g_idp"};
     static CharSequence fieldingStats[] = new CharSequence[] {"player_id", "year", "team_id", "pos", "g", "gs", "inn_outs", "po", "a", "e", "dp", "pb", "wp", "sb", "cs", "zr"};
     static CharSequence pitchingStats[] = new CharSequence[] {"player_id", "year", "team_id", "w", "l", "g", "gs", "cg", "sho", "sv", "ip", "h", "er", "hr", "bb", "so", "baopp", "era", "ibb", "wp", "hbp", "bk", "bfp", "gf", "r", "sh", "sf", "g_idp"};
     static CharSequence pitchingStatsNoEra[] = new CharSequence[] {"player_id", "year", "team_id", "w", "l", "g", "gs", "cg", "sho", "sv", "ip", "h", "er", "hr", "bb", "so", "baopp", "ibb", "wp", "hbp", "bk", "bfp", "gf", "r", "sh", "sf", "g_idp"};
@@ -239,7 +241,9 @@ public class FloaterApplication extends Application{
         // if cursor has no data, display error and return
         if (result == null || (result.getCount() < 1)){
             addSingleTextView(inflater, mainLayout, null);
-            result.close();
+            try {
+                result.close();
+            } catch (NullPointerException ex){}
             return;
         }
 
@@ -364,6 +368,7 @@ public class FloaterApplication extends Application{
                         addNulls = cb.isChecked();
                     }
                     else if (text instanceof Button){
+                        continue;
                     }
                     else if (text instanceof EditText){ // user input
                         EditText et = (EditText) text;
@@ -441,7 +446,7 @@ public class FloaterApplication extends Application{
                 if (is.getColumn().equals("name_first")){
                     // if the name is missing, we need an existing ID
                     if (is.getValue().equals("")){
-                        if (playerId != ""){
+                        if (!playerId.equals("")){
                             //check if inputted ID already exists, display error if not
                             CursorRow row = playerTableRow(playerId, context);
                             if (row ==  null || row.getValueByColumnName("name_first").equals("")){
@@ -460,7 +465,7 @@ public class FloaterApplication extends Application{
                 else if (is.getColumn().equals("name_last")){
                     // if the name is missing, we need an existing ID
                     if (is.getValue().equals("")){
-                        if (playerId != ""){
+                        if (!playerId.equals("")){
                             //check if inputted ID already exists, display error if not
                             CursorRow row = playerTableRow(playerId, context);
                             if (row ==  null || row.getValueByColumnName("name_first").equals("")){
@@ -569,12 +574,11 @@ public class FloaterApplication extends Application{
      * @param header - String to set the view to. If null, will show "no results found"
      */
     public static void addSingleTextView(LayoutInflater inflater, LinearLayout mainLayout, String header){
-        final View tableName = inflater.inflate(R.layout.no_results, null);
+        final View tableName = inflater.inflate(R.layout.no_results, mainLayout);
         if (header != null) {
             TextView tv = tableName.findViewById(R.id.noResultsTextView);
             tv.setText(header);
         }
-        mainLayout.addView(tableName);
     }
 
     /**
@@ -690,5 +694,50 @@ public class FloaterApplication extends Application{
             }
         });
         mainLayout.addView(dynamicLayout);
+    }
+
+    /**
+     * Set up an add/edit stats screen
+     * @param mainLayout - Layout to add views to
+     * @param activity - Activity screen
+     * @param stats - array of stats to display
+     * @param homeType - type of screen (player, hitting, fielding, pitching)
+     * @param context - application context
+     */
+    public static void setupAddStatsScreen(LinearLayout mainLayout, Activity activity,
+                                           CharSequence[] stats, String homeType, Context context){
+        // Add blank stat lines
+        LayoutInflater inflater = activity.getLayoutInflater();
+        addStatLines(mainLayout, inflater, stats);
+
+        // Get player ID and set the ID editText
+        Bundle bundle = activity.getIntent().getExtras();
+        if (bundle != null) {
+            String playerId = bundle.getString("playerId");
+            if (playerId != null) {
+                LinearLayout ll = (LinearLayout) mainLayout.getChildAt(2);
+                EditText idEdit = (EditText) ll.getChildAt(1);
+                idEdit.setText(playerId);
+            }
+        }
+
+        // add buttons
+        View save = inflater.inflate(R.layout.save_changes_button, null);
+        View add = inflater.inflate(R.layout.add_season_stats, null);
+
+        Button saveButton = save.findViewById(R.id.saveChangesButton);
+        setAddOnClick(mainLayout, saveButton, "player", homeType, context, inflater);
+
+        Button hittingButton = add.findViewById(R.id.hittingAddButton);
+        setAddOnClick(mainLayout, hittingButton, "batting", homeType, context, inflater);
+
+        Button fieldingButton = add.findViewById(R.id.fieldingAddButton);
+        setAddOnClick(mainLayout, fieldingButton, "fielding", homeType, context, inflater);
+
+        Button pitchingButton = add.findViewById(R.id.pitchingAddButton);
+        setAddOnClick(mainLayout, pitchingButton, "pitching", homeType, context, inflater);
+
+        mainLayout.addView(save);
+        mainLayout.addView(add);
     }
 }
