@@ -596,7 +596,10 @@ public class DBHandler extends SQLiteOpenHelper {
             NumberFormat formatter = new DecimalFormat("#.##");
             for (InsertStat player:playerData) {
                 if (player.getTable().equals("pitching")){
-                    String value = formatter.format(Float.valueOf(player.getValue()));
+                    String value = "";
+                    if(!player.getValue().equals("")) {
+                        value = formatter.format(Float.valueOf(player.getValue()));
+                    }
                     if(player.getColumn().equals("er") || player.getColumn().equals("ip")){
                         pitching = true;
                     }
@@ -626,7 +629,10 @@ public class DBHandler extends SQLiteOpenHelper {
             boolean pitching = false;
             NumberFormat formatter = new DecimalFormat("#.##");
             for (InsertStat player : playerData) {
-                String value = formatter.format(Float.valueOf(player.getValue()));
+                String value = "";
+                if(!player.getValue().equals("")) {
+                    value = formatter.format(Float.valueOf(player.getValue()));
+                }
                 if (player.getTable().equals("pitching")) {
                     if (player.getColumn().equals("er") || player.getColumn().equals("ip")) {
                         pitching = true;
