@@ -35,6 +35,8 @@ public class AddTeamProfileAsync extends AsyncTask<Object, Boolean, Boolean> {
         String[] exclude = {"name", "year"};
         String[] parkExclude = {"team_id", "attendance"};
 
+        //TODO: faster name retrieval
+
         while (result.moveToNext()){
             CursorRow cursorRow = new CursorRow(result, result.getPosition());
 
