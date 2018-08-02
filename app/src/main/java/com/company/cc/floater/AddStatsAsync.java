@@ -97,28 +97,7 @@ public class AddStatsAsync extends AsyncTask<Object, Boolean, Boolean> {
         activity.runOnUiThread(new Runnable() {
             @Override
             public void run() {
-                View dynamicLayout = inflater.inflate(R.layout.single_button, null);
-                Button button = dynamicLayout.findViewById(R.id.blankButton);
-                button.setText("Add/edit Player Stats");
-                button.setOnClickListener(new View.OnClickListener() {
-                    public void onClick(View v) {
-                        Class statScreen;
-                        if (type == BATTING){
-                            statScreen = AddHitting.class;
-                        }
-                        else if (type == PITCHING){
-                            statScreen = AddPitching.class;
-                        }
-                        else {
-                            statScreen = AddFielding.class;
-                        }
-
-                        Intent startIntent = new Intent(context, statScreen);
-                        startIntent.putExtra("playerId", playerId);
-                        context.startActivity(startIntent);
-                    }
-                });
-                mainLayout.addView(dynamicLayout);
+                FloaterApplication.createAddStatsButton(mainLayout, inflater, type, context, playerId);
             }
         });
     }

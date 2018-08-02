@@ -22,9 +22,20 @@ public class AddPlayer extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_add_player);
         final LinearLayout mainLayout = findViewById(R.id.addPlayerLayout);
+
         // generate layout showing each player stat input
         LayoutInflater inflater = getLayoutInflater();
         FloaterApplication.addStatLines(mainLayout, inflater, FloaterApplication.getPlayerStats());
+
+        Bundle bundle = getIntent().getExtras();
+        if (bundle != null) {
+            String playerId = bundle.getString("playerId");
+            if (playerId != null) {
+                LinearLayout ll = (LinearLayout) mainLayout.getChildAt(2);
+                EditText idEdit = (EditText) ll.getChildAt(1);
+                idEdit.setText(playerId);
+            }
+        }
 
         // add buttons
         View save = inflater.inflate(R.layout.save_changes_button, null);

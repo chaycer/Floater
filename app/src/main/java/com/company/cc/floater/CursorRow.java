@@ -14,15 +14,15 @@ public class CursorRow implements Serializable {
     private int size;
 
     public CursorRow(){
-        this.columnNames = new ArrayList<String>();
-        this.values = new ArrayList<String>();
+        this.columnNames = new ArrayList<>();
+        this.values = new ArrayList<>();
         this.size = 0;
     }
 
     public CursorRow(Cursor result, int position){
         this.size = result.getColumnCount();
-        this.columnNames = new ArrayList<String>();
-        this.values = new ArrayList<String>();
+        this.columnNames = new ArrayList<>();
+        this.values = new ArrayList<>();
         result.moveToPosition(position);
         for(int i = 0; i < this.size; i++){
             this.columnNames.add(result.getColumnName(i));
@@ -32,8 +32,8 @@ public class CursorRow implements Serializable {
 
     public CursorRow(Cursor result, int position, boolean filter){
         this.size = result.getColumnCount();
-        this.columnNames = new ArrayList<String>();
-        this.values = new ArrayList<String>();
+        this.columnNames = new ArrayList<>();
+        this.values = new ArrayList<>();
         result.moveToPosition(position);
         for(int i = 0; i < this.size; i++){
             if (filter){
