@@ -2,19 +2,15 @@ package com.company.cc.floater;
 
 import android.app.Activity;
 import android.content.Context;
-import android.content.Intent;
 import android.database.Cursor;
 import android.os.AsyncTask;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.view.ViewGroup;
 import android.widget.Button;
-import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import java.text.DecimalFormat;
-import java.util.Iterator;
 import java.util.LinkedList;
 
 import static android.view.View.GONE;
@@ -23,6 +19,9 @@ import static com.company.cc.floater.FloaterApplication.FIELDING;
 import static com.company.cc.floater.FloaterApplication.PITCHING;
 import static com.company.cc.floater.FloaterApplication.addLabelValue;
 
+/**
+ * Asynchronous task to stats to a screen
+ */
 public class AddStatsAsync extends AsyncTask<Object, Boolean, Boolean> {
 
     private static double ip = -1;
@@ -33,6 +32,11 @@ public class AddStatsAsync extends AsyncTask<Object, Boolean, Boolean> {
     private static int AVG = 3;
     private static int TOT = 4;
 
+    /**
+     * Run the async task in the background
+     * @param params - LinearLayout, LayoutInflater, String, Integer, Context, Activity
+     * @return
+     */
     protected Boolean doInBackground(Object... params){
         if (params.length < 6){
             return false;
@@ -42,6 +46,15 @@ public class AddStatsAsync extends AsyncTask<Object, Boolean, Boolean> {
         return true;
     }
 
+    /**
+     * Adds all a players' stats of a specific type to a layout
+     * @param mainLayout - Vertical layout to add stats to
+     * @param inflater - inflater to generate new views
+     * @param playerId - player ID
+     * @param type - stat type
+     * @param context - application context
+     * @param activity - activity this is being generated to
+     */
     private static void addStats(final LinearLayout mainLayout, final LayoutInflater inflater, final String playerId, final int type, final Context context, Activity activity){
 
         DBHandler db = new DBHandler(context);
@@ -185,7 +198,7 @@ public class AddStatsAsync extends AsyncTask<Object, Boolean, Boolean> {
                         hiddenViews.add(temp);
                     }
                 }
-                //TODO finish adding aggregate buttons
+                // add aggregate buttons for career stats
                 hiddenViews.add(setupAggregateButtons(LL, inflater, type, table, playerId, context));
             }
             activity.runOnUiThread(new Runnable() {
@@ -210,6 +223,16 @@ public class AddStatsAsync extends AsyncTask<Object, Boolean, Boolean> {
         return hasItems;
     }
 
+    /**
+     * Set up the aggregate buttons (max, min, avg, total) for career stats
+     * @param LL - Vertical linear layout to add everything to
+     * @param inflater - inflater to generate new button row
+     * @param type - stat type
+     * @param table - table name
+     * @param playerId - player ID
+     * @param context - application context
+     * @return A list containing the view with the buttons
+     */
     private static LinkedList<View> setupAggregateButtons(LinearLayout LL, LayoutInflater inflater, int type,
                                        String table, String playerId, Context context){
         View view = inflater.inflate(R.layout.aggregate_buttons, null);
@@ -227,7 +250,18 @@ public class AddStatsAsync extends AsyncTask<Object, Boolean, Boolean> {
         return list;
     }
 
-    private static void setupSingleButton(final LinearLayout LL, final Button button, final int type, final String table, final int buttonType, final String playerId, final Context context){
+    /**
+     * Sets up a single aggregate button
+     * @param LL - Layout containing the existing statistics
+     * @param button - button being set up
+     * @param type - stat type
+     * @param table - table name
+     * @param buttonType - type of button (max, min, avg, total)
+     * @param playerId - Player ID
+     * @param context - application context
+     */
+    private static void setupSingleButton(final LinearLayout LL, final Button button, final int type,
+                                          final String table, final int buttonType, final String playerId, final Context context){
         button.setOnClickListener(new View.OnClickListener() {
             public void onClick(View view) {
                 regenerateCareer(LL, type, table, buttonType, playerId, context);
@@ -235,9 +269,21 @@ public class AddStatsAsync extends AsyncTask<Object, Boolean, Boolean> {
         });
     }
 
-    private static void regenerateCareer(LinearLayout LL, int type, String table, int buttonType, String playerId, Context context){
+    /**
+     * Regenerates the statistics displayed in the career section based on the button clicked by the user
+     * @param LL - Layout containing the existing statistics
+     * @param type - stat type
+     * @param table - table name
+     * @param buttonType - type of button (max, min, avg, total)
+     * @param playerId - Player ID
+     * @param context - application context
+     */
+    private static void regenerateCareer(LinearLayout LL, int type, String table, int buttonType,
+                                         String playerId, Context context){
         DBHandler db = new DBHandler(context);
         Cursor result;
+
+        // do the query
         if (buttonType == MAX){
             result = db.maxStats(playerId, table);
         }/*
@@ -251,59 +297,83 @@ public class AddStatsAsync extends AsyncTask<Object, Boolean, Boolean> {
             result = db.careerStats(playerId, table);
         }
 
-        String[] exclude = {"player_id", "year", "team_id"};
-        result.moveToFirst();
-        CursorRow row = new CursorRow(result, result.getPosition(), exclude);
+        String[] exclude = {"player_id", "year", "team_id", "pos"}; // don't show anything regarding the header
 
+        // prep era calculations
         double tempIp = -1;
         double tempEr = -1;
+        DecimalFormat df = new DecimalFormat("#.##");
 
-        //TODO get Chayce to go to 2 decimals on the averages and give working era aggregates
-        //TODO also fix the fielding part and figure out max wins
+        int sub = 2; // child indices displaying stats start at 2
 
-        int sub = 2;
-
-        if (type == PITCHING){
+        if (type == PITCHING){ //&& (buttonType == AVG || buttonType == TOT)){ //era not in cursor
             sub = 3;
         }
-        int i;
-        for (i = 0; i < LL.getChildCount() - sub; i++) {
-            LinearLayout layout = (LinearLayout) LL.getChildAt(i + 1);
-
-            TextView statTv = (TextView) layout.getChildAt(0);
-            String stat = statTv.getText().toString();
-
-            boolean ex = false;
-            if (stat.equals("pos")){
-                ex = true;
+        int i = 0; // counter to get correct linear layout
+        int j = 1; // fielding multiplier to find correct child field
+        int startIndex; // how many children before stats get displayed?
+        if (type == FIELDING){ // fielding has an extra child
+            startIndex = 2;
+        }
+        else{
+            startIndex = 1;
+        }
+        // repopulate the stat values with results from the query
+        while (result.moveToNext()) {
+            int max; // number of times to loop
+            int k = 0; // counter for cursorrow
+            if (type == FIELDING){
+                max = (j * 12) + j - 1; // 11 fielding stats, must skip the position header
             }
-            if (ex){
-                continue;
+            else {
+                max = LL.getChildCount() - sub;
             }
 
-            TextView valueTv = (TextView) layout.getChildAt(1);
-            String value = row.getValueByIndex(i);
-            valueTv.setText(value);
+            CursorRow row = new CursorRow(result, result.getPosition(), exclude);
+            while (i < max) {
+                LinearLayout layout = (LinearLayout) LL.getChildAt(i + startIndex);
 
-            if (type == PITCHING){
-                if (stat.equals("ip")){
-                    tempIp = Double.parseDouble(value);
+                // get stat name from child
+                TextView statTv = (TextView) layout.getChildAt(0);
+                String stat = statTv.getText().toString();
+
+                // get stat value from cursorrow
+                TextView valueTv = (TextView) layout.getChildAt(1);
+                String value = row.getValueByIndex(k);
+                if (buttonType == AVG) {
+                    value = df.format(Double.parseDouble(value));
                 }
-                else if(stat.equals("er")){
-                    tempEr = Double.parseDouble(value);
+                valueTv.setText(value);
+
+                // set era stats
+                if (type == PITCHING) {
+                    if (stat.equals("ip")) {
+                        tempIp = Double.parseDouble(value);
+                    } else if (stat.equals("er")) {
+                        tempEr = Double.parseDouble(value);
+                    }
                 }
+
+                i++;
+                k++;
+            }
+
+            j++;
+            i++;
+
+            // calculate era
+            if (type == PITCHING && (buttonType == AVG || buttonType == TOT) && tempEr >= 0 && tempIp > 0) {
+                String era = df.format(9.00 * (tempEr / tempIp));
+                LinearLayout layout = (LinearLayout) LL.getChildAt(i);
+                TextView valueTv = (TextView) layout.getChildAt(1);
+                valueTv.setText(era);
+            }
+
+
+            if (type != FIELDING){
+                break; // sanity check
             }
         }
-
-        /*
-        if (type == PITCHING && tempEr >= 0 && tempIp > 0){
-            i++;
-            DecimalFormat df = new DecimalFormat("#.##");
-            String era = df.format(9.00 * (tempEr/tempIp));
-            LinearLayout layout = (LinearLayout) LL.getChildAt(i);
-            TextView valueTv = (TextView) layout.getChildAt(1);
-            valueTv.setText(era);
-        }*/
     }
 
     /**
@@ -342,6 +412,7 @@ public class AddStatsAsync extends AsyncTask<Object, Boolean, Boolean> {
                 for (int j = 0; j < headers.length; j++) {
                     if (row.getColumnNameByIndex(i).compareTo(headers[j]) == 0) {
                         layout = R.layout.stat_line_no_edit_header;
+                        break;
                     }
                 }
             }

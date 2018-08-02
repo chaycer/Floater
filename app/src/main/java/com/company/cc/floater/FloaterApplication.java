@@ -178,6 +178,7 @@ public class FloaterApplication extends Application{
                 for (int j = 0; j < headers.length; j++) {
                     if (row.getColumnNameByIndex(i).compareTo(headers[j]) == 0) {
                         layout = R.layout.stat_line_no_edit_header;
+                        break;
                     }
                 }
             }
