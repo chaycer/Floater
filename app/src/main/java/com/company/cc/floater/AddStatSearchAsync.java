@@ -20,14 +20,12 @@ public class AddStatSearchAsync extends AsyncTask<Object, Boolean, Boolean> {
             return false;
         }
         addStatSearchLines((LinearLayout) params[0], (LayoutInflater) params[1], (SerialList) params[2],
-                (Context) params[3], (Integer) params[4], (Activity) params[5]);
+                (Context) params[3], (Integer) params[4], (Activity) params[5], (DBHandler) params[6], (Cursor) params[7]);
         return true;
     }
 
     public static void addStatSearchLines(final LinearLayout mainLayout, final LayoutInflater inflater,
-                                          final SerialList filters, final Context context, int count, Activity activity){
-        DBHandler db = new DBHandler(context);
-        Cursor result = db.filterSearchQuery(filters.getList());
+                                          final SerialList filters, final Context context, int count, Activity activity, DBHandler db, Cursor result){
         String[] exclude = {"player_id", "name_first", "name_last", "year", "team_id", "pos"};
         result.moveToPosition(count);
         int max = count + 100;

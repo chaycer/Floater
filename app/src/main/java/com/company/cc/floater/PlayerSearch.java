@@ -34,7 +34,7 @@ public class PlayerSearch extends AppCompatActivity {
         LayoutInflater inflater = getLayoutInflater();
         FloaterApplication.addPlayerLines(mainLayout, inflater, result, this);
 
-        View dynamicLayout = inflater.inflate(R.layout.single_button, null);
+        View dynamicLayout = inflater.inflate(R.layout.single_button, mainLayout, false);
         Button button = dynamicLayout.findViewById(R.id.blankButton);
         button.setText("Add New Player To Database");
         button.setOnClickListener(new View.OnClickListener() {
@@ -43,6 +43,7 @@ public class PlayerSearch extends AppCompatActivity {
                 startActivity(startIntent);
             }
         });
+
         mainLayout.addView(dynamicLayout);
 
         result.close();

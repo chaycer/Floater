@@ -40,7 +40,7 @@ public class TeamSearch extends AppCompatActivity {
         }
 
         while (result.moveToNext()){
-            View dynamicLayout = inflater.inflate(R.layout.player_search_layout, null);
+            View dynamicLayout = inflater.inflate(R.layout.player_search_layout, mainLayout, false);
             TextView name = dynamicLayout.findViewById(R.id.playerNameTextView);
             TextView id = dynamicLayout.findViewById(R.id.yearsActiveTextView);
 
@@ -68,6 +68,7 @@ public class TeamSearch extends AppCompatActivity {
                     startActivity(startIntent);
                 }
             });
+
             mainLayout.addView(dynamicLayout);
         }
     }
