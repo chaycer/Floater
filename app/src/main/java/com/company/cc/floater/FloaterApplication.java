@@ -122,7 +122,7 @@ public class FloaterApplication extends Application{
             if (str == "player_id" || str == "team_id"){
                 validStatsDictionary.addWord(str.toString());
             }
-            else if (str == "baopp" || str == "era"){
+            else if (str == "ip" || str == "baopp" || str == "era"){
                 validStatsDictionary.addDouble(str.toString());
             }
             else{
