@@ -23,14 +23,25 @@ import java.util.List;
 import java.util.zip.Inflater;
 
 public class FloaterApplication extends Application{
-    static CharSequence battingStats[] = new CharSequence[] {"player_id", "year", "team_id", "g", "ab", "r", "h", "double", "triple", "hr", "rbi", "sb", "cs", "bb", "so", "ibb", "hbp", "sh", "sf", "g_idp"};
-    static CharSequence fieldingStats[] = new CharSequence[] {"player_id", "year", "team_id", "pos", "g", "gs", "inn_outs", "po", "a", "e", "dp", "pb", "wp", "sb", "cs", "zr"};
-    static CharSequence pitchingStats[] = new CharSequence[] {"player_id", "year", "team_id", "w", "l", "g", "gs", "cg", "sho", "sv", "ip", "h", "er", "hr", "bb", "so", "baopp", "era", "ibb", "wp", "hbp", "bk", "bfp", "gf", "r", "sh", "sf", "g_idp"};
-    static CharSequence pitchingStatsNoEra[] = new CharSequence[] {"player_id", "year", "team_id", "w", "l", "g", "gs", "cg", "sho", "sv", "ip", "h", "er", "hr", "bb", "so", "baopp", "ibb", "wp", "hbp", "bk", "bfp", "gf", "r", "sh", "sf", "g_idp"};
+    static CharSequence battingStats[] = new CharSequence[] {"player_id", "year", "team_id", "g", "ab",
+            "r", "h", "double", "triple", "hr", "rbi", "sb", "cs", "bb", "so", "ibb", "hbp", "sh", "sf", "g_idp"};
+    static CharSequence fieldingStats[] = new CharSequence[] {"player_id", "year", "team_id", "pos", "g",
+            "gs", "inn_outs", "po", "a", "e", "dp", "pb", "wp", "sb", "cs", "zr"};
+    static CharSequence pitchingStats[] = new CharSequence[] {"player_id", "year", "team_id", "w", "l",
+            "g", "gs", "cg", "sho", "sv", "ip", "h", "er", "hr", "bb", "so", "baopp", "era", "ibb", "wp",
+            "hbp", "bk", "bfp", "gf", "r", "sh", "sf", "g_idp"};
+    static CharSequence pitchingStatsNoEra[] = new CharSequence[] {"player_id", "year", "team_id",
+            "w", "l", "g", "gs", "cg", "sho", "sv", "ip", "h", "er", "hr", "bb", "so", "baopp", "ibb",
+            "wp", "hbp", "bk", "bfp", "gf", "r", "sh", "sf", "g_idp"};
 
-    static CharSequence playerStats[] = new CharSequence[] {"player_id", "name_first", "name_last", "birth_day", "birth_month", "birth_year", "birth_country", "death_day", "death_month", "death_year", "bats", "throws", "debut", "final_game"};
-    static CharSequence teamStats[] = new CharSequence[] {"team_id", "name", "year", "league", "div_id", "rank", "g", "w", "l", "ws_win", "attendance"};
-    static CharSequence parkStats[] = new CharSequence[] {"park_id", "park_name", "park_alias", "city", "state", "country"};
+    static CharSequence playerStats[] = new CharSequence[] {"player_id", "name_first", "name_last",
+            "birth_day", "birth_month", "birth_year", "birth_country", "birth_state", "birth_city",
+            "death_day", "death_month", "death_year", "death_country", "death_state", "death_city",
+            "name_given", "weight", "height", "bats", "throws", "debut", "final_game"};
+    static CharSequence teamStats[] = new CharSequence[] {"team_id", "name", "year", "league", "div_id",
+            "rank", "g", "w", "l", "ws_win", "attendance"};
+    static CharSequence parkStats[] = new CharSequence[] {"park_id", "park_name", "park_alias", "city",
+            "state", "country"};
 
     static CharSequence operators[] = new CharSequence[] {"=", "<", ">", "<=", ">="};
 
@@ -120,7 +131,9 @@ public class FloaterApplication extends Application{
         }
         for (CharSequence str: playerStats){
             if (str == "player_id" || str == "name_first" || str == "name_last" || str == "birth_country" ||
-                    str == "bats" || str == "throws"){
+                    str == "birth_state" || str == "birth_city" || str == "death_country" || str == "death_state" ||
+                    str == "death_city" || str == "name_given" || str == "weight" || str == "bats"
+                    || str == "throws" || str == "height"){
                 validStatsDictionary.addWord(str.toString());
             }
             else if (str == "debut" || str == "final_game"){

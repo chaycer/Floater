@@ -77,7 +77,9 @@ public class ValidDictionary {
         for (int i = 0; i < value.length(); i++){
             char c = value.charAt(i);
             if (!Character.isLetterOrDigit(c)){
-                return false;
+                if (c != ' ') {
+                    return false;
+                }
             }
         }
         return true;
