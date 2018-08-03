@@ -376,12 +376,12 @@ public class DBHandler extends SQLiteOpenHelper {
                         "END as 'team_id' " +
                         "%s" +
                         "%s " +
-                        "FROM fielding, batting, pitching, ERA_Stats, player " +
-                        "where batting.player_id = fielding.player_id AND batting.year = fielding.year and batting.team_id = fielding.team_id " +
-                        "AND pitching.player_id = fielding.player_id AND pitching.year = fielding.year and pitching.team_id = fielding.team_id " +
-                        "AND pitching.ip = ERA_Stats.ip AND pitching.er = ERA_Stats.er " +
-                        "AND player.player_id = fielding.player_id " +
-                        "AND %s order by player.name_last",fPos,select,where);
+                        "FROM fielding " +
+                        "LEFT OUTER JOIN batting ON batting.player_id = fielding.player_id AND batting.year = fielding.year and batting.team_id = fielding.team_id " +
+                        "LEFT OUTER JOIN pitching ON fielding.player_id = pitching.player_id AND fielding.year = pitching.year and fielding.team_id = pitching.team_id " +
+                        "LEFT OUTER JOIN ERA_Stats ON pitching.ip = ERA_Stats.ip AND pitching.er = ERA_Stats.er " +
+                        "LEFT OUTER JOIN player ON player.player_id = fielding.player_id " +
+                        "WHERE %s order by player.name_last",fPos,select,where);
 
         return db.rawQuery(query.toString(), null);
 
