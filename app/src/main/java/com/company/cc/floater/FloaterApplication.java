@@ -84,6 +84,67 @@ public class FloaterApplication extends Application{
         return PITCHING;
     }
 
+    public static ValidDictionary validStatsDictionary;
+
+    /**
+     * Create a dictionary of all the stat names and their allowed inputs
+     */
+    public static void buildDictionary(){
+        validStatsDictionary = new ValidDictionary();
+        for (CharSequence str: battingStats){
+            if (str == "player_id" || str == "team_id"){
+                validStatsDictionary.addWord(str.toString());
+            }
+            else{
+                validStatsDictionary.addNumber(str.toString());
+            }
+        }
+        for (CharSequence str: fieldingStats){
+            if (str == "player_id" || str == "team_id" || str == "pos"){
+                validStatsDictionary.addWord(str.toString());
+            }
+            else{
+                validStatsDictionary.addNumber(str.toString());
+            }
+        }
+        for (CharSequence str: pitchingStats){
+            if (str == "player_id" || str == "team_id"){
+                validStatsDictionary.addWord(str.toString());
+            }
+            else if (str == "baopp" || str == "era"){
+                validStatsDictionary.addDouble(str.toString());
+            }
+            else{
+                validStatsDictionary.addNumber(str.toString());
+            }
+        }
+        for (CharSequence str: playerStats){
+            if (str == "player_id" || str == "name_first" || str == "name_last" || str == "birth_country" ||
+                    str == "bats" || str == "throws"){
+                validStatsDictionary.addWord(str.toString());
+            }
+            else if (str == "debut" || str == "final_game"){
+                validStatsDictionary.addDate(str.toString());
+            }
+            else{
+                validStatsDictionary.addNumber(str.toString());
+            }
+        }
+    }
+
+    /**
+     * Given a stat name and the user's input for it, determines if the input is valid
+     * @param column - name of the stat
+     * @param value - user input
+     * @return True if the input is valid, false if not
+     */
+    public static boolean isInputValid(String column, String value){
+        if (validStatsDictionary == null){
+            buildDictionary();
+        }
+        return validStatsDictionary.isValid(column, value);
+    }
+
     /**
      * @return - all the columns of a stat array in a comma-delimited string with format tableName.ColumnName
      */
@@ -373,14 +434,14 @@ public class FloaterApplication extends Application{
                     else if (text instanceof EditText){ // user input
                         EditText et = (EditText) text;
                         val = et.getText().toString();
-                        // if input is invalid, display error and return
-                        if (!FloaterApplication.validString(val)){
+                        /*
+                        if (!FloaterApplication.isStringvalid(val)){
                             View dynamicLayout = inflater.inflate(R.layout.error_layout, null);
                             TextView tv = dynamicLayout.findViewById(R.id.errorText);
                             tv.setText(context.getString(R.string.badChars));
                             mainLayout.addView(dynamicLayout);
                             return null;
-                        }
+                        }*/
                     }
                     else { // stat label
                         TextView tv = (TextView) text;
@@ -412,6 +473,15 @@ public class FloaterApplication extends Application{
         Iterator<InsertStat> iterator = ret.iterator();
         while (iterator.hasNext()){
             InsertStat is = iterator.next();
+
+            // if input is invalid, display error and return
+            if (!FloaterApplication.isInputValid(is.getColumn(), is.getValue())){
+                View dynamicLayout = inflater.inflate(R.layout.error_layout, null);
+                TextView tv = dynamicLayout.findViewById(R.id.errorText);
+                tv.setText(context.getString(R.string.badInput));
+                mainLayout.addView(dynamicLayout);
+                return null;
+            }
 
             // if this is a stat entry screen, verify we have a player id
             if (!homeType.equals("player")){

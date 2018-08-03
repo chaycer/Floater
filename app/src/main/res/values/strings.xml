@@ -34,6 +34,8 @@
     <string name="yearHeader">Year</string>
     <string name="noResults">No Results Found!</string>
     <string name="badChars">Enter only alphanumeric characters, spaces, or periods</string>
+    <string name="badInput">Enter only numbers for numeric fields, numbers, dashes and slashes for dates,
+        numbers and decimals for averages, and alphanumeric characters for other fields</string>
     <string name="playerInvalid">Must enter a first name and last name, or an existing player ID</string>
     <string name="statInvalid">Must enter a player ID, team ID, and year</string>
     <string name="fieldingInvalid">Must enter a player ID, team ID, year, and pos</string>

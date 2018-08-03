@@ -80,7 +80,7 @@ public class StatSearch extends AppCompatActivity {
 
             if (!TextUtils.isEmpty(stat.getText()) && !TextUtils.isEmpty(op.getText()) &&
                     !TextUtils.isEmpty(pre.getText()) && !TextUtils.isEmpty(et.getText())){
-                if (!FloaterApplication.validString(et.getText().toString())){
+                if (!FloaterApplication.isInputValid(stat.getText().toString(), et.getText().toString())){
                     TextView tv = statSearchLayout.findViewById(R.id.errorText);
                     tv.setVisibility(View.VISIBLE);
                     return new SerialList(new ArrayList<FilterSearch>());
