@@ -32,6 +32,15 @@ public class AddStatSearchAsync extends AsyncTask<Object, Boolean, Boolean> {
         return true;
     }
 
+    /**
+     * Adds 100 results of a stat search to a screen
+     * @param mainLayout - layout to add results to
+     * @param inflater - inflater to add new views
+     * @param filters - the list of filters to search on
+     * @param context - application context
+     * @param count - current position in the cursor
+     * @param activity - activity where the results are being added
+     */
     public static void addStatSearchLines(final LinearLayout mainLayout, final LayoutInflater inflater,
                                           final SerialList filters, final Context context, int count, Activity activity){
         String[] exclude = {"player_id", "name_first", "name_last", "year", "team_id", "pos"}; // columns to exclude
@@ -141,6 +150,7 @@ public class AddStatSearchAsync extends AsyncTask<Object, Boolean, Boolean> {
                 });
             }
         }
+
         result.close();
         db.close();
     }

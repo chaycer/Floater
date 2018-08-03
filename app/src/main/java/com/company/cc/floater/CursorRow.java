@@ -13,12 +13,11 @@ public class CursorRow implements Serializable {
     private ArrayList<String> values;
     private int size;
 
-    public CursorRow(){
-        this.columnNames = new ArrayList<>();
-        this.values = new ArrayList<>();
-        this.size = 0;
-    }
-
+    /**
+     * Creates a row given a cursor and position
+     * @param result - cursor to get the row from
+     * @param position - position of the cursor
+     */
     public CursorRow(Cursor result, int position){
         this.size = result.getColumnCount();
         this.columnNames = new ArrayList<>();
@@ -30,6 +29,12 @@ public class CursorRow implements Serializable {
         }
     }
 
+    /**
+     * Creates a row, excluding the columns listed in the exclude parameter
+     * @param result - cursor to get the row from
+     * @param position - position of the cursor
+     * @param exclude - array of column names to exclude
+     */
     public CursorRow(Cursor result, int position, String[] exclude){
         this.size = 0;
         int max = result.getColumnCount();
@@ -51,6 +56,12 @@ public class CursorRow implements Serializable {
         }
     }
 
+    /**
+     * Creates a row with the column name meant to be used as a search filter
+     * @param result - cursor to get the row from
+     * @param position - position of the cursor
+     * @param filter - is this a filter?
+     */
     public CursorRow(Cursor result, int position, boolean filter){
         this.size = result.getColumnCount();
         this.columnNames = new ArrayList<>();
@@ -85,6 +96,11 @@ public class CursorRow implements Serializable {
         return size < 1;
     }
 
+    /**
+     * Returns the value of the row at the specified column
+     * @param columnName - name of the column
+     * @return Value at the given column, "" if column isn't found
+     */
     public String getValueByColumnName(String columnName){
         int index = this.columnNames.indexOf(columnName);
         if (index < 0){
@@ -93,10 +109,20 @@ public class CursorRow implements Serializable {
         return values.get(index);
     }
 
+    /**
+     * Gets the value of the row at a specified index
+     * @param index - index where the value is found
+     * @return Value at the given column
+     */
     public String getValueByIndex(int index){
         return this.values.get(index);
     }
 
+    /**
+     * Gets the column name of the row at a specified index
+     * @param index - index where the column is found
+     * @return Name at the given column
+     */
     public String getColumnNameByIndex(int index){
         return this.columnNames.get(index);
     }

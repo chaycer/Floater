@@ -46,17 +46,18 @@ public class HomeScreen extends AppCompatActivity {
         final Button searchButton;
         final EditText searchET;
         final Class newActivity;
-        if (type == ((FloaterApplication) getApplication()).PLAYER){
+        if (type == ((FloaterApplication) getApplication()).PLAYER){ // player search
             searchButton = findViewById(R.id.playerSearchButton);
             searchET = findViewById(R.id.playerSearchEditText);
             newActivity = PlayerSearch.class;
         }
-        else {
+        else { // team search
             searchButton = findViewById(R.id.teamSearchButton);
             searchET = findViewById(R.id.teamSearchEditText);
             newActivity = TeamSearch.class;
         }
 
+        // set up the button to go to the appropriate screen
         searchButton.setOnClickListener(new View.OnClickListener() {
             public void onClick(View view) {
                 if (!TextUtils.isEmpty(searchET.getText())){
