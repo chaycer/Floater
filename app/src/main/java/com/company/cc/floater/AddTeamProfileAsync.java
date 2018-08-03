@@ -18,10 +18,18 @@ import java.util.LinkedList;
 
 import static com.company.cc.floater.FloaterApplication.addStatsFromRow;
 
+/**
+ * Async task to create a team profile
+ */
 public class AddTeamProfileAsync extends AsyncTask<Object, Boolean, Boolean> {
 
+    /**
+     * Runs background task to update profile
+     * @param params - LinearLayout, LayoutInflater, Cursor, Context, String, String, Activity, DBHandler, Integer
+     * @return true if successful, false if not
+     */
     protected Boolean doInBackground(Object... params){
-        if (params.length < 9){
+        if (params.length != 9){
             return false;
         }
         addTeamInfo((LinearLayout) params[0], (LayoutInflater) params[1], (Cursor) params[2],
@@ -29,6 +37,18 @@ public class AddTeamProfileAsync extends AsyncTask<Object, Boolean, Boolean> {
         return true;
     }
 
+    /**
+     * Given a cursor with team info, displays all the info
+     * @param mainLayout - Vertical layout to add info to
+     * @param inflater - inflater to generate new views
+     * @param result - cursor containing the information
+     * @param context - application context
+     * @param teamName - name of the team, can be null
+     * @param teamId - team ID
+     * @param activity - activity being called from
+     * @param db - DBHandler (to close it after use)
+     * @param yearOfTeam - if team name not passed, use this to determine what the header should say
+     */
     private void addTeamInfo(final LinearLayout mainLayout, LayoutInflater inflater, Cursor result,
                             final Context context, String teamName, final String teamId,
                             Activity activity, DBHandler db, Integer yearOfTeam){
@@ -63,6 +83,7 @@ public class AddTeamProfileAsync extends AsyncTask<Object, Boolean, Boolean> {
             year.setText(yearStr); // set row header
             final String tName = cursorRow.getValueByColumnName("name");
 
+            // add link to team roster
             Button rosterButton = dynamicLayout.findViewById(R.id.rosterButton);
             rosterButton.setOnClickListener(new View.OnClickListener() {
                 @Override
@@ -89,6 +110,7 @@ public class AddTeamProfileAsync extends AsyncTask<Object, Boolean, Boolean> {
                 parksList.add(FloaterApplication.addStatsFromRow(ll, inflater, parkRow, parkExclude, true, null, null));
             }
 
+            // make clicking the header expand the section
             dynamicLayout.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
@@ -113,6 +135,7 @@ public class AddTeamProfileAsync extends AsyncTask<Object, Boolean, Boolean> {
                 }
             });
 
+            // add everything on the UI thread
             activity.runOnUiThread(new Runnable() {
                 @Override
                 public void run() {

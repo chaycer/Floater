@@ -13,10 +13,18 @@ import android.widget.TextView;
 
 import static com.company.cc.floater.FloaterApplication.addStatsFromRow;
 
+/**
+ * Async task to generate results of a stat search
+ */
 public class AddStatSearchAsync extends AsyncTask<Object, Boolean, Boolean> {
 
+    /**
+     * Runs stat search and displays results
+     * @param params - LinearLayout, LayoutInflater, SerialList, Context, Integer, Activity
+     * @return
+     */
     protected Boolean doInBackground(Object... params){
-        if (params.length < 6){
+        if (params.length != 6){
             return false;
         }
         addStatSearchLines((LinearLayout) params[0], (LayoutInflater) params[1], (SerialList) params[2],
@@ -26,14 +34,15 @@ public class AddStatSearchAsync extends AsyncTask<Object, Boolean, Boolean> {
 
     public static void addStatSearchLines(final LinearLayout mainLayout, final LayoutInflater inflater,
                                           final SerialList filters, final Context context, int count, Activity activity){
-        String[] exclude = {"player_id", "name_first", "name_last", "year", "team_id", "pos"};
+        String[] exclude = {"player_id", "name_first", "name_last", "year", "team_id", "pos"}; // columns to exclude
 
         DBHandler db = new DBHandler(context);
         Cursor result = db.filterSearchQuery(filters.getList());
 
         result.moveToPosition(count);
-        int max = count + 100;
+        int max = count + 100; // load the next 100 rows
 
+        // display no results message if nothing is returned
         if (result == null || (result.getCount() < 1)){
             activity.runOnUiThread(new Runnable() {
                 @Override
@@ -41,29 +50,35 @@ public class AddStatSearchAsync extends AsyncTask<Object, Boolean, Boolean> {
                     FloaterApplication.addSingleTextView(inflater, mainLayout, null);
                 }
             });
-            result.close();
+            if (result == null) {
+                result.close();
+            }
             db.close();
             return;
         }
 
+        // display each result
         while (result.moveToNext() && count <= max){
             final CursorRow player = new CursorRow(result, result.getPosition(), true);
-            final View dynamicLayout = inflater.inflate(R.layout.stat_return_layout, null);
+            final View dynamicLayout = inflater.inflate(R.layout.stat_return_layout, mainLayout, false);
             TextView name = dynamicLayout.findViewById(R.id.playerNameTextView);
             TextView team = dynamicLayout.findViewById(R.id.teamTextView);
             TextView year = dynamicLayout.findViewById(R.id.yearTextView);
             TextView pos = dynamicLayout.findViewById(R.id.positionTextView);
 
+            // player has to have a name
             if(player.getValueByColumnName("name_first").isEmpty()
                     || player.getValueByColumnName("name_last").isEmpty()){
                 continue;
             }
 
+            // concatenate first and last names
             if (!player.getValueByColumnName("name_first").isEmpty()) {
                 name.setText(FloaterApplication.linkifyString(player.getValueByColumnName("name_first") + " "
                         + player.getValueByColumnName("name_last"))); // set label
             }
 
+            // make clicking name go to player profile
             name.setOnClickListener(new View.OnClickListener(){
                 @Override
                 public void onClick(View v){
@@ -73,6 +88,7 @@ public class AddStatSearchAsync extends AsyncTask<Object, Boolean, Boolean> {
                 }
             });
 
+            // show team and make clicking team name go to team profile
             team.setText(FloaterApplication.linkifyString(player.getValueByColumnName("team_id")));
             team.setOnClickListener(new View.OnClickListener(){
                 @Override
@@ -84,15 +100,16 @@ public class AddStatSearchAsync extends AsyncTask<Object, Boolean, Boolean> {
                 }
             });
 
+            // display year and also position, if we have it
             year.setText(player.getValueByColumnName("year"));
             pos.setText(player.getValueByColumnName("pos"));
             if (pos.getText() != null){
                 pos.setVisibility(View.VISIBLE);
-                //mainLayout.findViewById(R.id.playerSearchPositionHeader).setVisibility(View.VISIBLE);
             }
 
             LinearLayout verticalLayout = dynamicLayout.findViewById(R.id.statResultsVerticalLayout);
 
+            // display stats on screen
             addStatsFromRow(verticalLayout, inflater, player, exclude, false, null, null);
             activity.runOnUiThread(new Runnable() {
                @Override
@@ -108,7 +125,7 @@ public class AddStatSearchAsync extends AsyncTask<Object, Boolean, Boolean> {
                 activity.runOnUiThread(new Runnable() {
                     public void run() {
 
-                        View buttonLayout = inflater.inflate(R.layout.load_more_button, null);
+                        View buttonLayout = inflater.inflate(R.layout.load_more_button, mainLayout, false);
                         Button loadButton = buttonLayout.findViewById(R.id.loadMoreButton);
                         mainLayout.addView(buttonLayout);
 
