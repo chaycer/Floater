@@ -1,5 +1,6 @@
 package com.company.cc.floater;
 
+import android.content.Context;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
@@ -94,6 +95,7 @@ public class PlayerProfile extends FragmentActivity {
             LayoutInflater inflater2 = getLayoutInflater();
             FloaterApplication.addStatsFromRow(LL, inflater2, row, fullNameColumns, false, null, null);
             FloaterApplication.createAddStatsButton(LL, inflater, FloaterApplication.PLAYER, getContext(), playerId);
+            FloaterApplication.addHomeButton(LL, getActivity(), getContext());
             return v;
         }
 

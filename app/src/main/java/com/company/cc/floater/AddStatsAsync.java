@@ -55,7 +55,7 @@ public class AddStatsAsync extends AsyncTask<Object, Boolean, Boolean> {
      * @param context - application context
      * @param activity - activity this is being generated to
      */
-    private static void addStats(final LinearLayout mainLayout, final LayoutInflater inflater, final String playerId, final int type, final Context context, Activity activity){
+    private static void addStats(final LinearLayout mainLayout, final LayoutInflater inflater, final String playerId, final int type, final Context context, final Activity activity){
 
         DBHandler db = new DBHandler(context);
         // Get teams/years the player played on
@@ -121,6 +121,7 @@ public class AddStatsAsync extends AsyncTask<Object, Boolean, Boolean> {
             @Override
             public void run() {
                 FloaterApplication.createAddStatsButton(mainLayout, inflater, type, context, playerId);
+                FloaterApplication.addHomeButton(mainLayout, activity, context);
             }
         });
     }

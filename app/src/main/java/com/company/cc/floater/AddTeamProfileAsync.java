@@ -51,7 +51,7 @@ public class AddTeamProfileAsync extends AsyncTask<Object, Boolean, Boolean> {
      */
     private void addTeamInfo(final LinearLayout mainLayout, LayoutInflater inflater, Cursor result,
                             final Context context, String teamName, final String teamId,
-                            Activity activity, DBHandler db, Integer yearOfTeam){
+                            final Activity activity, DBHandler db, Integer yearOfTeam){
         String[] exclude = {"name", "year"};
         String[] parkExclude = {"team_id", "attendance"};
 
@@ -143,7 +143,12 @@ public class AddTeamProfileAsync extends AsyncTask<Object, Boolean, Boolean> {
                 }
             });
         }
-
+        activity.runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                FloaterApplication.addHomeButton(mainLayout, activity, context);
+            }
+        });
         result.close();
         db.close();
     }

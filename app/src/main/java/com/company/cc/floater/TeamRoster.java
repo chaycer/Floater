@@ -61,6 +61,8 @@ public class TeamRoster extends Activity {
             mainLayout.addView(dynamicLayout);
         }
 
+        FloaterApplication.addHomeButton(mainLayout, this, getApplicationContext());
+
         result.close();
         db.close();
     }

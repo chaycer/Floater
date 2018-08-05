@@ -823,4 +823,22 @@ public class FloaterApplication extends Application{
         mainLayout.addView(save);
         mainLayout.addView(add);
     }
+
+    public static void addHomeButton(LinearLayout mainLayout, Activity activity, final Context context){
+        LayoutInflater inflater = activity.getLayoutInflater();
+        View dynamicLayout = inflater.inflate(R.layout.save_changes_button, mainLayout, false);
+
+        Button homeButton = dynamicLayout.findViewById(R.id.saveChangesButton);
+        homeButton.setText("Go to Home Screen");
+
+        homeButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent startIntent = new Intent(context, HomeScreen.class);
+                context.startActivity(startIntent);
+            }
+        });
+
+        mainLayout.addView(dynamicLayout);
+    }
 }
