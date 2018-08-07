@@ -42,11 +42,12 @@ public class DBHandler extends SQLiteOpenHelper {
     private void createDatabase(){
         boolean dbExist = checkDataBase();
         if(!dbExist) {
-            this.getWritableDatabase();
+            db = this.getWritableDatabase();
+            db.close();
             try {
                 copyDataBase();
             } catch (IOException e) {
-                throw new Error("Lol couldn't copy database dumbass fix your broken code");
+                throw new Error("Lol couldn't copy database fix your broken code");
             }
         }
     }
@@ -65,7 +66,6 @@ public class DBHandler extends SQLiteOpenHelper {
         if (checkDB != null){
             checkDB.close();
         }
-
         return checkDB != null;
         }
 
